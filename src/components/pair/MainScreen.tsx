@@ -10,13 +10,11 @@ export default function MainScreen() {
   const [settings, setSettings] = useState(() => loadSettings());
   const [now, setNow] = useState(() => new Date());
 
-  // Обновляем время каждую секунду
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
-  // Подхватываем изменения настроек после возврата со страницы settings
   useEffect(() => {
     const onFocus = () => setSettings(loadSettings());
     window.addEventListener("focus", onFocus);
@@ -26,26 +24,27 @@ export default function MainScreen() {
   const diff = useMemo(() => calcDiff(settings.startDateISO, now), [settings.startDateISO, now]);
 
   return (
-    <>
-      {/* Header */}
-      <div className="flex justify-between items-center text-white">
-        <span>📌</span>
-        <span className="font-semibold text-[14px] tracking-wide">CHAINSO</span>
-        <Link href="/settings" className="select-none">
+    <div className="text-white">
+      {/* TOP BAR */}
+      <div className="flex items-center justify-between pt-2">
+        <div className="text-[18px] opacity-90">📌</div>
+        <div className="text-[22px] font-extrabold tracking-wide">CHAINSO</div>
+        <Link href="/settings" className="text-[18px] opacity-90 select-none">
           ⚙️
         </Link>
       </div>
 
-      {/* Days + heart */}
-<div className="mt-6 text-center text-white translate-y-[18px]">
-  <div className="text-[12px] opacity-80 translate-y-[15px]">{diff.days} ДНЕЙ</div>
-  <div className="text-[18px] translate-y-[10px]">♡</div>
-</div>
+      {/* DAYS + HEART */}
+      <div className="mt-7 flex flex-col items-center">
+        <div className="text-[16px] font-medium opacity-85">{diff.days} ДНЕЙ</div>
+        <div className="mt-2 text-[34px] leading-none opacity-85">♡</div>
+      </div>
 
-      {/* Avatars */}
-      <div className="mt-4 flex justify-center gap-4">
+      {/* AVATARS (как у тебя: большие круги) */}
+      <div className="mt-6 flex justify-center gap-4">
+        {/* left */}
         <div className="flex flex-col items-center">
-          <div className="w-[82px] h-[82px] rounded-full ring-2 ring-[#4aa7ff] overflow-hidden bg-gray-300">
+          <div className="w-[150px] h-[150px] rounded-full ring-[3px] ring-[#36A2FF] overflow-hidden bg-[#d9d9d9]">
             {settings.photo1DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -55,11 +54,12 @@ export default function MainScreen() {
               />
             ) : null}
           </div>
-          <span className="text-white text-[11px] mt-2">{settings.name1}</span>
+          <div className="mt-3 text-[20px] font-extrabold">{settings.name1}</div>
         </div>
 
+        {/* right */}
         <div className="flex flex-col items-center">
-          <div className="w-[82px] h-[82px] rounded-full ring-2 ring-[#4aa7ff] overflow-hidden bg-gray-300">
+          <div className="w-[150px] h-[150px] rounded-full ring-[3px] ring-[#36A2FF] overflow-hidden bg-[#d9d9d9]">
             {settings.photo2DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -69,73 +69,88 @@ export default function MainScreen() {
               />
             ) : null}
           </div>
-          <span className="text-white text-[11px] mt-2">{settings.name2}</span>
+          <div className="mt-3 text-[20px] font-extrabold">{settings.name2}</div>
         </div>
       </div>
 
-      {/* Progress (как в макете — пока статично) */}
-      <div className="mt-4 text-[10px] text-white/70 flex justify-between">
-        <span>709 дней</span>
-        <span>90%</span>
-      </div>
-      <div className="h-[6px] bg-white/20 rounded-full overflow-hidden mt-1">
-        <div className="bg-[#4aa7ff] h-full w-[90%]" />
-      </div>
-      <div className="text-[10px] text-white/70 text-right mt-1">64 дня осталось</div>
-
-      {/* Together */}
-      <div className="mt-4 text-center text-white/70 text-[10px]">Вместе уже:</div>
-      <div className="text-center text-white font-semibold text-[12px] mt-1">
-        {diff.years} год, {diff.months} месяцев, {diff.day} дней
+      {/* PROGRESS (как на твоём: проценты справа сверху, подписи снизу) */}
+      <div className="mt-7">
+        <div className="flex justify-end text-[14px] font-bold opacity-85 pr-1">90%</div>
+        <div className="mt-2 h-[10px] rounded-full bg-white/90 overflow-hidden">
+          <div className="h-full bg-[#3F86FF] w-[90%] rounded-full" />
+        </div>
+        <div className="mt-2 flex justify-between text-[14px] opacity-80 px-1">
+          <div>700 дней</div>
+          <div>64 дня осталось</div>
+        </div>
       </div>
 
-      {/* Timer (динамика каждую секунду) */}
-      <div className="flex justify-center gap-2 mt-3">
-        <TimeBox value={format2(diff.hours)} label="часов" />
-        <TimeBox value={format2(diff.minutes)} label="минут" />
-        <TimeBox value={format2(diff.seconds)} label="секунд" />
+      {/* TOGETHER */}
+      <div className="mt-8 text-center">
+        <div className="text-[18px] font-semibold opacity-60">Вместе уже:</div>
+        <div className="mt-3 text-[28px] font-extrabold leading-tight">
+          {diff.years} год, {diff.months} месяцев, {diff.day} дней
+        </div>
       </div>
 
-      {/* Widgets */}
-      <div className="mt-5 text-center text-white font-semibold text-[14px]">Виджеты</div>
-
-      <div className="mt-3 bg-[#4a84e0] rounded-[16px] px-4 py-5 text-white">
-        <div className="text-[12px] font-semibold">Первая встреча</div>
-        <div className="mt-6 text-center text-[12px] font-semibold">9 февраля 2024 года</div>
+      {/* TIMER PLATE (как у тебя: тёмная плашка + 3 большие кнопки) */}
+      <div className="mt-6 flex justify-center">
+        <div className="bg-black/30 rounded-[26px] px-4 py-4 flex gap-3">
+          <TimeBox value={format2(diff.hours)} label="часов" />
+          <TimeBox value={format2(diff.minutes)} label="минут" />
+          <TimeBox value={format2(diff.seconds)} label="секунд" />
+        </div>
       </div>
 
-      <div className="mt-3 bg-[#4a84e0] rounded-[16px] p-3 text-white flex gap-3">
-        <div className="w-[48px] h-[48px] rounded-[12px] bg-black" />
+      {/* WIDGETS TITLE */}
+      <div className="mt-10 text-center text-[34px] font-extrabold">Виджеты</div>
+
+      {/* FIRST MEET CARD */}
+      <div className="mt-6 bg-[#4A86E8] rounded-[34px] px-6 py-6">
+        <div className="text-center text-[22px] font-extrabold">Первая встреча</div>
+        <div className="mt-20 text-center text-[22px] font-extrabold">
+          9 февраля 2024 года
+        </div>
+      </div>
+
+      {/* TRACK CARD */}
+      <div className="mt-6 bg-[#4A86E8] rounded-[34px] p-5 flex items-center gap-5">
+        <div className="w-[92px] h-[92px] rounded-[26px] overflow-hidden bg-black">
+          {/* если захочешь — сюда можно вставить обложку */}
+        </div>
         <div>
-          <div className="text-[12px] font-semibold">Любимый трек</div>
-          <div className="text-[10px] opacity-90">Джизус - Верь</div>
+          <div className="text-[22px] font-extrabold">Любимый трек</div>
+          <div className="text-[18px] font-medium opacity-95">Джизус - Верь</div>
         </div>
       </div>
 
+      {/* ADD WIDGET */}
       <Link
         href="/widget/new"
-        className="mt-3 block w-full border border-dashed border-white/60 rounded-[16px] py-2 text-white/80 text-[11px] text-center"
+        className="mt-6 block text-center border-2 border-dashed border-white/70 rounded-[28px] py-4 text-[16px] font-medium opacity-90"
       >
         + добавить виджет
       </Link>
 
-      {/* Album */}
-      <div className="mt-5 text-center text-white font-semibold text-[14px]">Альбом</div>
+      {/* ALBUM */}
+      <div className="mt-10 text-center text-[28px] font-extrabold">Альбом</div>
 
-      <div className="mt-3 border border-dashed border-white/60 rounded-[16px] py-2 text-center text-white/70 text-[11px]">
+      <div className="mt-6 border-2 border-dashed border-white/55 rounded-[28px] py-4 text-center text-[16px] opacity-80">
         Дата событие
       </div>
 
-      <div className="mt-3 flex gap-2">
-        {["фото", "фото", "фото"].map((p, i) => (
+      <div className="mt-6 grid grid-cols-3 gap-4">
+        {["фото", "фото", "фото"].map((t, i) => (
           <div
             key={i}
-            className="flex-1 aspect-square border border-dashed border-white/60 rounded-[16px] text-white/60 flex items-center justify-center text-[10px]"
+            className="aspect-square border-2 border-dashed border-white/55 rounded-[28px] flex items-center justify-center text-[14px] opacity-70"
           >
-            {p}
+            {t}
           </div>
         ))}
       </div>
-    </>
+
+      <div className="h-10" />
+    </div>
   );
 }
