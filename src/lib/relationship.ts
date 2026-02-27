@@ -1,8 +1,9 @@
+// src/lib/relationship.ts
 export type RelationshipSettings = {
   name1: string;
   name2: string;
   startDateISO: string; // "2024-02-09"
-  photo1DataUrl?: string; // base64 dataURL
+  photo1DataUrl?: string;
   photo2DataUrl?: string;
 };
 
@@ -34,13 +35,11 @@ export function loadSettings(): RelationshipSettings {
   }
 }
 
-
 export function saveSettings(s: RelationshipSettings) {
   localStorage.setItem(KEY, JSON.stringify(s));
 }
 
 export function calcDiff(startISO: string, now = new Date()) {
-  // Считаем от полуночи даты начала (локальное время), как обычно ожидают люди
   const [y, m, d] = startISO.split("-").map(Number);
   const start = new Date(y, (m ?? 1) - 1, d ?? 1, 0, 0, 0, 0);
 
@@ -52,13 +51,11 @@ export function calcDiff(startISO: string, now = new Date()) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  // “1 год, 8 месяцев, 26 дней” — делаем как календарную разницу (чтобы было “по-человечески”)
   let years = now.getFullYear() - start.getFullYear();
   let months = now.getMonth() - start.getMonth();
   let day = now.getDate() - start.getDate();
 
   if (day < 0) {
-    // берём дни прошлого месяца
     const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
     day += prevMonthLastDay;
     months -= 1;
@@ -67,6 +64,7 @@ export function calcDiff(startISO: string, now = new Date()) {
     months += 12;
     years -= 1;
   }
+
   years = Math.max(0, years);
   months = Math.max(0, months);
   day = Math.max(0, day);
@@ -76,4 +74,26 @@ export function calcDiff(startISO: string, now = new Date()) {
 
 export function format2(n: number) {
   return String(n).padStart(2, "0");
+}
+
+export function ruPlural(n: number, one: string, few: string, many: string) {
+  const abs = Math.abs(n);
+  const mod10 = abs % 10;
+  const mod100 = abs % 100;
+
+  if (mod100 >= 11 && mod100 <= 14) return many;
+  if (mod10 === 1) return one;
+  if (mod10 >= 2 && mod10 <= 4) return few;
+  return many;
+}
+
+export function formatTogether(y: number, m: number, d: number) {
+  const parts: string[] = [];
+
+  if (y !== 0) parts.push(`${y} ${ruPlural(y, "год", "года", "лет")}`);
+  if (m !== 0) parts.push(`${m} ${ruPlural(m, "месяц", "месяца", "месяцев")}`);
+  if (d !== 0) parts.push(`${d} ${ruPlural(d, "день", "дня", "дней")}`);
+
+  if (parts.length === 0) parts.push("0 дней");
+  return parts.join(", ");
 }
