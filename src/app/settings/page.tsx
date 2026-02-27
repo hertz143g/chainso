@@ -1,11 +1,11 @@
 import PhoneFrame from "@/components/layout/PhoneFrame";
-import MainScreen from "@/components/pair/MainScreen";
+import SettingsScreen from "@/components/pair/SettingsScreen";
 
-export default function HomePage() {
+export default function SettingsPage() {
   return (
     <main className="min-h-screen bg-[#0b1020] flex items-start justify-center py-6">
       <PhoneFrame>
-        <MainScreen />
+        <SettingsScreen />
       </PhoneFrame>
     </main>
   );
