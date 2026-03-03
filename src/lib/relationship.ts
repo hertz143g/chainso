@@ -97,3 +97,19 @@ export function formatTogether(y: number, m: number, d: number) {
   if (parts.length === 0) parts.push("0 дней");
   return parts.join(", ");
 }
+
+export function getGoalProgress(days: number) {
+  // следующая цель кратная 100, но минимум 100
+  const goal = Math.max(100, Math.ceil((days + 1) / 100) * 100);
+  const percentRaw = (days / goal) * 100;
+
+  // 43.421 -> 43
+  const percent = Math.floor(percentRaw);
+
+  const leftDays = Math.max(0, goal - days);
+
+  // ширина полосы: не больше 100%
+  const bar = Math.min(100, Math.max(0, percentRaw));
+
+  return { goal, percent, leftDays, bar };
+}

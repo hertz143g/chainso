@@ -4,7 +4,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import TimeBox from "../ui/TimeBox";
-import { calcDiff, format2, loadSettings, formatTogether } from "@/lib/relationship";
+import { calcDiff, format2, loadSettings, formatTogether, getGoalProgress} from "@/lib/relationship";
+
 
 export default function MainScreen() {
   const [settings, setSettings] = useState(() => loadSettings());
@@ -21,10 +22,22 @@ export default function MainScreen() {
     return () => window.removeEventListener("focus", onFocus);
   }, []);
 
-  const diff = useMemo(
-    () => calcDiff(settings.startDateISO, now),
-    [settings.startDateISO, now]
-  );
+const { diff, progress } = useMemo(() => {
+  const d = calcDiff(settings.startDateISO, now);
+
+  const goal = Math.max(100, Math.ceil((d.days + 1) / 100) * 100);
+  const percentRaw = (d.days / goal) * 100;
+
+  return {
+    diff: d,
+    progress: {
+      goal,
+      percent: Math.floor(percentRaw), // 43.421 -> 43
+      leftDays: Math.max(0, goal - d.days),
+      bar: Math.min(100, Math.max(0, percentRaw)),
+    },
+  };
+}, [settings.startDateISO, now]);
 
   return (
     <div className="text-white">
@@ -110,20 +123,23 @@ export default function MainScreen() {
       </div>
 
       {/* ================= PROGRESS ================= */}
-      <div className="mt-7">
-        <div className="flex justify-end text-[13px] font-semibold opacity-85 pr-1">
-          90%
-        </div>
+<div className="mt-7">
+  <div className="flex justify-end text-[13px] font-semibold opacity-85 pr-1">
+    {progress.percent}%
+  </div>
 
-        <div className="mt-2 h-[10px] rounded-full bg-white/90 overflow-hidden">
-          <div className="h-full bg-[#3F86FF] w-[90%] rounded-full" />
-        </div>
+  <div className="mt-2 h-[10px] rounded-full bg-white/90 overflow-hidden">
+    <div
+      className="h-full bg-[#3F86FF] rounded-full"
+      style={{ width: `${progress.bar}%` }}
+    />
+  </div>
 
-        <div className="mt-2 flex justify-between text-[13px] font-normal opacity-80 px-1">
-          <div>700 дней</div>
-          <div>64 дня осталось</div>
-        </div>
-      </div>
+  <div className="mt-2 flex justify-between text-[13px] font-normal opacity-80 px-1">
+    <div>{progress.goal} дней</div>
+    <div>{progress.leftDays} дня осталось</div>
+  </div>
+</div>
 
       {/* ================= TOGETHER ================= */}
       <div className="mt-8 text-center">
