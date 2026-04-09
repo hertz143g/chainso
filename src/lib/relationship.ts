@@ -46,6 +46,7 @@ export type RelationshipSettings = {
 const KEY = "chainso_settings_v2";
 const LEGACY_KEY = "chainso_settings_v1";
 const SETTINGS_UPDATED_EVENT = "chainso:settings-updated";
+let cachedSettings: RelationshipSettings | null = null;
 
 function createDefaultWidgets(): RelationshipWidget[] {
   return [
@@ -101,6 +102,19 @@ function cloneSettings(settings: RelationshipSettings): RelationshipSettings {
 
 function createFallbackSettings(): RelationshipSettings {
   return cloneSettings(defaultSettings);
+}
+
+function readAndNormalizeSettings(): RelationshipSettings {
+  if (typeof window === "undefined") return createFallbackSettings();
+
+  try {
+    const raw = readStoredSettings();
+    if (!raw) return createFallbackSettings();
+
+    return normalizeSettings(JSON.parse(raw) as Partial<RelationshipSettings>);
+  } catch {
+    return createFallbackSettings();
+  }
 }
 
 function readStoredSettings(): string | null {
@@ -208,16 +222,13 @@ function normalizeSettings(
 }
 
 export function loadSettings(): RelationshipSettings {
-  if (typeof window === "undefined") return createFallbackSettings();
+  if (typeof window === "undefined") return defaultSettings;
 
-  try {
-    const raw = readStoredSettings();
-    if (!raw) return createFallbackSettings();
-
-    return normalizeSettings(JSON.parse(raw) as Partial<RelationshipSettings>);
-  } catch {
-    return createFallbackSettings();
+  if (!cachedSettings) {
+    cachedSettings = readAndNormalizeSettings();
   }
+
+  return cachedSettings;
 }
 
 function emitSettingsUpdated() {
@@ -229,6 +240,7 @@ export function saveSettings(settings: RelationshipSettings) {
   if (typeof window === "undefined") return;
 
   const normalized = normalizeSettings(settings);
+  cachedSettings = normalized;
   localStorage.setItem(KEY, JSON.stringify(normalized));
   localStorage.removeItem(LEGACY_KEY);
   emitSettingsUpdated();
@@ -247,6 +259,7 @@ export function subscribeSettings(callback: () => void) {
 
   const handleStorage = (event: StorageEvent) => {
     if (event.key === KEY || event.key === LEGACY_KEY) {
+      cachedSettings = readAndNormalizeSettings();
       callback();
     }
   };
@@ -265,7 +278,7 @@ export function getSettingsSnapshot() {
 }
 
 export function getSettingsServerSnapshot() {
-  return createFallbackSettings();
+  return defaultSettings;
 }
 
 export function calcDiff(startISO: string, now = new Date()) {
