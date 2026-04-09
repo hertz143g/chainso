@@ -54,7 +54,7 @@ function WidgetCard({
 }) {
   if (widget.type === "memory") {
     return (
-      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-3">
+      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
         <AtmosphericBackdrop
           accentColor={widget.accentColor}
           colorMode={widget.colorMode}
@@ -63,20 +63,20 @@ function WidgetCard({
         />
         {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
 
-        <div className="relative z-10 flex h-full flex-col">
+        <div className="relative z-10 grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
               Момент
             </div>
             {widget.dateISO ? (
-              <div className="rounded-full bg-black/28 px-3 py-1 text-[12px] font-semibold backdrop-blur-sm">
+              <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
                 {formatDateLong(widget.dateISO)}
               </div>
             ) : null}
           </div>
 
-          <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-[24px] border border-white/12 bg-black/18 p-2 shadow-[0_20px_50px_rgba(8,15,33,0.32)] backdrop-blur-sm">
-            <div className="h-full overflow-hidden rounded-[18px]">
+          <div className="min-h-0 overflow-hidden rounded-[26px] border border-white/12 bg-black/18 p-2.5 shadow-[0_20px_50px_rgba(8,15,33,0.32)] backdrop-blur-sm">
+            <div className="h-full overflow-hidden rounded-[20px] bg-black/12">
               {widget.imageDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -92,10 +92,10 @@ function WidgetCard({
             </div>
           </div>
 
-          <div className="mt-4 rounded-[22px] bg-black/28 px-4 py-3 backdrop-blur-md">
-            <div className="text-[21px] font-extrabold leading-tight">{widget.title}</div>
+          <div className="rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.22),rgba(9,17,35,0.4))] px-4 py-3.5 backdrop-blur-md">
+            <div className="text-[20px] font-extrabold leading-tight">{widget.title}</div>
             {widget.note ? (
-              <div className="mt-1 text-[13px] leading-relaxed text-white/76">{widget.note}</div>
+              <div className="mt-1.5 text-[13px] leading-relaxed text-white/76">{widget.note}</div>
             ) : null}
           </div>
         </div>
@@ -114,26 +114,36 @@ function WidgetCard({
         />
         {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
 
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="flex h-[96px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
-            {widget.coverDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={widget.coverDataUrl}
-                alt={`${widget.artist} — ${widget.title}`}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              "♪"
-            )}
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-3">
+            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
+              Трек
+            </div>
           </div>
 
-          <div className="min-w-0 pr-2">
-            <div className="truncate text-[23px] font-extrabold">{widget.title}</div>
-            <div className="mt-1 text-[18px] font-semibold text-white/90">{widget.artist}</div>
-            {widget.note ? (
-              <div className="mt-2 text-[13px] leading-relaxed text-white/76">{widget.note}</div>
-            ) : null}
+          <div className="mt-4 grid grid-cols-[104px_minmax(0,1fr)] items-center gap-4">
+            <div className="flex h-[104px] w-[104px] shrink-0 items-center justify-center overflow-hidden rounded-[26px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
+              {widget.coverDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={widget.coverDataUrl}
+                  alt={`${widget.artist} — ${widget.title}`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                "♪"
+              )}
+            </div>
+
+            <div className="min-w-0 rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.2),rgba(9,17,35,0.38))] px-4 py-4 backdrop-blur-md">
+              <div className="truncate text-[22px] font-extrabold">{widget.title}</div>
+              <div className="mt-1 text-[17px] font-semibold text-white/90">{widget.artist}</div>
+              {widget.note ? (
+                <div className="mt-2 text-[13px] leading-relaxed text-white/76">
+                  {widget.note}
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
@@ -143,7 +153,7 @@ function WidgetCard({
   const hasImage = Boolean(widget.imageDataUrl);
 
   return (
-    <div className="relative col-span-2 min-h-[232px] overflow-hidden rounded-[32px] border border-white/10 bg-[#111A33] p-5">
+    <div className="relative col-span-2 min-h-[224px] overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
       <AtmosphericBackdrop
         accentColor={widget.accentColor}
         colorMode={widget.colorMode}
@@ -152,27 +162,42 @@ function WidgetCard({
       />
       {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
 
-      {hasImage ? (
-        <div className="absolute inset-y-4 right-4 w-[40%] overflow-hidden rounded-[24px] border border-white/12 bg-black/20 shadow-[0_20px_50px_rgba(8,15,33,0.28)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={widget.imageDataUrl}
-            alt={widget.title}
-            className="h-full w-full object-cover"
-          />
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="flex items-start justify-between gap-3">
+          <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
+            Событие
+          </div>
+          <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
+            {formatDateLong(widget.dateISO)}
+          </div>
         </div>
-      ) : null}
 
-      <div className="relative z-10 flex h-full min-h-[190px] flex-col justify-between">
-        <div className={hasImage ? "max-w-[52%]" : "max-w-[72%]"}>
-          <div className="text-[26px] font-extrabold leading-tight">{widget.title}</div>
-          {widget.subtitle ? (
-            <div className="mt-2 text-[14px] leading-relaxed text-white/76">{widget.subtitle}</div>
+        <div
+          className={`mt-4 grid flex-1 gap-3 ${hasImage ? "grid-cols-[minmax(0,1fr)_118px]" : "grid-cols-1"}`}
+        >
+          <div className="flex min-h-[148px] flex-col justify-between rounded-[26px] bg-[linear-gradient(180deg,rgba(9,17,35,0.22),rgba(9,17,35,0.42))] px-4 py-4 backdrop-blur-md">
+            <div className="text-[24px] font-extrabold leading-tight">{widget.title}</div>
+            {widget.subtitle ? (
+              <div className="mt-3 text-[14px] leading-relaxed text-white/76">
+                {widget.subtitle}
+              </div>
+            ) : (
+              <div className="mt-3 text-[13px] text-white/46">
+                Здесь появится короткая подпись к вашему событию.
+              </div>
+            )}
+          </div>
+
+          {hasImage ? (
+            <div className="overflow-hidden rounded-[26px] border border-white/12 bg-black/20 shadow-[0_20px_50px_rgba(8,15,33,0.28)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={widget.imageDataUrl}
+                alt={widget.title}
+                className="h-full w-full object-cover"
+              />
+            </div>
           ) : null}
-        </div>
-
-        <div className="self-end rounded-full bg-black/28 px-4 py-2 text-[13px] font-semibold backdrop-blur-sm">
-          {formatDateLong(widget.dateISO)}
         </div>
       </div>
     </div>

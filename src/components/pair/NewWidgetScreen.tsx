@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import AtmosphericBackdrop from "@/components/pair/AtmosphericBackdrop";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
@@ -20,6 +20,7 @@ import {
 import {
   extractPaletteFromDataUrl,
   getWidgetPalette,
+  prepareImageForStorage,
 } from "@/lib/widgetAppearance";
 
 const COLOR_OPTIONS = ["#4A86E8", "#E86FA5", "#5AA897", "#F59E0B", "#7C65FF"];
@@ -36,15 +37,6 @@ type WidgetDraft = {
   colorMode: WidgetColorMode;
   accentPalette?: string[];
 };
-
-function readFileAsDataURL(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("File read error"));
-    reader.onload = () => resolve(String(reader.result));
-    reader.readAsDataURL(file);
-  });
-}
 
 function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
   if (type === "memory") {
@@ -218,7 +210,7 @@ function WidgetTypeCard({
 function WidgetPreview({ draft }: { draft: WidgetDraft }) {
   if (draft.type === "memory") {
     return (
-      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-3">
+      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
         <AtmosphericBackdrop
           accentColor={draft.accentColor}
           colorMode={draft.colorMode}
@@ -226,20 +218,20 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
           imageDataUrl={draft.imageDataUrl}
         />
 
-        <div className="relative z-10 flex h-full flex-col">
+        <div className="relative z-10 grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
               Момент
             </div>
             {draft.dateISO ? (
-              <div className="rounded-full bg-black/28 px-3 py-1 text-[12px] font-semibold backdrop-blur-sm">
+              <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
                 {formatDateLong(draft.dateISO)}
               </div>
             ) : null}
           </div>
 
-          <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-[24px] border border-white/12 bg-black/18 p-2 shadow-[0_20px_50px_rgba(8,15,33,0.32)] backdrop-blur-sm">
-            <div className="h-full overflow-hidden rounded-[18px]">
+          <div className="min-h-0 overflow-hidden rounded-[26px] border border-white/12 bg-black/18 p-2.5 shadow-[0_20px_50px_rgba(8,15,33,0.32)] backdrop-blur-sm">
+            <div className="h-full overflow-hidden rounded-[20px] bg-black/12">
               {draft.imageDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -255,12 +247,12 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
             </div>
           </div>
 
-          <div className="mt-4 rounded-[22px] bg-black/28 px-4 py-3 backdrop-blur-md">
-            <div className="text-[21px] font-extrabold leading-tight">
+          <div className="rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.22),rgba(9,17,35,0.4))] px-4 py-3.5 backdrop-blur-md">
+            <div className="text-[20px] font-extrabold leading-tight">
               {draft.title.trim() || "Название момента"}
             </div>
             {draft.note.trim() ? (
-              <div className="mt-1 text-[13px] leading-relaxed text-white/76">
+              <div className="mt-1.5 text-[13px] leading-relaxed text-white/76">
                 {draft.note.trim()}
               </div>
             ) : null}
@@ -280,30 +272,40 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
           imageDataUrl={draft.imageDataUrl}
         />
 
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="flex h-[96px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
-            {draft.imageDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={draft.imageDataUrl}
-                alt={draft.title || "Обложка"}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              "♪"
-            )}
+        <div className="relative z-10">
+          <div className="flex items-start justify-between gap-3">
+            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
+              Трек
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <div className="truncate text-[22px] font-extrabold">
-              {draft.title.trim() || "Название трека"}
+          <div className="mt-4 grid grid-cols-[104px_minmax(0,1fr)] items-center gap-4">
+            <div className="flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[26px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
+              {draft.imageDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={draft.imageDataUrl}
+                  alt={draft.title || "Обложка"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                "♪"
+              )}
             </div>
-            <div className="mt-1 text-[17px] font-semibold text-white/88">
-              {draft.artist.trim() || "Исполнитель"}
+
+            <div className="min-w-0 rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.2),rgba(9,17,35,0.38))] px-4 py-4 backdrop-blur-md">
+              <div className="truncate text-[22px] font-extrabold">
+                {draft.title.trim() || "Название трека"}
+              </div>
+              <div className="mt-1 text-[17px] font-semibold text-white/88">
+                {draft.artist.trim() || "Исполнитель"}
+              </div>
+              {draft.note.trim() ? (
+                <div className="mt-2 text-[13px] leading-relaxed text-white/72">
+                  {draft.note.trim()}
+                </div>
+              ) : null}
             </div>
-            {draft.note.trim() ? (
-              <div className="mt-2 text-[13px] text-white/72">{draft.note.trim()}</div>
-            ) : null}
           </div>
         </div>
       </div>
@@ -313,7 +315,7 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
   const hasImage = Boolean(draft.imageDataUrl);
 
   return (
-    <div className="relative min-h-[220px] overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-5">
+    <div className="relative min-h-[224px] overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
       <AtmosphericBackdrop
         accentColor={draft.accentColor}
         colorMode={draft.colorMode}
@@ -321,28 +323,42 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
         imageDataUrl={draft.imageDataUrl}
       />
 
-      {hasImage ? (
-        <div className="absolute inset-y-4 right-4 w-[40%] overflow-hidden rounded-[24px] border border-white/12 bg-black/20 shadow-[0_20px_50px_rgba(8,15,33,0.28)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={draft.imageDataUrl}
-            alt={draft.title || "Фото события"}
-            className="h-full w-full object-cover"
-          />
-        </div>
-      ) : null}
-
-      <div className="relative z-10 flex h-full min-h-[180px] flex-col justify-between">
-        <div className={hasImage ? "max-w-[52%]" : "max-w-[72%]"}>
-          <div className="text-[25px] font-extrabold leading-tight">
-            {draft.title.trim() || "Название события"}
+      <div className="relative z-10 flex h-full flex-col">
+        <div className="flex items-start justify-between gap-3">
+          <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
+            Событие
           </div>
-          {draft.subtitle.trim() ? (
-            <div className="mt-2 text-[14px] text-white/78">{draft.subtitle.trim()}</div>
-          ) : null}
+          <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
+            {draft.dateISO ? formatDateLong(draft.dateISO) : "Дата события"}
+          </div>
         </div>
-        <div className="self-end rounded-full bg-black/26 px-4 py-2 text-[13px] font-semibold">
-          {draft.dateISO ? formatDateLong(draft.dateISO) : "Дата события"}
+
+        <div className={`mt-4 grid flex-1 gap-3 ${hasImage ? "grid-cols-[minmax(0,1fr)_118px]" : "grid-cols-1"}`}>
+          <div className="flex min-h-[148px] flex-col justify-between rounded-[26px] bg-[linear-gradient(180deg,rgba(9,17,35,0.22),rgba(9,17,35,0.42))] px-4 py-4 backdrop-blur-md">
+            <div className="text-[24px] font-extrabold leading-tight">
+              {draft.title.trim() || "Название события"}
+            </div>
+            {draft.subtitle.trim() ? (
+              <div className="mt-3 text-[14px] leading-relaxed text-white/76">
+                {draft.subtitle.trim()}
+              </div>
+            ) : (
+              <div className="mt-3 text-[13px] text-white/46">
+                Здесь можно оставить короткую подпись к событию.
+              </div>
+            )}
+          </div>
+
+          {hasImage ? (
+            <div className="overflow-hidden rounded-[26px] border border-white/12 bg-black/20 shadow-[0_20px_50px_rgba(8,15,33,0.28)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={draft.imageDataUrl}
+                alt={draft.title || "Фото события"}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
@@ -353,9 +369,10 @@ export default function NewWidgetScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const settings = useRelationshipSettings();
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<WidgetDraft | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isExtractingPalette, setIsExtractingPalette] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const widgetId = searchParams.get("id");
   const editingWidget = settings.widgets.find((widget) => widget.id === widgetId);
@@ -430,29 +447,42 @@ export default function NewWidgetScreen() {
         ? "Фото момента"
         : "Фон события";
 
+  const onPickImage = () => {
+    imageInputRef.current?.click();
+  };
+
   const onImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
     if (!file) return;
 
-    const url = await readFileAsDataURL(file);
     event.currentTarget.value = "";
-    setIsExtractingPalette(true);
+    setIsUploadingImage(true);
 
     try {
-      const palette = await extractPaletteFromDataUrl(url).catch(() => []);
+      const imageDataUrl = await prepareImageForStorage(file, {
+        maxDimension: 1180,
+        quality: 0.82,
+        targetLength: current.type === "track" ? 520_000 : 640_000,
+      });
+      const palette = await extractPaletteFromDataUrl(imageDataUrl);
 
       setDraft((prev) => {
         const base = prev ?? initialDraft;
+        const shouldStayAdaptive = base.colorMode === "adaptive";
+        const nextAccentColor =
+          shouldStayAdaptive && palette[0] ? palette[0] : base.accentColor;
+
         return {
           ...base,
-          imageDataUrl: url,
+          imageDataUrl,
           accentPalette: palette.length > 0 ? palette : base.accentPalette,
-          accentColor:
-            base.colorMode === "adaptive" && palette[0] ? palette[0] : base.accentColor,
+          accentColor: nextAccentColor,
         };
       });
+    } catch {
+      window.alert("Не удалось обработать изображение. Попробуй выбрать другое фото.");
     } finally {
-      setIsExtractingPalette(false);
+      setIsUploadingImage(false);
     }
   };
 
@@ -462,16 +492,21 @@ export default function NewWidgetScreen() {
 
     setIsSaving(true);
 
-    const nextWidget = buildWidgetFromDraft(current, editingWidget);
+    try {
+      const nextWidget = buildWidgetFromDraft(current, editingWidget);
 
-    updateSettings((prev) => ({
-      ...prev,
-      widgets: editingWidget
-        ? prev.widgets.map((widget) => (widget.id === editingWidget.id ? nextWidget : widget))
-        : [nextWidget, ...prev.widgets],
-    }));
+      updateSettings((prev) => ({
+        ...prev,
+        widgets: editingWidget
+          ? prev.widgets.map((widget) => (widget.id === editingWidget.id ? nextWidget : widget))
+          : [nextWidget, ...prev.widgets],
+      }));
 
-    router.push("/");
+      router.push("/");
+    } catch {
+      setIsSaving(false);
+      window.alert("Не удалось сохранить виджет. Попробуй изображение поменьше.");
+    }
   };
 
   return (
@@ -583,20 +618,17 @@ export default function NewWidgetScreen() {
 
         <div className="mt-5">
           <div className="text-[13px] text-white/80">{imageLabel}</div>
-          <label className="mt-3 flex min-h-[88px] w-full cursor-pointer items-center justify-center rounded-[22px] border-2 border-dashed border-white/55 bg-white/4 px-4 py-4 text-center text-[14px] text-white/80">
-            {current.imageDataUrl ? "Изображение выбрано, нажми чтобы заменить" : "Нажми, чтобы выбрать изображение"}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={onImageChange}
-            />
-          </label>
-          {isExtractingPalette ? (
-            <div className="mt-2 text-[12px] text-white/58">
-              Подбираю палитру с фотографии...
-            </div>
-          ) : null}
+          <button
+            type="button"
+            onClick={onPickImage}
+            className="mt-3 flex min-h-[88px] w-full items-center justify-center rounded-[22px] border-2 border-dashed border-white/55 bg-white/4 px-4 py-4 text-center text-[14px] text-white/80"
+          >
+            {isUploadingImage
+              ? "Подготавливаю изображение..."
+              : current.imageDataUrl
+                ? "Изображение выбрано, нажми чтобы заменить"
+                : "Нажми, чтобы выбрать изображение"}
+          </button>
         </div>
 
         <div className="mt-5">
@@ -652,11 +684,19 @@ export default function NewWidgetScreen() {
 
         <button
           type="submit"
-          disabled={!canSave || isSaving || isExtractingPalette}
+          disabled={!canSave || isSaving || isUploadingImage}
           className="mt-6 w-full rounded-[18px] bg-[#3F86FF] py-3 text-[16px] font-semibold text-white disabled:opacity-55"
         >
           {isEditing ? "Сохранить изменения" : "Добавить виджет"}
         </button>
+
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={onImageChange}
+        />
       </form>
     </div>
   );
