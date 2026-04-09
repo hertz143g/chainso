@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import TimeBox from "../ui/TimeBox";
+import AtmosphericBackdrop from "@/components/pair/AtmosphericBackdrop";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   calcDiff,
@@ -15,6 +15,7 @@ import {
   type RelationshipWidget,
   updateSettings,
 } from "@/lib/relationship";
+import TimeBox from "../ui/TimeBox";
 
 function WidgetActions({
   widgetId,
@@ -24,7 +25,7 @@ function WidgetActions({
   onDelete: (widgetId: string) => void;
 }) {
   return (
-    <div className="absolute right-3 top-3 z-10 flex gap-2">
+    <div className="absolute right-3 top-3 z-20 flex gap-2">
       <Link
         href={`/widget/new?id=${widgetId}`}
         className="rounded-full bg-black/42 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm"
@@ -53,30 +54,48 @@ function WidgetCard({
 }) {
   if (widget.type === "memory") {
     return (
-      <div
-        className="relative aspect-square overflow-hidden rounded-[30px] bg-cover bg-center p-4"
-        style={{
-          backgroundColor: widget.accentColor,
-          backgroundImage: widget.imageDataUrl
-            ? `linear-gradient(to top, rgba(8, 15, 33, 0.84), rgba(8, 15, 33, 0.18)), url(${widget.imageDataUrl})`
-            : undefined,
-        }}
-      >
+      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-3">
+        <AtmosphericBackdrop
+          accentColor={widget.accentColor}
+          colorMode={widget.colorMode}
+          accentPalette={widget.accentPalette}
+          imageDataUrl={widget.imageDataUrl}
+        />
         {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
 
-        <div className="flex h-full flex-col justify-between">
-          <div className="self-end rounded-full bg-black/24 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">
-            Момент
-          </div>
-          <div>
-            <div className="text-[22px] font-extrabold leading-tight">{widget.title}</div>
-            {widget.note ? (
-              <div className="mt-1 text-[13px] text-white/76">{widget.note}</div>
-            ) : null}
+        <div className="relative z-10 flex h-full flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
+              Момент
+            </div>
             {widget.dateISO ? (
-              <div className="mt-3 inline-flex rounded-full bg-black/28 px-3 py-1 text-[12px] font-semibold">
+              <div className="rounded-full bg-black/28 px-3 py-1 text-[12px] font-semibold backdrop-blur-sm">
                 {formatDateLong(widget.dateISO)}
               </div>
+            ) : null}
+          </div>
+
+          <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-[24px] border border-white/12 bg-black/18 p-2 shadow-[0_20px_50px_rgba(8,15,33,0.32)] backdrop-blur-sm">
+            <div className="h-full overflow-hidden rounded-[18px]">
+              {widget.imageDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={widget.imageDataUrl}
+                  alt={widget.title}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-white/8 text-[13px] text-white/72">
+                  Добавь фото
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-[22px] bg-black/28 px-4 py-3 backdrop-blur-md">
+            <div className="text-[21px] font-extrabold leading-tight">{widget.title}</div>
+            {widget.note ? (
+              <div className="mt-1 text-[13px] leading-relaxed text-white/76">{widget.note}</div>
             ) : null}
           </div>
         </div>
@@ -86,14 +105,17 @@ function WidgetCard({
 
   if (widget.type === "track") {
     return (
-      <div
-        className="relative col-span-2 overflow-hidden rounded-[30px] p-4"
-        style={{ backgroundColor: widget.accentColor }}
-      >
+      <div className="relative col-span-2 overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
+        <AtmosphericBackdrop
+          accentColor={widget.accentColor}
+          colorMode={widget.colorMode}
+          accentPalette={widget.accentPalette}
+          imageDataUrl={widget.coverDataUrl}
+        />
         {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
 
-        <div className="flex items-center gap-4">
-          <div className="flex h-[96px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded-[24px] bg-black/25 text-[28px]">
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="flex h-[96px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
             {widget.coverDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -105,11 +127,12 @@ function WidgetCard({
               "♪"
             )}
           </div>
+
           <div className="min-w-0 pr-2">
             <div className="truncate text-[23px] font-extrabold">{widget.title}</div>
             <div className="mt-1 text-[18px] font-semibold text-white/90">{widget.artist}</div>
             {widget.note ? (
-              <div className="mt-2 text-[13px] text-white/76">{widget.note}</div>
+              <div className="mt-2 text-[13px] leading-relaxed text-white/76">{widget.note}</div>
             ) : null}
           </div>
         </div>
@@ -117,26 +140,38 @@ function WidgetCard({
     );
   }
 
+  const hasImage = Boolean(widget.imageDataUrl);
+
   return (
-    <div
-      className="relative col-span-2 min-h-[230px] overflow-hidden rounded-[32px] bg-cover bg-center p-5"
-      style={{
-        backgroundColor: widget.accentColor,
-        backgroundImage: widget.imageDataUrl
-          ? `linear-gradient(to top, rgba(8, 15, 33, 0.86), rgba(8, 15, 33, 0.18)), url(${widget.imageDataUrl})`
-          : undefined,
-      }}
-    >
+    <div className="relative col-span-2 min-h-[232px] overflow-hidden rounded-[32px] border border-white/10 bg-[#111A33] p-5">
+      <AtmosphericBackdrop
+        accentColor={widget.accentColor}
+        colorMode={widget.colorMode}
+        accentPalette={widget.accentPalette}
+        imageDataUrl={widget.imageDataUrl}
+      />
       {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
 
-      <div className="flex h-full min-h-[190px] flex-col justify-between">
-        <div className="max-w-[70%]">
+      {hasImage ? (
+        <div className="absolute inset-y-4 right-4 w-[40%] overflow-hidden rounded-[24px] border border-white/12 bg-black/20 shadow-[0_20px_50px_rgba(8,15,33,0.28)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={widget.imageDataUrl}
+            alt={widget.title}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ) : null}
+
+      <div className="relative z-10 flex h-full min-h-[190px] flex-col justify-between">
+        <div className={hasImage ? "max-w-[52%]" : "max-w-[72%]"}>
           <div className="text-[26px] font-extrabold leading-tight">{widget.title}</div>
           {widget.subtitle ? (
-            <div className="mt-2 text-[14px] text-white/76">{widget.subtitle}</div>
+            <div className="mt-2 text-[14px] leading-relaxed text-white/76">{widget.subtitle}</div>
           ) : null}
         </div>
-        <div className="self-end rounded-full bg-black/28 px-4 py-2 text-[13px] font-semibold">
+
+        <div className="self-end rounded-full bg-black/28 px-4 py-2 text-[13px] font-semibold backdrop-blur-sm">
           {formatDateLong(widget.dateISO)}
         </div>
       </div>

@@ -1,10 +1,13 @@
 // src/lib/relationship.ts
 export type WidgetType = "event" | "memory" | "track";
+export type WidgetColorMode = "solid" | "adaptive";
 
 export type BaseWidget = {
   id: string;
   type: WidgetType;
   accentColor: string;
+  colorMode: WidgetColorMode;
+  accentPalette?: string[];
   createdAtISO: string;
 };
 
@@ -57,6 +60,7 @@ function createDefaultWidgets(): RelationshipWidget[] {
       dateISO: "2024-02-09",
       subtitle: "Тот самый день",
       accentColor: "#4A86E8",
+      colorMode: "solid",
       createdAtISO: "2024-02-09T00:00:00.000Z",
     },
     {
@@ -66,6 +70,7 @@ function createDefaultWidgets(): RelationshipWidget[] {
       dateISO: "2024-04-12",
       note: "Оставь здесь любимый снимок",
       accentColor: "#E86FA5",
+      colorMode: "solid",
       createdAtISO: "2024-04-12T00:00:00.000Z",
     },
     {
@@ -75,6 +80,7 @@ function createDefaultWidgets(): RelationshipWidget[] {
       artist: "Джизус",
       note: "Ваш общий трек",
       accentColor: "#5AA897",
+      colorMode: "solid",
       createdAtISO: "2024-02-12T00:00:00.000Z",
     },
   ];
@@ -96,7 +102,10 @@ export const defaultSettings = getDefaultSettings();
 function cloneSettings(settings: RelationshipSettings): RelationshipSettings {
   return {
     ...settings,
-    widgets: settings.widgets.map((widget) => ({ ...widget })),
+    widgets: settings.widgets.map((widget) => ({
+      ...widget,
+      accentPalette: widget.accentPalette ? [...widget.accentPalette] : undefined,
+    })),
   };
 }
 
@@ -137,6 +146,10 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
   const raw = widget as Record<string, unknown>;
   const id = typeof raw.id === "string" ? raw.id : createWidgetId();
   const accentColor = typeof raw.accentColor === "string" ? raw.accentColor : "#4A86E8";
+  const colorMode = raw.colorMode === "adaptive" ? "adaptive" : "solid";
+  const accentPalette = Array.isArray(raw.accentPalette)
+    ? raw.accentPalette.filter((color): color is string => typeof color === "string").slice(0, 4)
+    : undefined;
   const createdAtISO =
     typeof raw.createdAtISO === "string" ? raw.createdAtISO : new Date().toISOString();
 
@@ -151,6 +164,8 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
       subtitle: typeof raw.subtitle === "string" ? raw.subtitle : undefined,
       imageDataUrl: typeof raw.imageDataUrl === "string" ? raw.imageDataUrl : undefined,
       accentColor,
+      colorMode,
+      accentPalette,
       createdAtISO,
     };
   }
@@ -166,6 +181,8 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
       note: typeof raw.note === "string" ? raw.note : undefined,
       imageDataUrl: typeof raw.imageDataUrl === "string" ? raw.imageDataUrl : undefined,
       accentColor,
+      colorMode,
+      accentPalette,
       createdAtISO,
     };
   }
@@ -181,6 +198,8 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
       note: typeof raw.note === "string" ? raw.note : undefined,
       coverDataUrl: typeof raw.coverDataUrl === "string" ? raw.coverDataUrl : undefined,
       accentColor,
+      colorMode,
+      accentPalette,
       createdAtISO,
     };
   }

@@ -4,6 +4,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import AtmosphericBackdrop from "@/components/pair/AtmosphericBackdrop";
+import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   createWidgetId,
   formatDateLong,
@@ -11,10 +13,14 @@ import {
   type MemoryWidget,
   type RelationshipWidget,
   type TrackWidget,
+  type WidgetColorMode,
   type WidgetType,
   updateSettings,
 } from "@/lib/relationship";
-import useRelationshipSettings from "@/hooks/useRelationshipSettings";
+import {
+  extractPaletteFromDataUrl,
+  getWidgetPalette,
+} from "@/lib/widgetAppearance";
 
 const COLOR_OPTIONS = ["#4A86E8", "#E86FA5", "#5AA897", "#F59E0B", "#7C65FF"];
 
@@ -27,6 +33,8 @@ type WidgetDraft = {
   artist: string;
   imageDataUrl?: string;
   accentColor: string;
+  colorMode: WidgetColorMode;
+  accentPalette?: string[];
 };
 
 function readFileAsDataURL(file: File): Promise<string> {
@@ -49,6 +57,8 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
       artist: "",
       imageDataUrl: undefined,
       accentColor: "#E86FA5",
+      colorMode: "solid",
+      accentPalette: undefined,
     };
   }
 
@@ -62,6 +72,8 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
       artist: "",
       imageDataUrl: undefined,
       accentColor: "#5AA897",
+      colorMode: "solid",
+      accentPalette: undefined,
     };
   }
 
@@ -74,6 +86,8 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
     artist: "",
     imageDataUrl: undefined,
     accentColor: "#4A86E8",
+    colorMode: "solid",
+    accentPalette: undefined,
   };
 }
 
@@ -88,6 +102,8 @@ function widgetToDraft(widget: RelationshipWidget): WidgetDraft {
       artist: "",
       imageDataUrl: widget.imageDataUrl,
       accentColor: widget.accentColor,
+      colorMode: widget.colorMode,
+      accentPalette: widget.accentPalette ? [...widget.accentPalette] : undefined,
     };
   }
 
@@ -101,6 +117,8 @@ function widgetToDraft(widget: RelationshipWidget): WidgetDraft {
       artist: widget.artist,
       imageDataUrl: widget.coverDataUrl,
       accentColor: widget.accentColor,
+      colorMode: widget.colorMode,
+      accentPalette: widget.accentPalette ? [...widget.accentPalette] : undefined,
     };
   }
 
@@ -113,6 +131,8 @@ function widgetToDraft(widget: RelationshipWidget): WidgetDraft {
     artist: "",
     imageDataUrl: widget.imageDataUrl,
     accentColor: widget.accentColor,
+    colorMode: widget.colorMode,
+    accentPalette: widget.accentPalette ? [...widget.accentPalette] : undefined,
   };
 }
 
@@ -123,6 +143,8 @@ function buildWidgetFromDraft(
   const base = {
     id: existingWidget?.id ?? createWidgetId(),
     accentColor: draft.accentColor,
+    colorMode: draft.colorMode,
+    accentPalette: draft.accentPalette,
     createdAtISO: existingWidget?.createdAtISO ?? new Date().toISOString(),
   };
 
@@ -194,22 +216,84 @@ function WidgetTypeCard({
 }
 
 function WidgetPreview({ draft }: { draft: WidgetDraft }) {
+  if (draft.type === "memory") {
+    return (
+      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-3">
+        <AtmosphericBackdrop
+          accentColor={draft.accentColor}
+          colorMode={draft.colorMode}
+          accentPalette={draft.accentPalette}
+          imageDataUrl={draft.imageDataUrl}
+        />
+
+        <div className="relative z-10 flex h-full flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
+              Момент
+            </div>
+            {draft.dateISO ? (
+              <div className="rounded-full bg-black/28 px-3 py-1 text-[12px] font-semibold backdrop-blur-sm">
+                {formatDateLong(draft.dateISO)}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-[24px] border border-white/12 bg-black/18 p-2 shadow-[0_20px_50px_rgba(8,15,33,0.32)] backdrop-blur-sm">
+            <div className="h-full overflow-hidden rounded-[18px]">
+              {draft.imageDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={draft.imageDataUrl}
+                  alt={draft.title || "Фото момента"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-white/8 text-[13px] text-white/72">
+                  Добавь фото
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-[22px] bg-black/28 px-4 py-3 backdrop-blur-md">
+            <div className="text-[21px] font-extrabold leading-tight">
+              {draft.title.trim() || "Название момента"}
+            </div>
+            {draft.note.trim() ? (
+              <div className="mt-1 text-[13px] leading-relaxed text-white/76">
+                {draft.note.trim()}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (draft.type === "track") {
     return (
-      <div className="rounded-[28px] p-4" style={{ backgroundColor: draft.accentColor }}>
-        <div className="flex items-center gap-4">
-          <div className="flex h-[96px] w-[96px] items-center justify-center overflow-hidden rounded-[24px] bg-black/25 text-[28px]">
+      <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
+        <AtmosphericBackdrop
+          accentColor={draft.accentColor}
+          colorMode={draft.colorMode}
+          accentPalette={draft.accentPalette}
+          imageDataUrl={draft.imageDataUrl}
+        />
+
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="flex h-[96px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
             {draft.imageDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={draft.imageDataUrl}
-                alt="Обложка"
+                alt={draft.title || "Обложка"}
                 className="h-full w-full object-cover"
               />
             ) : (
               "♪"
             )}
           </div>
+
           <div className="min-w-0">
             <div className="truncate text-[22px] font-extrabold">
               {draft.title.trim() || "Название трека"}
@@ -226,51 +310,30 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
     );
   }
 
-  if (draft.type === "memory") {
-    return (
-      <div
-        className="aspect-square rounded-[28px] overflow-hidden bg-cover bg-center p-4"
-        style={{
-          backgroundColor: draft.accentColor,
-          backgroundImage: draft.imageDataUrl
-            ? `linear-gradient(to top, rgba(9, 14, 30, 0.78), rgba(9, 14, 30, 0.2)), url(${draft.imageDataUrl})`
-            : undefined,
-        }}
-      >
-        <div className="flex h-full flex-col justify-between">
-          <div className="self-end rounded-full bg-black/22 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">
-            Момент
-          </div>
-          <div>
-            <div className="text-[22px] font-extrabold">
-              {draft.title.trim() || "Любимый кадр"}
-            </div>
-            {draft.note.trim() ? (
-              <div className="mt-1 text-[13px] text-white/78">{draft.note.trim()}</div>
-            ) : null}
-            {draft.dateISO ? (
-              <div className="mt-3 inline-flex rounded-full bg-black/26 px-3 py-1 text-[12px] font-semibold">
-                {formatDateLong(draft.dateISO)}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const hasImage = Boolean(draft.imageDataUrl);
 
   return (
-    <div
-      className="min-h-[220px] rounded-[30px] overflow-hidden bg-cover bg-center p-5"
-      style={{
-        backgroundColor: draft.accentColor,
-        backgroundImage: draft.imageDataUrl
-          ? `linear-gradient(to top, rgba(9, 14, 30, 0.84), rgba(9, 14, 30, 0.16)), url(${draft.imageDataUrl})`
-          : undefined,
-      }}
-    >
-      <div className="flex h-full min-h-[180px] flex-col justify-between">
-        <div className="max-w-[70%]">
+    <div className="relative min-h-[220px] overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-5">
+      <AtmosphericBackdrop
+        accentColor={draft.accentColor}
+        colorMode={draft.colorMode}
+        accentPalette={draft.accentPalette}
+        imageDataUrl={draft.imageDataUrl}
+      />
+
+      {hasImage ? (
+        <div className="absolute inset-y-4 right-4 w-[40%] overflow-hidden rounded-[24px] border border-white/12 bg-black/20 shadow-[0_20px_50px_rgba(8,15,33,0.28)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={draft.imageDataUrl}
+            alt={draft.title || "Фото события"}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ) : null}
+
+      <div className="relative z-10 flex h-full min-h-[180px] flex-col justify-between">
+        <div className={hasImage ? "max-w-[52%]" : "max-w-[72%]"}>
           <div className="text-[25px] font-extrabold leading-tight">
             {draft.title.trim() || "Название события"}
           </div>
@@ -292,6 +355,7 @@ export default function NewWidgetScreen() {
   const settings = useRelationshipSettings();
   const [draft, setDraft] = useState<WidgetDraft | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExtractingPalette, setIsExtractingPalette] = useState(false);
 
   const widgetId = searchParams.get("id");
   const editingWidget = settings.widgets.find((widget) => widget.id === widgetId);
@@ -303,6 +367,12 @@ export default function NewWidgetScreen() {
   );
 
   const current = draft ?? initialDraft;
+  const autoPalette = getWidgetPalette({
+    accentColor: current.accentColor,
+    colorMode: "adaptive",
+    accentPalette: current.accentPalette,
+  });
+  const isAdaptiveAvailable = Boolean(current.imageDataUrl);
 
   const patchDraft = (patch: Partial<WidgetDraft>) => {
     setDraft((prev) => ({
@@ -323,7 +393,26 @@ export default function NewWidgetScreen() {
         note: base.note,
         artist: base.artist,
         imageDataUrl: base.imageDataUrl,
+        colorMode: base.colorMode,
+        accentPalette: base.accentPalette,
+        accentColor: base.accentColor,
       };
+    });
+  };
+
+  const selectSolidColor = (color: string) => {
+    patchDraft({
+      accentColor: color,
+      colorMode: "solid",
+    });
+  };
+
+  const selectAdaptiveColor = () => {
+    if (!isAdaptiveAvailable) return;
+
+    patchDraft({
+      colorMode: "adaptive",
+      accentColor: current.accentPalette?.[0] ?? current.accentColor,
     });
   };
 
@@ -346,8 +435,25 @@ export default function NewWidgetScreen() {
     if (!file) return;
 
     const url = await readFileAsDataURL(file);
-    patchDraft({ imageDataUrl: url });
     event.currentTarget.value = "";
+    setIsExtractingPalette(true);
+
+    try {
+      const palette = await extractPaletteFromDataUrl(url).catch(() => []);
+
+      setDraft((prev) => {
+        const base = prev ?? initialDraft;
+        return {
+          ...base,
+          imageDataUrl: url,
+          accentPalette: palette.length > 0 ? palette : base.accentPalette,
+          accentColor:
+            base.colorMode === "adaptive" && palette[0] ? palette[0] : base.accentColor,
+        };
+      });
+    } finally {
+      setIsExtractingPalette(false);
+    }
   };
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -396,7 +502,7 @@ export default function NewWidgetScreen() {
             />
             <WidgetTypeCard
               title="Момент"
-              caption="Квадратный кадр"
+              caption="Фото как главный акцент"
               selected={current.type === "memory"}
               className="min-h-[104px]"
               onClick={() => selectType("memory")}
@@ -486,24 +592,55 @@ export default function NewWidgetScreen() {
               onChange={onImageChange}
             />
           </label>
+          {isExtractingPalette ? (
+            <div className="mt-2 text-[12px] text-white/58">
+              Подбираю палитру с фотографии...
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-5">
           <div className="text-[13px] text-white/80">Цвет карточки</div>
-          <div className="mt-3 flex gap-3">
+          <div className="mt-3 flex flex-wrap gap-3">
             {COLOR_OPTIONS.map((color) => (
               <button
                 key={color}
                 type="button"
-                onClick={() => patchDraft({ accentColor: color })}
+                onClick={() => selectSolidColor(color)}
                 className={`h-10 w-10 rounded-full border-2 ${
-                  current.accentColor === color ? "border-white" : "border-transparent"
+                  current.colorMode === "solid" && current.accentColor === color
+                    ? "border-white"
+                    : "border-transparent"
                 }`}
                 style={{ backgroundColor: color }}
                 aria-label={`Выбрать цвет ${color}`}
               />
             ))}
+
+            <button
+              type="button"
+              onClick={selectAdaptiveColor}
+              disabled={!isAdaptiveAvailable}
+              className={`flex h-10 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition ${
+                current.colorMode === "adaptive"
+                  ? "border-white bg-white/10 text-white"
+                  : "border-white/20 bg-white/6 text-white/78"
+              } disabled:cursor-not-allowed disabled:opacity-45`}
+            >
+              <span
+                className="block h-5 w-5 rounded-full"
+                style={{
+                  background: `radial-gradient(circle at 30% 30%, ${autoPalette[0]}, ${autoPalette[1]}, ${autoPalette[2]})`,
+                }}
+              />
+              Авто
+            </button>
           </div>
+          {!isAdaptiveAvailable ? (
+            <div className="mt-2 text-[12px] text-white/54">
+              Авто-режим станет доступен после выбора фотографии.
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-6">
@@ -515,7 +652,7 @@ export default function NewWidgetScreen() {
 
         <button
           type="submit"
-          disabled={!canSave || isSaving}
+          disabled={!canSave || isSaving || isExtractingPalette}
           className="mt-6 w-full rounded-[18px] bg-[#3F86FF] py-3 text-[16px] font-semibold text-white disabled:opacity-55"
         >
           {isEditing ? "Сохранить изменения" : "Добавить виджет"}
