@@ -218,6 +218,18 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
           imageDataUrl={draft.imageDataUrl}
         />
 
+        {draft.imageDataUrl ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={draft.imageDataUrl}
+              alt={draft.title || "Фото момента"}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,12,24,0.16),rgba(6,12,24,0.2)_38%,rgba(6,12,24,0.68))]" />
+          </>
+        ) : null}
+
         <div className="relative z-10 grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
@@ -230,30 +242,20 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
             ) : null}
           </div>
 
-          <div className="min-h-0 overflow-hidden rounded-[26px] border border-white/12 bg-black/18 p-2.5 shadow-[0_20px_50px_rgba(8,15,33,0.32)] backdrop-blur-sm">
-            <div className="h-full overflow-hidden rounded-[20px] bg-black/12">
-              {draft.imageDataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={draft.imageDataUrl}
-                  alt={draft.title || "Фото момента"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center bg-white/8 text-[13px] text-white/72">
-                  Добавь фото
-                </div>
-              )}
-            </div>
-          </div>
+          <div className="min-h-0" />
 
-          <div className="rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.22),rgba(9,17,35,0.4))] px-4 py-3.5 backdrop-blur-md">
+          <div className="rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.18),rgba(9,17,35,0.56))] px-4 py-3.5 backdrop-blur-md">
             <div className="text-[20px] font-extrabold leading-tight">
               {draft.title.trim() || "Название момента"}
             </div>
             {draft.note.trim() ? (
               <div className="mt-1.5 text-[13px] leading-relaxed text-white/76">
                 {draft.note.trim()}
+              </div>
+            ) : null}
+            {!draft.imageDataUrl ? (
+              <div className="mt-2 text-[13px] text-white/56">
+                Добавь фото, и карточка станет живой.
               </div>
             ) : null}
           </div>
@@ -323,6 +325,19 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
         imageDataUrl={draft.imageDataUrl}
       />
 
+      {hasImage ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={draft.imageDataUrl}
+            alt={draft.title || "Фото события"}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(118deg,rgba(6,12,24,0.78)_0%,rgba(6,12,24,0.38)_46%,rgba(6,12,24,0.62)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,12,24,0.08),rgba(6,12,24,0.5)_72%,rgba(6,12,24,0.72))]" />
+        </>
+      ) : null}
+
       <div className="relative z-10 flex h-full flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
@@ -333,8 +348,8 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
           </div>
         </div>
 
-        <div className={`mt-4 grid flex-1 gap-3 ${hasImage ? "grid-cols-[minmax(0,1fr)_118px]" : "grid-cols-1"}`}>
-          <div className="flex min-h-[148px] flex-col justify-between rounded-[26px] bg-[linear-gradient(180deg,rgba(9,17,35,0.22),rgba(9,17,35,0.42))] px-4 py-4 backdrop-blur-md">
+        <div className="mt-4 flex flex-1 items-end">
+          <div className="max-w-[78%] rounded-[26px] bg-[linear-gradient(180deg,rgba(9,17,35,0.14),rgba(9,17,35,0.48))] px-4 py-4 backdrop-blur-md">
             <div className="text-[24px] font-extrabold leading-tight">
               {draft.title.trim() || "Название события"}
             </div>
@@ -348,17 +363,6 @@ function WidgetPreview({ draft }: { draft: WidgetDraft }) {
               </div>
             )}
           </div>
-
-          {hasImage ? (
-            <div className="overflow-hidden rounded-[26px] border border-white/12 bg-black/20 shadow-[0_20px_50px_rgba(8,15,33,0.28)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={draft.imageDataUrl}
-                alt={draft.title || "Фото события"}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ) : null}
         </div>
       </div>
     </div>
