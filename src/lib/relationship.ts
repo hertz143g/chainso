@@ -5,7 +5,33 @@ export type RelationshipSettings = {
   startDateISO: string; // "2024-02-09"
   photo1DataUrl?: string;
   photo2DataUrl?: string;
+  widgets: RelationshipWidget[];
 };
+
+export type WidgetType = "event" | "track";
+
+type BaseWidget = {
+  id: string;
+  type: WidgetType;
+  accentColor: string;
+  createdAtISO: string;
+};
+
+export type EventWidget = BaseWidget & {
+  type: "event";
+  title: string;
+  dateISO: string;
+  imageDataUrl?: string;
+};
+
+export type TrackWidget = BaseWidget & {
+  type: "track";
+  title: string;
+  artist: string;
+  coverDataUrl?: string;
+};
+
+export type RelationshipWidget = EventWidget | TrackWidget;
 
 const KEY = "chainso_settings_v1";
 
@@ -15,7 +41,64 @@ export const defaultSettings: RelationshipSettings = {
   startDateISO: "2024-02-09",
   photo1DataUrl: undefined,
   photo2DataUrl: undefined,
+  widgets: [
+    {
+      id: "default-event",
+      type: "event",
+      title: "Первая встреча",
+      dateISO: "2024-02-09",
+      accentColor: "#4A86E8",
+      createdAtISO: "2024-02-09T00:00:00.000Z",
+    },
+    {
+      id: "default-track",
+      type: "track",
+      title: "Верь",
+      artist: "Джизус",
+      accentColor: "#4A86E8",
+      createdAtISO: "2024-02-09T00:00:00.000Z",
+    },
+  ],
 };
+
+function parseWidget(widget: unknown): RelationshipWidget | null {
+  if (!widget || typeof widget !== "object") return null;
+
+  const raw = widget as Record<string, unknown>;
+  const id = typeof raw.id === "string" ? raw.id : createWidgetId();
+  const accentColor =
+    typeof raw.accentColor === "string" ? raw.accentColor : "#4A86E8";
+  const createdAtISO =
+    typeof raw.createdAtISO === "string" ? raw.createdAtISO : new Date().toISOString();
+
+  if (raw.type === "event") {
+    if (typeof raw.title !== "string" || typeof raw.dateISO !== "string") return null;
+    return {
+      id,
+      type: "event",
+      title: raw.title,
+      dateISO: raw.dateISO,
+      accentColor,
+      createdAtISO,
+      imageDataUrl: typeof raw.imageDataUrl === "string" ? raw.imageDataUrl : undefined,
+    };
+  }
+
+  if (raw.type === "track") {
+    if (typeof raw.title !== "string" || typeof raw.artist !== "string") return null;
+    return {
+      id,
+      type: "track",
+      title: raw.title,
+      artist: raw.artist,
+      accentColor,
+      createdAtISO,
+      coverDataUrl: typeof raw.coverDataUrl === "string" ? raw.coverDataUrl : undefined,
+    };
+  }
+
+  return null;
+}
 
 export function loadSettings(): RelationshipSettings {
   if (typeof window === "undefined") return defaultSettings;
@@ -23,12 +106,17 @@ export function loadSettings(): RelationshipSettings {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultSettings;
     const parsed = JSON.parse(raw) as Partial<RelationshipSettings>;
+    const widgets = Array.isArray(parsed.widgets)
+      ? parsed.widgets.map(parseWidget).filter((widget): widget is RelationshipWidget => widget !== null)
+      : defaultSettings.widgets;
+
     return {
       name1: parsed.name1 ?? defaultSettings.name1,
       name2: parsed.name2 ?? defaultSettings.name2,
       startDateISO: parsed.startDateISO ?? defaultSettings.startDateISO,
       photo1DataUrl: parsed.photo1DataUrl,
       photo2DataUrl: parsed.photo2DataUrl,
+      widgets,
     };
   } catch {
     return defaultSettings;
@@ -37,6 +125,14 @@ export function loadSettings(): RelationshipSettings {
 
 export function saveSettings(s: RelationshipSettings) {
   localStorage.setItem(KEY, JSON.stringify(s));
+}
+
+export function createWidgetId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `widget-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 export function calcDiff(startISO: string, now = new Date()) {
@@ -96,6 +192,17 @@ export function formatTogether(y: number, m: number, d: number) {
 
   if (parts.length === 0) parts.push("0 дней");
   return parts.join(", ");
+}
+
+export function formatDateLong(dateISO: string) {
+  const [year, month, day] = dateISO.split("-").map(Number);
+  const date = new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
+
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
 }
 
 export function getGoalProgress(days: number) {
