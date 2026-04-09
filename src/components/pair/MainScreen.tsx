@@ -198,6 +198,7 @@ export default function MainScreen() {
           <TimeBox value={format2(diff.seconds)} label="секунд" />
         </div>
       </div>
+      
 
       {/* ================= WIDGETS ================= */}
       <div className="mt-7 text-center text-[30px] font-extrabold">Виджеты</div>
