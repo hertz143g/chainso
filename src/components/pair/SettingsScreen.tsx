@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadSettings, saveSettings, type RelationshipSettings } from "@/lib/relationship";
 
@@ -21,10 +21,6 @@ export default function SettingsScreen() {
 
   const file1Ref = useRef<HTMLInputElement>(null);
   const file2Ref = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setS(loadSettings());
-  }, []);
 
   const onPick1 = () => file1Ref.current?.click();
   const onPick2 = () => file2Ref.current?.click();
