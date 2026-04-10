@@ -29,7 +29,7 @@ function WidgetActions({
     <div className="absolute right-2 top-2 z-30 flex gap-1.5">
       <Link
         href={`/widget/new?id=${widgetId}`}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-black/46 text-[15px] font-bold text-white backdrop-blur-md"
+        className="theme-icon-button flex h-8 w-8 items-center justify-center rounded-full border text-[15px] font-bold"
         aria-label="Изменить виджет"
       >
         ✎
@@ -37,7 +37,7 @@ function WidgetActions({
       <button
         type="button"
         onClick={() => onDelete(widgetId)}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-black/46 text-[18px] font-bold text-white backdrop-blur-md"
+        className="theme-icon-button flex h-8 w-8 items-center justify-center rounded-full border text-[18px] font-bold"
         aria-label="Удалить виджет"
       >
         ×
@@ -95,14 +95,14 @@ export default function MainScreen() {
   };
 
   return (
-    <div className="text-white">
+    <div className="theme-screen">
       <div className="relative h-[52px]">
         <div className="absolute left-0 top-3">
           <button
             type="button"
             onClick={() => setIsEditingWidgets((value) => !value)}
-            className={`flex h-[38px] w-[38px] items-center justify-center rounded-full border ${
-              isEditingWidgets ? "border-[#4AA7FF] bg-[#4AA7FF]/16" : "border-white/18 bg-white/6"
+            className={`theme-icon-button flex h-[38px] w-[38px] items-center justify-center rounded-full border ${
+              isEditingWidgets ? "theme-icon-button-active" : ""
             }`}
             aria-label="Переключить режим редактирования виджетов"
           >
@@ -123,7 +123,7 @@ export default function MainScreen() {
         <div className="absolute right-0 top-3">
           <Link
             href="/settings"
-            className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-white/18 bg-white/6"
+            className="theme-icon-button flex h-[38px] w-[38px] items-center justify-center rounded-full border"
             aria-label="Открыть настройки"
           >
             <Image
@@ -138,7 +138,9 @@ export default function MainScreen() {
       </div>
 
       <div className="mt-5 flex flex-col items-center">
-        <div className="text-[17px] leading-none opacity-85">{diff.days} ДНЕЙ</div>
+        <div className="theme-subtle-text text-[17px] font-semibold leading-none">
+          {diff.days} ДНЕЙ
+        </div>
 
         <div className="mt-1">
           <Image
@@ -153,7 +155,7 @@ export default function MainScreen() {
 
       <div className="mt-0 flex justify-center gap-6">
         <div className="flex flex-col items-center">
-          <div className="theme-avatar-ring h-[150px] w-[150px] overflow-hidden rounded-full bg-[#d9d9d9] ring-[3px]">
+          <div className="theme-avatar-ring theme-avatar-surface h-[150px] w-[150px] overflow-hidden rounded-full ring-[3px]">
             {settings.photo1DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -167,7 +169,7 @@ export default function MainScreen() {
         </div>
 
         <div className="flex flex-col items-center">
-          <div className="theme-avatar-ring h-[150px] w-[150px] overflow-hidden rounded-full bg-[#d9d9d9] ring-[3px]">
+          <div className="theme-avatar-ring theme-avatar-surface h-[150px] w-[150px] overflow-hidden rounded-full ring-[3px]">
             {settings.photo2DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -182,32 +184,32 @@ export default function MainScreen() {
       </div>
 
       <div className="mt-7">
-        <div className="flex justify-end pr-1 text-[13px] font-semibold opacity-85">
+        <div className="theme-subtle-text flex justify-end pr-1 text-[13px] font-semibold">
           {progress.percent}%
         </div>
 
-        <div className="mt-2 h-[10px] overflow-hidden rounded-full bg-white/90">
+        <div className="theme-progress-track mt-2 h-[10px] overflow-hidden rounded-full">
           <div
             className="theme-primary-button h-full rounded-full"
             style={{ width: `${progress.bar}%` }}
           />
         </div>
 
-        <div className="mt-2 flex justify-between px-1 text-[13px] font-normal opacity-80">
+        <div className="theme-subtle-text mt-2 flex justify-between px-1 text-[13px] font-normal">
           <div>{progress.goal} дней</div>
           <div>{progress.leftDays} дня осталось</div>
         </div>
       </div>
 
       <div className="mt-8 text-center">
-        <div className="text-[22px] font-semibold text-white/55">Вместе уже:</div>
+        <div className="theme-subtle-text text-[22px] font-semibold">Вместе уже:</div>
         <div className="mt-1 text-[28px] font-semibold leading-tight">
           {formatTogether(diff.years, diff.months, diff.day)}
         </div>
       </div>
 
       <div className="mt-4 flex justify-center">
-        <div className="flex gap-2 rounded-[33px] bg-black/30 px-5 py-4">
+        <div className="theme-time-tray flex gap-2 rounded-[33px] px-5 py-4">
           <TimeBox value={format2(diff.hours)} label="часов" />
           <TimeBox value={format2(diff.minutes)} label="минут" />
           <TimeBox value={format2(diff.seconds)} label="секунд" />
@@ -217,7 +219,7 @@ export default function MainScreen() {
       <div className="mt-7 flex items-center justify-between">
         <div className="text-[30px] font-extrabold">Виджеты</div>
         {isEditingWidgets ? (
-          <div className="rounded-full border border-[#4AA7FF]/60 bg-[#4AA7FF]/14 px-3 py-1 text-[12px] font-semibold text-white/90">
+          <div className="theme-action-chip rounded-full border px-3 py-1 text-[12px] font-semibold">
             Режим редактирования
           </div>
         ) : null}
@@ -235,21 +237,21 @@ export default function MainScreen() {
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-[28px] border-2 border-dashed border-white/45 px-5 py-8 text-center text-[15px] text-white/72">
+        <div className="theme-dashed-card mt-6 rounded-[28px] border-2 border-dashed px-5 py-8 text-center text-[15px]">
           Пока нет виджетов. Добавь первый, и здесь появится ваша история.
         </div>
       )}
 
       <Link
         href="/widget/new"
-        className="mt-6 block rounded-[28px] border-2 border-dashed border-white/70 py-4 text-center text-[16px] font-normal text-white/90"
+        className="theme-dashed-card-strong mt-6 block rounded-[28px] border-2 border-dashed py-4 text-center text-[16px] font-semibold"
       >
         + добавить виджет
       </Link>
 
       <div className="mt-10 text-center text-[28px] font-extrabold">Альбом</div>
 
-      <div className="mt-6 rounded-[28px] border-2 border-dashed border-white/55 py-4 text-center text-[16px] font-normal text-white/80">
+      <div className="theme-dashed-card mt-6 rounded-[28px] border-2 border-dashed py-4 text-center text-[16px] font-normal">
         Дата событие
       </div>
 
@@ -257,7 +259,7 @@ export default function MainScreen() {
         {["фото", "фото", "фото"].map((item, index) => (
           <div
             key={index}
-            className="flex aspect-square items-center justify-center rounded-[28px] border-2 border-dashed border-white/55 text-[14px] font-normal text-white/70"
+            className="theme-dashed-card flex aspect-square items-center justify-center rounded-[28px] border-2 border-dashed text-[14px] font-normal"
           >
             {item}
           </div>

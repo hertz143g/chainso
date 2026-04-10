@@ -33,9 +33,23 @@ body {
   --theme-chip-bg: rgba(4, 9, 22, 0.32);
   --theme-glass-bg: rgba(4, 9, 22, 0.34);
   --theme-photo-frame: rgba(255, 255, 255, 0.16);
+  --theme-photo-inner: rgba(4, 9, 22, 0.22);
+  --theme-control-bg: rgba(255, 255, 255, 0.08);
+  --theme-control-active-bg: rgba(63, 134, 255, 0.18);
+  --theme-control-border: rgba(255, 255, 255, 0.18);
+  --theme-control-active-border: rgba(126, 183, 255, 0.68);
+  --theme-progress-track: rgba(255, 255, 255, 0.86);
+  --theme-dashed-border: rgba(255, 255, 255, 0.46);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.05);
+  --theme-avatar-bg: rgba(232, 238, 248, 0.82);
+  --theme-overlay-bg: rgba(2, 6, 14, 0.42);
+  --theme-image-overlay-soft: rgba(5, 10, 22, 0.12);
+  --theme-image-overlay-mid: rgba(5, 10, 22, 0.22);
+  --theme-image-overlay-strong: rgba(5, 10, 22, 0.72);
   --theme-text: #ffffff;
   --theme-text-muted: rgba(255, 255, 255, 0.7);
   --theme-primary: #3f86ff;
+  --theme-on-primary: #ffffff;
   --theme-ring: #4aa7ff;
   --theme-input-bg: rgba(229, 229, 229, 0.94);
   --theme-input-text: #050816;
@@ -107,9 +121,22 @@ body {
   --theme-chip-bg: rgba(84, 28, 65, 0.28);
   --theme-glass-bg: rgba(94, 30, 72, 0.34);
   --theme-photo-frame: rgba(255, 255, 255, 0.2);
+  --theme-photo-inner: rgba(90, 34, 70, 0.18);
+  --theme-control-bg: rgba(255, 255, 255, 0.18);
+  --theme-control-active-bg: rgba(243, 95, 159, 0.22);
+  --theme-control-border: rgba(255, 255, 255, 0.34);
+  --theme-control-active-border: rgba(255, 235, 245, 0.88);
+  --theme-progress-track: rgba(255, 250, 253, 0.84);
+  --theme-dashed-border: rgba(255, 255, 255, 0.48);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.14);
+  --theme-avatar-bg: rgba(255, 246, 251, 0.88);
+  --theme-image-overlay-soft: rgba(64, 22, 49, 0.08);
+  --theme-image-overlay-mid: rgba(64, 22, 49, 0.18);
+  --theme-image-overlay-strong: rgba(64, 22, 49, 0.62);
   --theme-text: #fff9fc;
   --theme-text-muted: rgba(255, 247, 252, 0.72);
   --theme-primary: #f35f9f;
+  --theme-on-primary: #ffffff;
   --theme-ring: #ffe1ef;
   --theme-input-bg: rgba(255, 248, 252, 0.96);
   --theme-input-text: #441631;
@@ -130,9 +157,22 @@ body {
   --theme-chip-bg: rgba(3, 34, 54, 0.3);
   --theme-glass-bg: rgba(5, 40, 58, 0.36);
   --theme-photo-frame: rgba(234, 255, 255, 0.18);
+  --theme-photo-inner: rgba(2, 34, 52, 0.18);
+  --theme-control-bg: rgba(255, 255, 255, 0.12);
+  --theme-control-active-bg: rgba(53, 201, 234, 0.2);
+  --theme-control-border: rgba(194, 250, 255, 0.26);
+  --theme-control-active-border: rgba(184, 245, 255, 0.82);
+  --theme-progress-track: rgba(233, 254, 255, 0.82);
+  --theme-dashed-border: rgba(190, 250, 255, 0.44);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.08);
+  --theme-avatar-bg: rgba(230, 253, 255, 0.82);
+  --theme-image-overlay-soft: rgba(3, 28, 42, 0.08);
+  --theme-image-overlay-mid: rgba(3, 28, 42, 0.18);
+  --theme-image-overlay-strong: rgba(3, 28, 42, 0.66);
   --theme-text: #f2feff;
   --theme-text-muted: rgba(231, 253, 255, 0.72);
   --theme-primary: #35c9ea;
+  --theme-on-primary: #052133;
   --theme-ring: #b8f5ff;
   --theme-input-bg: rgba(235, 253, 255, 0.94);
   --theme-input-text: #073244;
@@ -308,11 +348,100 @@ body {
 
 .theme-primary-button {
   background: var(--theme-primary);
-  color: white;
+  color: var(--theme-on-primary);
 }
 
 .theme-avatar-ring {
   --tw-ring-color: var(--theme-ring);
+}
+
+.theme-screen {
+  color: var(--theme-text);
+}
+
+.theme-heading {
+  color: var(--theme-text);
+}
+
+.theme-subtle-text {
+  color: var(--theme-text-muted);
+}
+
+.theme-icon-button {
+  background: var(--theme-control-bg);
+  border-color: var(--theme-control-border);
+  color: var(--theme-text);
+  backdrop-filter: blur(18px);
+}
+
+.theme-icon-button-active {
+  background: var(--theme-control-active-bg);
+  border-color: var(--theme-control-active-border);
+}
+
+.theme-action-chip {
+  background: var(--theme-control-active-bg);
+  border-color: var(--theme-control-active-border);
+  color: var(--theme-text);
+}
+
+.theme-avatar-surface {
+  background: var(--theme-avatar-bg);
+  color: var(--theme-input-text);
+}
+
+.theme-progress-track {
+  background: var(--theme-progress-track);
+}
+
+.theme-time-tray {
+  background: var(--theme-glass-bg);
+  border: 1px solid var(--theme-card-border);
+  box-shadow: 0 18px 48px var(--theme-shadow);
+  backdrop-filter: blur(22px);
+}
+
+.theme-dashed-card {
+  background: var(--theme-dashed-bg);
+  border-color: var(--theme-dashed-border);
+  color: var(--theme-text-muted);
+}
+
+.theme-dashed-card-strong {
+  background: color-mix(in srgb, var(--theme-dashed-bg) 72%, var(--theme-primary) 28%);
+  border-color: var(--theme-ring);
+  color: var(--theme-text);
+}
+
+.theme-option-card {
+  background: var(--theme-dashed-bg);
+  border-color: var(--theme-dashed-border);
+  color: var(--theme-text);
+}
+
+.theme-option-card-selected {
+  background: var(--theme-control-active-bg);
+  border-color: var(--theme-control-active-border);
+}
+
+.theme-form-label {
+  color: var(--theme-text-muted);
+}
+
+.theme-upload-button {
+  background: var(--theme-dashed-bg);
+  border-color: var(--theme-dashed-border);
+  color: var(--theme-text-muted);
+}
+
+.theme-upload-button:hover {
+  border-color: var(--theme-ring);
+  color: var(--theme-text);
+}
+
+.theme-loading-overlay {
+  background: var(--theme-overlay-bg);
+  color: var(--theme-text);
 }
 
 .theme-widget-card {
@@ -335,6 +464,10 @@ body {
 .theme-photo-frame {
   background: var(--theme-photo-frame);
   border-color: var(--theme-widget-border);
+}
+
+.theme-photo-inner {
+  background: var(--theme-photo-inner);
 }
 
 .theme-muted-text {

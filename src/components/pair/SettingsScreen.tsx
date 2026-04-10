@@ -136,7 +136,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <div className="text-white">
+    <div className="theme-screen">
       <div className="relative flex items-center">
         <Link href="/" className="w-8 text-left select-none">
           ←
@@ -152,7 +152,7 @@ export default function SettingsScreen() {
           <button
             type="button"
             onClick={() => onPickPhoto(1)}
-            className="theme-avatar-ring relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e5e5] ring-2"
+            className="theme-avatar-ring theme-avatar-surface relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full ring-2"
           >
             {current.photo1DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -165,7 +165,7 @@ export default function SettingsScreen() {
               <span className="text-[22px]">📷</span>
             )}
             {isUploadingPhoto1 ? (
-              <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-[11px] font-semibold text-white">
+              <span className="theme-loading-overlay absolute inset-0 flex items-center justify-center text-[11px] font-semibold">
                 Загрузка
               </span>
             ) : null}
@@ -183,7 +183,7 @@ export default function SettingsScreen() {
           <button
             type="button"
             onClick={() => onPickPhoto(2)}
-            className="theme-avatar-ring relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e5e5] ring-2"
+            className="theme-avatar-ring theme-avatar-surface relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full ring-2"
           >
             {current.photo2DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -196,7 +196,7 @@ export default function SettingsScreen() {
               <span className="text-[22px]">📷</span>
             )}
             {isUploadingPhoto2 ? (
-              <span className="absolute inset-0 flex items-center justify-center bg-black/45 text-[11px] font-semibold text-white">
+              <span className="theme-loading-overlay absolute inset-0 flex items-center justify-center text-[11px] font-semibold">
                 Загрузка
               </span>
             ) : null}
@@ -210,7 +210,7 @@ export default function SettingsScreen() {
           />
         </div>
 
-        <div className="mb-2 text-[13px] text-white/80">Дата начала отношений:</div>
+        <div className="theme-form-label mb-2 text-[13px]">Дата начала отношений:</div>
         <input
           type="date"
           value={current.startDateISO}
@@ -219,7 +219,7 @@ export default function SettingsScreen() {
         />
 
         <div className="mt-6">
-          <div className="mb-3 text-[13px] font-semibold text-white/84">Тема приложения:</div>
+          <div className="theme-form-label mb-3 text-[13px] font-semibold">Тема приложения:</div>
           <div className="space-y-3">
             {THEME_OPTIONS.map((theme) => {
               const selected = current.theme === theme.id;
@@ -229,23 +229,21 @@ export default function SettingsScreen() {
                   key={theme.id}
                   type="button"
                   onClick={() => patchDraft({ theme: theme.id })}
-                  className={`w-full rounded-[24px] border px-3.5 py-3 text-left transition ${
-                    selected
-                      ? "border-white/80 bg-white/18 shadow-[0_16px_36px_rgba(3,7,18,0.18)]"
-                      : "border-white/16 bg-white/8"
+                  className={`theme-option-card w-full rounded-[24px] border px-3.5 py-3 text-left transition ${
+                    selected ? "theme-option-card-selected" : ""
                   }`}
                 >
                   <div className="grid grid-cols-[64px_minmax(0,1fr)_14px] items-center gap-3">
                     <ThemePreviewDots theme={theme.id} />
                     <div className="min-w-0">
                       <div className="text-[15px] font-extrabold">{theme.title}</div>
-                      <div className="mt-1 text-[12px] leading-relaxed text-white/70">
+                      <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
                         {theme.description}
                       </div>
                     </div>
                     <span
                       className={`h-3 w-3 shrink-0 rounded-full ${
-                        selected ? "bg-white" : "bg-white/28"
+                        selected ? "bg-[var(--theme-ring)]" : "bg-[var(--theme-control-border)]"
                       }`}
                     />
                   </div>

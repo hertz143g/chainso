@@ -194,13 +194,13 @@ function WidgetTypeCard({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-[24px] border-4 border-dashed px-4 py-4 text-left transition ${
-        selected ? "border-[#4AA7FF] bg-white/8" : "border-white/80 bg-transparent"
+      className={`theme-option-card rounded-[24px] border-4 border-dashed px-4 py-4 text-left transition ${
+        selected ? "theme-option-card-selected" : ""
       } ${className}`}
     >
       <div className="flex h-full flex-col justify-between">
         <div className="text-[15px] font-bold">{title}</div>
-        <div className="text-[12px] text-white/70">{caption}</div>
+        <div className="theme-subtle-text text-[12px]">{caption}</div>
       </div>
     </button>
   );
@@ -374,7 +374,7 @@ export default function NewWidgetScreen() {
   };
 
   return (
-    <div className="text-white">
+    <div className="theme-screen">
       <div className="relative flex items-center">
         <Link href="/" className="w-8 text-left select-none">
           ←
@@ -387,7 +387,7 @@ export default function NewWidgetScreen() {
 
       <form onSubmit={onSubmit} className="theme-panel mt-6 rounded-[22px] p-4">
         <div>
-          <div className="text-[16px] font-extrabold underline decoration-[#4AA7FF] underline-offset-4">
+          <div className="text-[16px] font-extrabold underline decoration-[var(--theme-ring)] underline-offset-4">
             Тип виджета:
           </div>
 
@@ -481,11 +481,11 @@ export default function NewWidgetScreen() {
         </div>
 
         <div className="mt-5">
-          <div className="text-[13px] text-white/80">{imageLabel}</div>
+          <div className="theme-form-label text-[13px]">{imageLabel}</div>
           <button
             type="button"
             onClick={onPickImage}
-            className="mt-3 flex min-h-[88px] w-full items-center justify-center rounded-[22px] border-2 border-dashed border-white/55 bg-white/4 px-4 py-4 text-center text-[14px] text-white/80"
+            className="theme-upload-button mt-3 flex min-h-[88px] w-full items-center justify-center rounded-[22px] border-2 border-dashed px-4 py-4 text-center text-[14px] transition"
           >
             {isUploadingImage
               ? "Подготавливаю изображение..."
@@ -496,19 +496,21 @@ export default function NewWidgetScreen() {
         </div>
 
         <div className="mt-5">
-          <div className="text-[13px] text-white/80">Цвет карточки</div>
+          <div className="theme-form-label text-[13px]">Цвет карточки</div>
           <div className="mt-3 flex flex-wrap gap-3">
             {COLOR_OPTIONS.map((color) => (
               <button
                 key={color}
                 type="button"
                 onClick={() => selectSolidColor(color)}
-                className={`h-10 w-10 rounded-full border-2 ${
-                  current.colorMode === "solid" && current.accentColor === color
-                    ? "border-white"
-                    : "border-transparent"
-                }`}
-                style={{ backgroundColor: color }}
+                className="h-10 w-10 rounded-full border-2 transition"
+                style={{
+                  backgroundColor: color,
+                  borderColor:
+                    current.colorMode === "solid" && current.accentColor === color
+                      ? "var(--theme-ring)"
+                      : "transparent",
+                }}
                 aria-label={`Выбрать цвет ${color}`}
               />
             ))}
@@ -517,10 +519,8 @@ export default function NewWidgetScreen() {
               type="button"
               onClick={selectAdaptiveColor}
               disabled={!isAdaptiveAvailable}
-              className={`flex h-10 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition ${
-                current.colorMode === "adaptive"
-                  ? "border-white bg-white/10 text-white"
-                  : "border-white/20 bg-white/6 text-white/78"
+              className={`theme-option-card flex h-10 items-center gap-2 rounded-full border px-3 text-[12px] font-semibold transition ${
+                current.colorMode === "adaptive" ? "theme-option-card-selected" : ""
               } disabled:cursor-not-allowed disabled:opacity-45`}
             >
               <span
@@ -533,14 +533,14 @@ export default function NewWidgetScreen() {
             </button>
           </div>
           {!isAdaptiveAvailable ? (
-            <div className="mt-2 text-[12px] text-white/54">
+            <div className="theme-subtle-text mt-2 text-[12px] opacity-75">
               Авто-режим станет доступен после выбора фотографии.
             </div>
           ) : null}
         </div>
 
         <div className="mt-6">
-          <div className="text-[13px] text-white/80">Превью</div>
+          <div className="theme-form-label text-[13px]">Превью</div>
           <div className="mt-3">
             <WidgetPreview draft={current} />
           </div>

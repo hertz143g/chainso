@@ -43,7 +43,7 @@ export default function AtmosphericBackdrop({
         />
       ) : null}
 
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,33,0.08),rgba(8,15,33,0.42))]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--theme-image-overlay-soft),var(--theme-image-overlay-mid))]" />
     </div>
   );
 }

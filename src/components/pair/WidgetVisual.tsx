@@ -97,8 +97,8 @@ function FullImageLayer({
         className={cx(
           "absolute inset-0",
           variant === "memory"
-            ? "bg-[linear-gradient(180deg,rgba(5,10,22,0.1)_0%,rgba(5,10,22,0.16)_42%,rgba(5,10,22,0.74)_100%)]"
-            : "bg-[linear-gradient(180deg,rgba(5,10,22,0.12)_0%,rgba(5,10,22,0.2)_40%,rgba(5,10,22,0.76)_100%)]",
+            ? "bg-[linear-gradient(180deg,var(--theme-image-overlay-soft)_0%,var(--theme-image-overlay-mid)_42%,var(--theme-image-overlay-strong)_100%)]"
+            : "bg-[linear-gradient(180deg,var(--theme-image-overlay-soft)_0%,var(--theme-image-overlay-mid)_40%,var(--theme-image-overlay-strong)_100%)]",
         )}
       />
     </>
@@ -173,9 +173,9 @@ export default function WidgetVisual({
 
         <div className="relative z-10 grid min-h-[158px] grid-cols-[128px_minmax(0,1fr)] items-center gap-4">
           <div className="relative h-[154px]">
-            <div className="absolute inset-1 rotate-[-7deg] rounded-[28px] bg-white/16 shadow-[0_18px_42px_rgba(3,7,18,0.26)]" />
+            <div className="absolute inset-1 rotate-[-7deg] rounded-[28px] bg-[var(--theme-photo-frame)] shadow-[0_18px_42px_var(--theme-shadow)]" />
             <div className="theme-photo-frame relative h-full rotate-[-2deg] overflow-hidden rounded-[28px] border p-2 shadow-[0_18px_46px_rgba(3,7,18,0.32)] backdrop-blur-md">
-              <div className="h-full overflow-hidden rounded-[22px] bg-black/22">
+              <div className="theme-photo-inner h-full overflow-hidden rounded-[22px]">
                 {widget.imageDataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -216,7 +216,7 @@ export default function WidgetVisual({
               </p>
             ) : null}
 
-            <div className="mt-4 h-1 w-16 rounded-full bg-white/24" />
+            <div className="mt-4 h-1 w-16 rounded-full bg-[var(--theme-ring)] opacity-50" />
           </div>
         </div>
       </article>
@@ -238,7 +238,7 @@ export default function WidgetVisual({
         {actions}
 
         <div className="relative z-10 grid grid-cols-[104px_minmax(0,1fr)] items-center gap-4">
-          <div className="theme-photo-frame flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[24px] border text-[32px] font-bold text-white/82 shadow-[0_18px_36px_rgba(3,7,18,0.3)]">
+          <div className="theme-photo-frame flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[24px] border text-[32px] font-bold text-[var(--theme-text)] shadow-[0_18px_36px_var(--theme-shadow)]">
             {widget.imageDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
