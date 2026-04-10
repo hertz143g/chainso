@@ -4,12 +4,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import AtmosphericBackdrop from "@/components/pair/AtmosphericBackdrop";
+import WidgetVisual, {
+  relationshipWidgetToVisualData,
+} from "@/components/pair/WidgetVisual";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   calcDiff,
   format2,
-  formatDateLong,
   formatTogether,
   getGoalProgress,
   type RelationshipWidget,
@@ -25,19 +26,21 @@ function WidgetActions({
   onDelete: (widgetId: string) => void;
 }) {
   return (
-    <div className="absolute right-3 top-3 z-20 flex gap-2">
+    <div className="absolute right-2 top-2 z-30 flex gap-1.5">
       <Link
         href={`/widget/new?id=${widgetId}`}
-        className="rounded-full bg-black/42 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-black/46 text-[15px] font-bold text-white backdrop-blur-md"
+        aria-label="Изменить виджет"
       >
-        Изменить
+        ✎
       </Link>
       <button
         type="button"
         onClick={() => onDelete(widgetId)}
-        className="rounded-full bg-black/42 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-black/46 text-[18px] font-bold text-white backdrop-blur-md"
+        aria-label="Удалить виджет"
       >
-        Удалить
+        ×
       </button>
     </div>
   );
@@ -52,157 +55,11 @@ function WidgetCard({
   isEditing: boolean;
   onDelete: (widgetId: string) => void;
 }) {
-  if (widget.type === "memory") {
-    return (
-      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
-        <AtmosphericBackdrop
-          accentColor={widget.accentColor}
-          colorMode={widget.colorMode}
-          accentPalette={widget.accentPalette}
-          imageDataUrl={widget.imageDataUrl}
-        />
-        {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
-
-        {widget.imageDataUrl ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={widget.imageDataUrl}
-              alt={widget.title}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,12,24,0.16),rgba(6,12,24,0.2)_38%,rgba(6,12,24,0.68))]" />
-          </>
-        ) : null}
-
-        <div className="relative z-10 grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
-              Момент
-            </div>
-            {widget.dateISO ? (
-              <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
-                {formatDateLong(widget.dateISO)}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="min-h-0" />
-
-          <div className="rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.18),rgba(9,17,35,0.56))] px-4 py-3.5 backdrop-blur-md">
-            <div className="text-[20px] font-extrabold leading-tight">{widget.title}</div>
-            {widget.note ? (
-              <div className="mt-1.5 text-[13px] leading-relaxed text-white/76">{widget.note}</div>
-            ) : null}
-            {!widget.imageDataUrl ? (
-              <div className="mt-2 text-[13px] text-white/56">
-                Добавь фото, и карточка станет живой.
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (widget.type === "track") {
-    return (
-      <div className="relative col-span-2 overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
-        <AtmosphericBackdrop
-          accentColor={widget.accentColor}
-          colorMode={widget.colorMode}
-          accentPalette={widget.accentPalette}
-          imageDataUrl={widget.coverDataUrl}
-        />
-        {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
-
-        <div className="relative z-10">
-          <div className="flex items-start justify-between gap-3">
-            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
-              Трек
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-[104px_minmax(0,1fr)] items-center gap-4">
-            <div className="flex h-[104px] w-[104px] shrink-0 items-center justify-center overflow-hidden rounded-[26px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
-              {widget.coverDataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={widget.coverDataUrl}
-                  alt={`${widget.artist} — ${widget.title}`}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                "♪"
-              )}
-            </div>
-
-            <div className="min-w-0 rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.2),rgba(9,17,35,0.38))] px-4 py-4 backdrop-blur-md">
-              <div className="truncate text-[22px] font-extrabold">{widget.title}</div>
-              <div className="mt-1 text-[17px] font-semibold text-white/90">{widget.artist}</div>
-              {widget.note ? (
-                <div className="mt-2 text-[13px] leading-relaxed text-white/76">
-                  {widget.note}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const hasImage = Boolean(widget.imageDataUrl);
-
   return (
-    <div className="relative col-span-2 min-h-[224px] overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
-      <AtmosphericBackdrop
-        accentColor={widget.accentColor}
-        colorMode={widget.colorMode}
-        accentPalette={widget.accentPalette}
-        imageDataUrl={widget.imageDataUrl}
-      />
-      {isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
-
-      {hasImage ? (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={widget.imageDataUrl}
-            alt={widget.title}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(118deg,rgba(6,12,24,0.78)_0%,rgba(6,12,24,0.38)_46%,rgba(6,12,24,0.62)_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,12,24,0.08),rgba(6,12,24,0.5)_72%,rgba(6,12,24,0.72))]" />
-        </>
-      ) : null}
-
-      <div className="relative z-10 flex h-full flex-col">
-        <div className="flex items-start justify-between gap-3">
-          <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
-            Событие
-          </div>
-          <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
-            {formatDateLong(widget.dateISO)}
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-1 items-end">
-          <div className="max-w-[78%] rounded-[26px] bg-[linear-gradient(180deg,rgba(9,17,35,0.14),rgba(9,17,35,0.48))] px-4 py-4 backdrop-blur-md">
-            <div className="text-[24px] font-extrabold leading-tight">{widget.title}</div>
-            {widget.subtitle ? (
-              <div className="mt-3 text-[14px] leading-relaxed text-white/76">
-                {widget.subtitle}
-              </div>
-            ) : (
-              <div className="mt-3 text-[13px] text-white/46">
-                Здесь появится короткая подпись к вашему событию.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <WidgetVisual
+      widget={relationshipWidgetToVisualData(widget)}
+      actions={isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
+    />
   );
 }
 

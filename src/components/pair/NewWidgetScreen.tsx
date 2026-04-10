@@ -4,11 +4,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
-import AtmosphericBackdrop from "@/components/pair/AtmosphericBackdrop";
+import WidgetVisual, { type WidgetVisualData } from "@/components/pair/WidgetVisual";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   createWidgetId,
-  formatDateLong,
   type EventWidget,
   type MemoryWidget,
   type RelationshipWidget,
@@ -207,164 +206,25 @@ function WidgetTypeCard({
   );
 }
 
+function draftToVisualData(draft: WidgetDraft): WidgetVisualData {
+  return {
+    type: draft.type,
+    title: draft.title,
+    dateISO: draft.type === "track" ? undefined : draft.dateISO || undefined,
+    subtitle: draft.type === "event" ? draft.subtitle : undefined,
+    note: draft.type === "event" ? undefined : draft.note,
+    artist: draft.type === "track" ? draft.artist : undefined,
+    imageDataUrl: draft.imageDataUrl,
+    accentColor: draft.accentColor,
+    colorMode: draft.colorMode,
+    accentPalette: draft.accentPalette,
+  };
+}
+
 function WidgetPreview({ draft }: { draft: WidgetDraft }) {
-  if (draft.type === "memory") {
-    return (
-      <div className="relative aspect-square overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
-        <AtmosphericBackdrop
-          accentColor={draft.accentColor}
-          colorMode={draft.colorMode}
-          accentPalette={draft.accentPalette}
-          imageDataUrl={draft.imageDataUrl}
-        />
-
-        {draft.imageDataUrl ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={draft.imageDataUrl}
-              alt={draft.title || "Фото момента"}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,12,24,0.16),rgba(6,12,24,0.2)_38%,rgba(6,12,24,0.68))]" />
-          </>
-        ) : null}
-
-        <div className="relative z-10 grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
-              Момент
-            </div>
-            {draft.dateISO ? (
-              <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
-                {formatDateLong(draft.dateISO)}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="min-h-0" />
-
-          <div className="rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.18),rgba(9,17,35,0.56))] px-4 py-3.5 backdrop-blur-md">
-            <div className="text-[20px] font-extrabold leading-tight">
-              {draft.title.trim() || "Название момента"}
-            </div>
-            {draft.note.trim() ? (
-              <div className="mt-1.5 text-[13px] leading-relaxed text-white/76">
-                {draft.note.trim()}
-              </div>
-            ) : null}
-            {!draft.imageDataUrl ? (
-              <div className="mt-2 text-[13px] text-white/56">
-                Добавь фото, и карточка станет живой.
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (draft.type === "track") {
-    return (
-      <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
-        <AtmosphericBackdrop
-          accentColor={draft.accentColor}
-          colorMode={draft.colorMode}
-          accentPalette={draft.accentPalette}
-          imageDataUrl={draft.imageDataUrl}
-        />
-
-        <div className="relative z-10">
-          <div className="flex items-start justify-between gap-3">
-            <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
-              Трек
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-[104px_minmax(0,1fr)] items-center gap-4">
-            <div className="flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[26px] border border-white/12 bg-black/28 text-[28px] shadow-[0_20px_40px_rgba(8,15,33,0.3)]">
-              {draft.imageDataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={draft.imageDataUrl}
-                  alt={draft.title || "Обложка"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                "♪"
-              )}
-            </div>
-
-            <div className="min-w-0 rounded-[24px] bg-[linear-gradient(180deg,rgba(9,17,35,0.2),rgba(9,17,35,0.38))] px-4 py-4 backdrop-blur-md">
-              <div className="truncate text-[22px] font-extrabold">
-                {draft.title.trim() || "Название трека"}
-              </div>
-              <div className="mt-1 text-[17px] font-semibold text-white/88">
-                {draft.artist.trim() || "Исполнитель"}
-              </div>
-              {draft.note.trim() ? (
-                <div className="mt-2 text-[13px] leading-relaxed text-white/72">
-                  {draft.note.trim()}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const hasImage = Boolean(draft.imageDataUrl);
-
   return (
-    <div className="relative min-h-[224px] overflow-hidden rounded-[30px] border border-white/10 bg-[#111A33] p-4">
-      <AtmosphericBackdrop
-        accentColor={draft.accentColor}
-        colorMode={draft.colorMode}
-        accentPalette={draft.accentPalette}
-        imageDataUrl={draft.imageDataUrl}
-      />
-
-      {hasImage ? (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={draft.imageDataUrl}
-            alt={draft.title || "Фото события"}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(118deg,rgba(6,12,24,0.78)_0%,rgba(6,12,24,0.38)_46%,rgba(6,12,24,0.62)_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,12,24,0.08),rgba(6,12,24,0.5)_72%,rgba(6,12,24,0.72))]" />
-        </>
-      ) : null}
-
-      <div className="relative z-10 flex h-full flex-col">
-        <div className="flex items-start justify-between gap-3">
-          <div className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/82 backdrop-blur-sm">
-            Событие
-          </div>
-          <div className="rounded-full bg-black/28 px-3 py-1 text-[11px] font-semibold backdrop-blur-sm">
-            {draft.dateISO ? formatDateLong(draft.dateISO) : "Дата события"}
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-1 items-end">
-          <div className="max-w-[78%] rounded-[26px] bg-[linear-gradient(180deg,rgba(9,17,35,0.14),rgba(9,17,35,0.48))] px-4 py-4 backdrop-blur-md">
-            <div className="text-[24px] font-extrabold leading-tight">
-              {draft.title.trim() || "Название события"}
-            </div>
-            {draft.subtitle.trim() ? (
-              <div className="mt-3 text-[14px] leading-relaxed text-white/76">
-                {draft.subtitle.trim()}
-              </div>
-            ) : (
-              <div className="mt-3 text-[13px] text-white/46">
-                Здесь можно оставить короткую подпись к событию.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="grid grid-cols-2 gap-4">
+      <WidgetVisual widget={draftToVisualData(draft)} />
     </div>
   );
 }
