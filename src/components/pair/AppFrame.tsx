@@ -57,6 +57,17 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
     );
   }
 
+  if (theme === "pearl") {
+    return (
+      <div className="theme-ornaments theme-ornaments-pearl" aria-hidden="true">
+        <span className="theme-blob pearl-blob-a" />
+        <span className="theme-blob pearl-blob-b" />
+        <span className="theme-blob pearl-blob-c" />
+        <span className="theme-sheen pearl-sheen" />
+      </div>
+    );
+  }
+
   return (
     <div className="theme-ornaments theme-ornaments-sun" aria-hidden="true">
       <span className="theme-blob sun-cycle-orb" />

@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import WidgetVisual, { type WidgetVisualData } from "@/components/pair/WidgetVisual";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
@@ -16,6 +16,7 @@ import {
   type WidgetType,
   updateSettings,
 } from "@/lib/relationship";
+import { inferTrackFromUrl, resolveTrackLink } from "@/lib/trackLink";
 import {
   extractPaletteFromDataUrl,
   getWidgetPalette,
@@ -31,6 +32,7 @@ type WidgetDraft = {
   subtitle: string;
   note: string;
   artist: string;
+  trackUrl: string;
   imageDataUrl?: string;
   accentColor: string;
   colorMode: WidgetColorMode;
@@ -46,6 +48,7 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
       subtitle: "",
       note: "",
       artist: "",
+      trackUrl: "",
       imageDataUrl: undefined,
       accentColor: "#E86FA5",
       colorMode: "solid",
@@ -61,6 +64,7 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
       subtitle: "",
       note: "",
       artist: "",
+      trackUrl: "",
       imageDataUrl: undefined,
       accentColor: "#5AA897",
       colorMode: "solid",
@@ -75,6 +79,7 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
     subtitle: "",
     note: "",
     artist: "",
+    trackUrl: "",
     imageDataUrl: undefined,
     accentColor: "#4A86E8",
     colorMode: "solid",
@@ -91,6 +96,7 @@ function widgetToDraft(widget: RelationshipWidget): WidgetDraft {
       subtitle: "",
       note: widget.note ?? "",
       artist: "",
+      trackUrl: "",
       imageDataUrl: widget.imageDataUrl,
       accentColor: widget.accentColor,
       colorMode: widget.colorMode,
@@ -106,6 +112,7 @@ function widgetToDraft(widget: RelationshipWidget): WidgetDraft {
       subtitle: "",
       note: widget.note ?? "",
       artist: widget.artist,
+      trackUrl: widget.trackUrl ?? "",
       imageDataUrl: widget.coverDataUrl,
       accentColor: widget.accentColor,
       colorMode: widget.colorMode,
@@ -120,6 +127,7 @@ function widgetToDraft(widget: RelationshipWidget): WidgetDraft {
     subtitle: widget.subtitle ?? "",
     note: "",
     artist: "",
+    trackUrl: "",
     imageDataUrl: widget.imageDataUrl,
     accentColor: widget.accentColor,
     colorMode: widget.colorMode,
@@ -153,13 +161,16 @@ function buildWidgetFromDraft(
   }
 
   if (draft.type === "track") {
+    const linkMetadata = inferTrackFromUrl(draft.trackUrl);
     const widget: TrackWidget = {
       ...base,
       type: "track",
-      title: draft.title.trim(),
-      artist: draft.artist.trim(),
+      title: draft.title.trim() || linkMetadata?.title || "Трек",
+      artist: draft.artist.trim() || linkMetadata?.artist || "Музыка",
       note: draft.note.trim() || undefined,
       coverDataUrl: draft.imageDataUrl,
+      trackUrl: linkMetadata?.url ?? (draft.trackUrl.trim() || undefined),
+      platform: linkMetadata?.platform,
     };
 
     return widget;
@@ -207,15 +218,22 @@ function WidgetTypeCard({
 }
 
 function draftToVisualData(draft: WidgetDraft): WidgetVisualData {
+  const trackMetadata = draft.type === "track" ? inferTrackFromUrl(draft.trackUrl) : null;
+
   return {
     type: draft.type,
-    title: draft.title,
+    title: draft.title || trackMetadata?.title || "",
     dateISO: draft.type === "track" ? undefined : draft.dateISO || undefined,
     subtitle: draft.type === "event" ? draft.subtitle : undefined,
     note: draft.type === "event" ? undefined : draft.note,
-    artist: draft.type === "track" ? draft.artist : undefined,
+    artist: draft.type === "track" ? draft.artist || trackMetadata?.artist : undefined,
+    trackUrl: draft.type === "track" ? draft.trackUrl : undefined,
+    platform: trackMetadata?.platform,
     imageDataUrl: draft.imageDataUrl,
-    accentColor: draft.accentColor,
+    accentColor:
+      draft.type === "track" && draft.accentColor === "#5AA897"
+        ? trackMetadata?.accentColor ?? draft.accentColor
+        : draft.accentColor,
     colorMode: draft.colorMode,
     accentPalette: draft.accentPalette,
   };
@@ -254,6 +272,10 @@ export default function NewWidgetScreen() {
     accentPalette: current.accentPalette,
   });
   const isAdaptiveAvailable = Boolean(current.imageDataUrl);
+  const trackLinkMetadata = current.type === "track" ? inferTrackFromUrl(current.trackUrl) : null;
+  const [trackLookupStatus, setTrackLookupStatus] = useState<
+    "idle" | "loading" | "ready" | "invalid"
+  >("idle");
 
   const patchDraft = (patch: Partial<WidgetDraft>) => {
     setDraft((prev) => ({
@@ -273,6 +295,7 @@ export default function NewWidgetScreen() {
         subtitle: base.subtitle,
         note: base.note,
         artist: base.artist,
+        trackUrl: base.trackUrl,
         imageDataUrl: base.imageDataUrl,
         colorMode: base.colorMode,
         accentPalette: base.accentPalette,
@@ -302,7 +325,67 @@ export default function NewWidgetScreen() {
       ? current.title.trim().length > 0 && current.dateISO.length > 0
       : current.type === "memory"
         ? current.title.trim().length > 0
-        : current.title.trim().length > 0 && current.artist.trim().length > 0;
+        : (current.title.trim().length > 0 && current.artist.trim().length > 0) ||
+          Boolean(trackLinkMetadata);
+
+  useEffect(() => {
+    if (current.type !== "track") {
+      setTrackLookupStatus("idle");
+      return;
+    }
+
+    const trackUrl = current.trackUrl.trim();
+    if (!trackUrl) {
+      setTrackLookupStatus("idle");
+      return;
+    }
+
+    const fallbackMetadata = inferTrackFromUrl(trackUrl);
+    if (!fallbackMetadata) {
+      setTrackLookupStatus("invalid");
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setTrackLookupStatus("loading");
+
+      resolveTrackLink(trackUrl, controller.signal).then((metadata) => {
+        if (controller.signal.aborted) return;
+
+        if (!metadata) {
+          setTrackLookupStatus("invalid");
+          return;
+        }
+
+        setTrackLookupStatus("ready");
+        setDraft((prev) => {
+          const base = prev ?? initialDraft;
+
+          if (base.type !== "track" || base.trackUrl.trim() !== trackUrl) return base;
+
+          const shouldUseTitle =
+            !base.title.trim() || base.title.trim() === fallbackMetadata.title;
+          const shouldUseArtist =
+            !base.artist.trim() || base.artist.trim() === fallbackMetadata.artist;
+          const shouldUseCover = !base.imageDataUrl && metadata.imageUrl;
+
+          return {
+            ...base,
+            title: shouldUseTitle ? metadata.title : base.title,
+            artist: shouldUseArtist ? metadata.artist : base.artist,
+            imageDataUrl: shouldUseCover ? metadata.imageUrl : base.imageDataUrl,
+            accentColor: base.accentColor === "#5AA897" ? metadata.accentColor : base.accentColor,
+          };
+        });
+      });
+    }, 450);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [current.type, current.trackUrl, initialDraft]);
 
   const imageLabel =
     current.type === "track"
@@ -310,6 +393,16 @@ export default function NewWidgetScreen() {
       : current.type === "memory"
         ? "Фото момента"
         : "Фон события";
+  const trackLinkHint =
+    current.type !== "track" || !current.trackUrl.trim()
+      ? "Можно просто вставить ссылку: Spotify, Apple Music, YouTube, SoundCloud, Яндекс Музыка и т.д."
+      : trackLookupStatus === "invalid"
+        ? "Ссылка пока не похожа на трек. Можно заполнить название вручную."
+        : trackLookupStatus === "loading"
+          ? "Пробую подтянуть название и обложку..."
+          : trackLinkMetadata
+            ? `Распознал источник: ${trackLinkMetadata.platform}.`
+            : "Можно заполнить название вручную.";
 
   const onPickImage = () => {
     imageInputRef.current?.click();
@@ -417,11 +510,27 @@ export default function NewWidgetScreen() {
         </div>
 
         <div className="mt-6 space-y-3">
+          {current.type === "track" ? (
+            <div>
+              <input
+                type="text"
+                inputMode="url"
+                value={current.trackUrl}
+                onChange={(event) => patchDraft({ trackUrl: event.target.value })}
+                placeholder="Ссылка на трек"
+                className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
+              />
+              <div className="theme-subtle-text mt-2 px-1 text-[12px] leading-relaxed" aria-live="polite">
+                {trackLinkHint}
+              </div>
+            </div>
+          ) : null}
+
           <input
             value={current.title}
             onChange={(event) => patchDraft({ title: event.target.value })}
             placeholder={
-              current.type === "track" ? "Название трека" : "Название виджета"
+              current.type === "track" ? "Название трека, если ссылка не подтянулась" : "Название виджета"
             }
             className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
           />

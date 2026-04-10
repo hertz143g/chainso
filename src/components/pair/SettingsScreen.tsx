@@ -32,9 +32,23 @@ const THEME_OPTIONS: Array<{
     title: "Аквариум",
     description: "Liquid glass, водные блики и пузырьки без визуального шума вокруг контента.",
   },
+  {
+    id: "pearl",
+    title: "Темный перламутр",
+    description: "Глубокая темная тема с жемчужными бликами, мягким стеклом и дорогим контрастом.",
+  },
 ];
 
 function ThemePreviewDots({ theme }: { theme: AppTheme }) {
+  if (theme === "pearl") {
+    return (
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#05070d,#273244,#e8e1ff)]">
+        <span className="absolute left-2 top-2 h-5 w-8 rounded-full bg-white/45 blur-[6px]" />
+        <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#9ad7ff]/70 blur-[2px]" />
+      </div>
+    );
+  }
+
   if (theme === "kitty") {
     return (
       <div className="flex h-10 w-16 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,#d96f9d,#f6bfd6,#fff2f8)]">

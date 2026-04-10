@@ -185,6 +185,44 @@ body {
     linear-gradient(180deg, #052135 0%, #075170 54%, #041d31 100%);
 }
 
+.app-theme-pearl {
+  --theme-surface: rgba(10, 13, 21, 0.72);
+  --theme-surface-soft: rgba(255, 255, 255, 0.11);
+  --theme-widget-bg: rgba(12, 15, 24, 0.78);
+  --theme-widget-border: rgba(235, 240, 255, 0.18);
+  --theme-chip-bg: rgba(225, 235, 255, 0.12);
+  --theme-glass-bg: rgba(16, 20, 32, 0.56);
+  --theme-photo-frame: rgba(235, 240, 255, 0.16);
+  --theme-photo-inner: rgba(255, 255, 255, 0.08);
+  --theme-control-bg: rgba(245, 248, 255, 0.1);
+  --theme-control-active-bg: rgba(202, 224, 255, 0.18);
+  --theme-control-border: rgba(235, 240, 255, 0.2);
+  --theme-control-active-border: rgba(235, 231, 255, 0.72);
+  --theme-progress-track: rgba(236, 240, 255, 0.76);
+  --theme-dashed-border: rgba(235, 240, 255, 0.36);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.06);
+  --theme-avatar-bg: rgba(235, 240, 255, 0.86);
+  --theme-overlay-bg: rgba(1, 3, 8, 0.56);
+  --theme-image-overlay-soft: rgba(1, 3, 8, 0.1);
+  --theme-image-overlay-mid: rgba(1, 3, 8, 0.28);
+  --theme-image-overlay-strong: rgba(1, 3, 8, 0.72);
+  --theme-text: #f8fbff;
+  --theme-text-muted: rgba(234, 240, 255, 0.72);
+  --theme-primary: #d7dfff;
+  --theme-on-primary: #07111f;
+  --theme-ring: #f3eaff;
+  --theme-input-bg: rgba(246, 248, 255, 0.94);
+  --theme-input-text: #0a0f1c;
+  --theme-card-border: rgba(236, 241, 255, 0.18);
+  --theme-shadow: rgba(0, 0, 0, 0.34);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(235, 231, 255, 0.24), transparent min(42vw, 230px)),
+    radial-gradient(circle at 86% 18%, rgba(154, 215, 255, 0.16), transparent min(48vw, 260px)),
+    radial-gradient(circle at 22% 86%, rgba(255, 214, 238, 0.12), transparent min(56vw, 300px)),
+    conic-gradient(from 210deg at 64% 26%, rgba(255, 255, 255, 0.12), rgba(154, 215, 255, 0.04), rgba(255, 214, 238, 0.1), rgba(255, 255, 255, 0.03)),
+    linear-gradient(180deg, #05070d 0%, #111827 52%, #070b13 100%);
+}
+
 .theme-ornaments {
   pointer-events: none;
   position: absolute;
@@ -292,6 +330,41 @@ body {
   opacity: 0.24;
 }
 
+.pearl-blob-a {
+  left: -90px;
+  top: 52px;
+  width: min(68vw, 290px);
+  height: min(68vw, 290px);
+  background: #e8e1ff;
+  opacity: 0.22;
+}
+
+.pearl-blob-b {
+  right: -120px;
+  top: 180px;
+  width: min(78vw, 340px);
+  height: min(78vw, 340px);
+  background: #9ad7ff;
+  opacity: 0.2;
+}
+
+.pearl-blob-c {
+  left: 18%;
+  bottom: -120px;
+  width: min(86vw, 380px);
+  height: min(86vw, 380px);
+  background: #ffd6ee;
+  opacity: 0.14;
+}
+
+.pearl-sheen {
+  left: -36vw;
+  top: 18vh;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), rgba(159, 215, 255, 0.12), transparent);
+  opacity: 0.26;
+  animation: pearl-sheen-drift 11s ease-in-out infinite alternate;
+}
+
 .theme-aquarium-bubbles span {
   --bubble-index: 0;
   --bubble-left: 10%;
@@ -331,6 +404,15 @@ body {
   }
   to {
     transform: translate3d(34px, 22px, 0) rotate(5deg);
+  }
+}
+
+@keyframes pearl-sheen-drift {
+  from {
+    transform: translate3d(-10vw, 0, 0) rotate(-12deg);
+  }
+  to {
+    transform: translate3d(10vw, 3vh, 0) rotate(-9deg);
   }
 }
 
@@ -474,6 +556,12 @@ body {
   color: var(--theme-text-muted);
 }
 
+.widget-fit-text {
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+  word-break: normal;
+}
+
 @media (min-width: 480px) {
   .app-frame {
     background-size: 100% 100%;
@@ -483,6 +571,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .aquarium-liquid-a,
   .aquarium-liquid-b,
+  .pearl-sheen,
   .theme-aquarium-bubbles span {
     animation: none;
   }

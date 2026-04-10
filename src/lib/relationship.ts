@@ -1,7 +1,7 @@
 // src/lib/relationship.ts
 export type WidgetType = "event" | "memory" | "track";
 export type WidgetColorMode = "solid" | "adaptive";
-export type AppTheme = "sun-cycle" | "kitty" | "aquarium";
+export type AppTheme = "sun-cycle" | "kitty" | "aquarium" | "pearl";
 
 export type BaseWidget = {
   id: string;
@@ -34,6 +34,8 @@ export type TrackWidget = BaseWidget & {
   artist: string;
   note?: string;
   coverDataUrl?: string;
+  trackUrl?: string;
+  platform?: string;
 };
 
 export type RelationshipWidget = EventWidget | MemoryWidget | TrackWidget;
@@ -81,6 +83,7 @@ function createDefaultWidgets(): RelationshipWidget[] {
       title: "Верь",
       artist: "Джизус",
       note: "Ваш общий трек",
+      platform: "Музыка",
       accentColor: "#5AA897",
       colorMode: "solid",
       createdAtISO: "2024-02-12T00:00:00.000Z",
@@ -200,6 +203,8 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
       artist: raw.artist,
       note: typeof raw.note === "string" ? raw.note : undefined,
       coverDataUrl: typeof raw.coverDataUrl === "string" ? raw.coverDataUrl : undefined,
+      trackUrl: typeof raw.trackUrl === "string" ? raw.trackUrl : undefined,
+      platform: typeof raw.platform === "string" ? raw.platform : undefined,
       accentColor,
       colorMode,
       accentPalette,
@@ -211,7 +216,9 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
 }
 
 function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
-  if (theme === "kitty" || theme === "aquarium" || theme === "sun-cycle") return theme;
+  if (theme === "kitty" || theme === "aquarium" || theme === "sun-cycle" || theme === "pearl") {
+    return theme;
+  }
   return fallback;
 }
 
