@@ -24,15 +24,41 @@ const THEME_OPTIONS: Array<{
   },
   {
     id: "kitty",
-    title: "Kitty love",
-    description: "Мягкая розовая тема: мило, воздушно, но без перегруза интерфейса.",
+    title: "Нежная розовая",
+    description: "Мягкая девичья тема: розовый, молочные стеклянные панели и спокойный контраст.",
   },
   {
     id: "aquarium",
     title: "Аквариум",
-    description: "Liquid glass, водные блики и пузырьки в более спокойном Apple-стиле.",
+    description: "Liquid glass, водные блики и пузырьки без визуального шума вокруг контента.",
   },
 ];
+
+function ThemePreviewDots({ theme }: { theme: AppTheme }) {
+  if (theme === "kitty") {
+    return (
+      <div className="flex h-10 w-16 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,#d96f9d,#f6bfd6,#fff2f8)]">
+        <span className="h-5 w-5 rounded-full bg-white/70" />
+        <span className="-ml-1 h-4 w-4 rounded-full bg-[#f35f9f]/70" />
+      </div>
+    );
+  }
+
+  if (theme === "aquarium") {
+    return (
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#06324a,#0a7894,#bdfbff)]">
+        <span className="absolute left-3 top-2 h-4 w-4 rounded-full border border-white/70 bg-white/12" />
+        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full border border-white/60 bg-white/10" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#0b1326,#315b9e,#ff9f6b)]">
+      <span className="absolute left-3 top-2 h-5 w-5 rounded-full bg-[#ffd99d]/80 blur-[1px]" />
+    </div>
+  );
+}
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -203,22 +229,25 @@ export default function SettingsScreen() {
                   key={theme.id}
                   type="button"
                   onClick={() => patchDraft({ theme: theme.id })}
-                  className={`w-full rounded-[22px] border px-4 py-3 text-left transition ${
+                  className={`w-full rounded-[24px] border px-3.5 py-3 text-left transition ${
                     selected
                       ? "border-white/80 bg-white/18 shadow-[0_16px_36px_rgba(3,7,18,0.18)]"
                       : "border-white/16 bg-white/8"
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-[15px] font-extrabold">{theme.title}</div>
+                  <div className="grid grid-cols-[64px_minmax(0,1fr)_14px] items-center gap-3">
+                    <ThemePreviewDots theme={theme.id} />
+                    <div className="min-w-0">
+                      <div className="text-[15px] font-extrabold">{theme.title}</div>
+                      <div className="mt-1 text-[12px] leading-relaxed text-white/70">
+                        {theme.description}
+                      </div>
+                    </div>
                     <span
                       className={`h-3 w-3 shrink-0 rounded-full ${
                         selected ? "bg-white" : "bg-white/28"
                       }`}
                     />
-                  </div>
-                  <div className="mt-1.5 text-[12px] leading-relaxed text-white/70">
-                    {theme.description}
                   </div>
                 </button>
               );

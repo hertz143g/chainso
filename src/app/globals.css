@@ -26,89 +26,123 @@ body {
 }
 
 .app-frame {
-  --theme-surface: rgba(14, 27, 61, 0.9);
-  --theme-surface-soft: rgba(255, 255, 255, 0.08);
+  --theme-surface: rgba(11, 20, 44, 0.72);
+  --theme-surface-soft: rgba(255, 255, 255, 0.1);
+  --theme-widget-bg: rgba(12, 21, 45, 0.76);
+  --theme-widget-border: rgba(255, 255, 255, 0.16);
+  --theme-chip-bg: rgba(4, 9, 22, 0.32);
+  --theme-glass-bg: rgba(4, 9, 22, 0.34);
+  --theme-photo-frame: rgba(255, 255, 255, 0.16);
+  --theme-text: #ffffff;
+  --theme-text-muted: rgba(255, 255, 255, 0.7);
   --theme-primary: #3f86ff;
   --theme-ring: #4aa7ff;
   --theme-input-bg: rgba(229, 229, 229, 0.94);
   --theme-input-text: #050816;
-  --theme-muted: rgba(255, 255, 255, 0.72);
   --theme-card-border: rgba(255, 255, 255, 0.16);
+  --theme-shadow: rgba(3, 7, 18, 0.28);
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
   color: white;
   background:
-    radial-gradient(circle at 22% 4%, rgba(74, 167, 255, 0.26), transparent 28%),
+    radial-gradient(circle at 22% 4%, rgba(74, 167, 255, 0.22), transparent min(34vw, 180px)),
     linear-gradient(180deg, #0b1326 0%, #0e1b3d 58%, #4c5f86 100%);
 }
 
 .app-theme-sun-cycle.app-phase-dawn {
+  --theme-surface: rgba(37, 33, 63, 0.68);
+  --theme-widget-bg: rgba(30, 28, 58, 0.72);
+  --theme-chip-bg: rgba(42, 31, 59, 0.32);
+  --theme-glass-bg: rgba(42, 31, 59, 0.36);
   --theme-primary: #ff9a6b;
   --theme-ring: #ffd1a3;
   background:
-    radial-gradient(circle at 24% 8%, rgba(255, 210, 148, 0.48), transparent 28%),
-    radial-gradient(circle at 84% 28%, rgba(120, 180, 255, 0.24), transparent 32%),
-    linear-gradient(180deg, #3f4770 0%, #ffb38a 56%, #627fae 100%);
+    radial-gradient(circle at 18% 10%, rgba(255, 218, 162, 0.42), transparent min(42vw, 220px)),
+    radial-gradient(circle at 86% 22%, rgba(112, 165, 255, 0.22), transparent min(46vw, 240px)),
+    linear-gradient(180deg, #222b57 0%, #765777 54%, #d79478 100%);
 }
 
 .app-theme-sun-cycle.app-phase-day {
+  --theme-surface: rgba(10, 29, 67, 0.7);
+  --theme-widget-bg: rgba(9, 29, 66, 0.76);
   --theme-primary: #3f86ff;
   --theme-ring: #70c8ff;
   background:
-    radial-gradient(circle at 28% 6%, rgba(255, 241, 179, 0.42), transparent 28%),
-    radial-gradient(circle at 82% 22%, rgba(76, 173, 255, 0.28), transparent 34%),
-    linear-gradient(180deg, #10204a 0%, #14346f 58%, #7aa6d8 100%);
+    radial-gradient(circle at 24% 8%, rgba(255, 239, 181, 0.32), transparent min(38vw, 210px)),
+    radial-gradient(circle at 82% 20%, rgba(76, 173, 255, 0.24), transparent min(46vw, 250px)),
+    linear-gradient(180deg, #0c1c42 0%, #123469 58%, #5f8ebd 100%);
 }
 
 .app-theme-sun-cycle.app-phase-sunset {
+  --theme-surface: rgba(39, 24, 54, 0.7);
+  --theme-widget-bg: rgba(37, 23, 52, 0.76);
+  --theme-chip-bg: rgba(45, 23, 51, 0.34);
+  --theme-glass-bg: rgba(45, 23, 51, 0.4);
   --theme-primary: #ff7a5c;
   --theme-ring: #ffb45f;
   background:
-    radial-gradient(circle at 18% 12%, rgba(255, 191, 106, 0.54), transparent 30%),
-    radial-gradient(circle at 80% 26%, rgba(255, 104, 139, 0.28), transparent 36%),
-    linear-gradient(180deg, #1b2448 0%, #833f67 52%, #ff9062 100%);
+    radial-gradient(circle at 18% 12%, rgba(255, 181, 96, 0.42), transparent min(42vw, 230px)),
+    radial-gradient(circle at 84% 26%, rgba(255, 105, 136, 0.24), transparent min(50vw, 260px)),
+    linear-gradient(180deg, #171d3f 0%, #603658 56%, #d66c5a 100%);
 }
 
 .app-theme-sun-cycle.app-phase-night {
+  --theme-surface: rgba(7, 13, 29, 0.76);
+  --theme-widget-bg: rgba(8, 15, 33, 0.8);
+  --theme-chip-bg: rgba(0, 0, 0, 0.3);
   --theme-primary: #7aa7ff;
   --theme-ring: #9dc0ff;
   background:
-    radial-gradient(circle at 22% 8%, rgba(148, 177, 255, 0.2), transparent 28%),
-    radial-gradient(circle at 88% 18%, rgba(106, 83, 187, 0.3), transparent 36%),
+    radial-gradient(circle at 22% 8%, rgba(148, 177, 255, 0.18), transparent min(40vw, 220px)),
+    radial-gradient(circle at 88% 18%, rgba(106, 83, 187, 0.24), transparent min(50vw, 260px)),
     linear-gradient(180deg, #050816 0%, #0e1b3d 62%, #24395f 100%);
 }
 
 .app-theme-kitty {
-  --theme-surface: rgba(94, 27, 72, 0.72);
-  --theme-surface-soft: rgba(255, 255, 255, 0.18);
-  --theme-primary: #ff6aa9;
-  --theme-ring: #ffd4e8;
-  --theme-input-bg: rgba(255, 243, 249, 0.96);
-  --theme-input-text: #4a1434;
-  --theme-muted: rgba(255, 245, 251, 0.78);
-  --theme-card-border: rgba(255, 255, 255, 0.34);
+  --theme-surface: rgba(112, 45, 86, 0.5);
+  --theme-surface-soft: rgba(255, 255, 255, 0.2);
+  --theme-widget-bg: rgba(104, 41, 82, 0.58);
+  --theme-widget-border: rgba(255, 255, 255, 0.32);
+  --theme-chip-bg: rgba(84, 28, 65, 0.28);
+  --theme-glass-bg: rgba(94, 30, 72, 0.34);
+  --theme-photo-frame: rgba(255, 255, 255, 0.2);
+  --theme-text: #fff9fc;
+  --theme-text-muted: rgba(255, 247, 252, 0.72);
+  --theme-primary: #f35f9f;
+  --theme-ring: #ffe1ef;
+  --theme-input-bg: rgba(255, 248, 252, 0.96);
+  --theme-input-text: #441631;
+  --theme-card-border: rgba(255, 255, 255, 0.28);
+  --theme-shadow: rgba(92, 22, 58, 0.2);
   background:
-    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.9), transparent 18%),
-    radial-gradient(circle at 78% 14%, rgba(255, 161, 205, 0.62), transparent 28%),
-    radial-gradient(circle at 18% 78%, rgba(255, 221, 237, 0.52), transparent 36%),
-    linear-gradient(180deg, #ff8fc2 0%, #ffc4dd 48%, #ffe8f2 100%);
+    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.62), transparent min(34vw, 190px)),
+    radial-gradient(circle at 82% 14%, rgba(255, 142, 194, 0.38), transparent min(46vw, 250px)),
+    radial-gradient(circle at 20% 82%, rgba(255, 222, 239, 0.34), transparent min(56vw, 300px)),
+    linear-gradient(180deg, #de77a5 0%, #f1a9c8 48%, #f6d9e5 100%);
 }
 
 .app-theme-aquarium {
-  --theme-surface: rgba(2, 42, 70, 0.58);
-  --theme-surface-soft: rgba(255, 255, 255, 0.12);
-  --theme-primary: #42d8ff;
-  --theme-ring: #a9f3ff;
-  --theme-input-bg: rgba(230, 252, 255, 0.9);
-  --theme-input-text: #053246;
-  --theme-muted: rgba(231, 253, 255, 0.76);
-  --theme-card-border: rgba(187, 246, 255, 0.34);
+  --theme-surface: rgba(6, 55, 76, 0.54);
+  --theme-surface-soft: rgba(255, 255, 255, 0.13);
+  --theme-widget-bg: rgba(5, 47, 70, 0.6);
+  --theme-widget-border: rgba(194, 250, 255, 0.26);
+  --theme-chip-bg: rgba(3, 34, 54, 0.3);
+  --theme-glass-bg: rgba(5, 40, 58, 0.36);
+  --theme-photo-frame: rgba(234, 255, 255, 0.18);
+  --theme-text: #f2feff;
+  --theme-text-muted: rgba(231, 253, 255, 0.72);
+  --theme-primary: #35c9ea;
+  --theme-ring: #b8f5ff;
+  --theme-input-bg: rgba(235, 253, 255, 0.94);
+  --theme-input-text: #073244;
+  --theme-card-border: rgba(187, 246, 255, 0.26);
+  --theme-shadow: rgba(0, 24, 42, 0.28);
   background:
-    radial-gradient(circle at 20% 12%, rgba(176, 255, 247, 0.3), transparent 24%),
-    radial-gradient(circle at 88% 22%, rgba(68, 186, 255, 0.32), transparent 34%),
-    radial-gradient(circle at 42% 82%, rgba(119, 243, 219, 0.22), transparent 42%),
-    linear-gradient(180deg, #06263d 0%, #074e72 54%, #061e36 100%);
+    radial-gradient(circle at 18% 10%, rgba(179, 255, 248, 0.24), transparent min(40vw, 220px)),
+    radial-gradient(circle at 88% 24%, rgba(69, 189, 255, 0.26), transparent min(54vw, 300px)),
+    radial-gradient(circle at 42% 84%, rgba(119, 243, 219, 0.16), transparent min(62vw, 340px)),
+    linear-gradient(180deg, #052135 0%, #075170 54%, #041d31 100%);
 }
 
 .theme-ornaments {
@@ -118,116 +152,82 @@ body {
   overflow: hidden;
 }
 
-.sun-cycle-orb {
+.theme-blob,
+.theme-sheen {
   position: absolute;
-  left: 10%;
-  top: 6%;
-  width: 148px;
-  height: 148px;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 231, 172, 0.9), rgba(255, 174, 99, 0.2) 54%, transparent 70%);
-  filter: blur(2px);
-  opacity: 0.72;
+  pointer-events: none;
 }
 
-.sun-cycle-haze {
-  position: absolute;
+.theme-blob {
   border-radius: 999px;
-  filter: blur(48px);
+  filter: blur(46px);
   opacity: 0.42;
 }
 
+.theme-sheen {
+  height: 38vh;
+  min-height: 240px;
+  width: 120vw;
+  transform: rotate(-12deg);
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  filter: blur(26px);
+  opacity: 0.3;
+}
+
+.sun-cycle-orb {
+  left: 10%;
+  top: 6%;
+  width: min(40vw, 150px);
+  height: min(40vw, 150px);
+  background: radial-gradient(circle, rgba(255, 231, 172, 0.9), rgba(255, 174, 99, 0.2) 54%, transparent 70%);
+  filter: blur(8px);
+  opacity: 0.46;
+}
+
 .sun-cycle-haze-a {
-  right: -72px;
+  right: -90px;
   top: 160px;
-  width: 210px;
-  height: 210px;
+  width: min(62vw, 260px);
+  height: min(62vw, 260px);
   background: #72b7ff;
 }
 
 .sun-cycle-haze-b {
   bottom: -90px;
   left: -70px;
-  width: 260px;
-  height: 260px;
+  width: min(72vw, 310px);
+  height: min(72vw, 310px);
   background: #ff8a65;
 }
 
-.kitty-bow,
-.kitty-paw {
-  position: absolute;
-  opacity: 0.42;
+.kitty-blob-a {
+  right: -100px;
+  top: 84px;
+  width: min(78vw, 330px);
+  height: min(78vw, 330px);
+  background: #ffb6d6;
 }
 
-.kitty-bow {
-  width: 86px;
-  height: 50px;
-  filter: blur(0.2px);
+.kitty-blob-b {
+  left: -110px;
+  bottom: -70px;
+  width: min(84vw, 360px);
+  height: min(84vw, 360px);
+  background: #fff1f7;
+  opacity: 0.28;
 }
 
-.kitty-bow::before,
-.kitty-bow::after {
-  content: "";
-  position: absolute;
-  top: 7px;
-  width: 42px;
-  height: 34px;
-  border-radius: 18px 18px 20px 12px;
-  background: rgba(255, 255, 255, 0.62);
-}
-
-.kitty-bow::before {
-  left: 0;
-  transform: rotate(24deg);
-}
-
-.kitty-bow::after {
-  right: 0;
-  transform: rotate(-24deg);
-}
-
-.kitty-bow-a {
-  right: -10px;
-  top: 90px;
-  transform: rotate(18deg);
-}
-
-.kitty-bow-b {
-  left: -22px;
-  bottom: 130px;
-  transform: rotate(-18deg) scale(1.25);
-}
-
-.kitty-paw {
-  width: 74px;
-  height: 74px;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.8) 0 8px, transparent 9px),
-    radial-gradient(circle at 55% 22%, rgba(255, 255, 255, 0.8) 0 8px, transparent 9px),
-    radial-gradient(circle at 70% 38%, rgba(255, 255, 255, 0.8) 0 8px, transparent 9px),
-    radial-gradient(circle at 50% 62%, rgba(255, 255, 255, 0.74) 0 19px, transparent 20px);
-}
-
-.kitty-paw-a {
-  left: 22px;
-  top: 190px;
-  transform: rotate(-18deg);
-}
-
-.kitty-paw-b {
-  right: 22px;
-  bottom: 86px;
-  transform: rotate(16deg) scale(0.84);
+.kitty-sheen {
+  left: -30vw;
+  top: 30vh;
 }
 
 .aquarium-liquid {
-  position: absolute;
-  border-radius: 999px;
   background: rgba(205, 255, 252, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: inset 0 1px 28px rgba(255, 255, 255, 0.28);
-  filter: blur(0.2px);
+  filter: blur(18px);
 }
 
 .aquarium-liquid-a {
@@ -244,6 +244,12 @@ body {
   width: 300px;
   height: 210px;
   animation: aquarium-drift 15s ease-in-out infinite alternate-reverse;
+}
+
+.aquarium-sheen {
+  left: -18vw;
+  top: 22vh;
+  opacity: 0.24;
 }
 
 .theme-aquarium-bubbles span {
@@ -291,7 +297,7 @@ body {
 .theme-panel {
   background: var(--theme-surface);
   border: 1px solid var(--theme-card-border);
-  box-shadow: 0 22px 70px rgba(3, 7, 18, 0.22);
+  box-shadow: 0 22px 70px var(--theme-shadow);
   backdrop-filter: blur(24px);
 }
 
@@ -307,4 +313,44 @@ body {
 
 .theme-avatar-ring {
   --tw-ring-color: var(--theme-ring);
+}
+
+.theme-widget-card {
+  background: var(--theme-widget-bg);
+  border-color: var(--theme-widget-border);
+  box-shadow: 0 20px 54px var(--theme-shadow);
+  color: var(--theme-text);
+}
+
+.theme-chip {
+  background: var(--theme-chip-bg);
+  color: var(--theme-text);
+}
+
+.theme-glass {
+  background: var(--theme-glass-bg);
+  color: var(--theme-text);
+}
+
+.theme-photo-frame {
+  background: var(--theme-photo-frame);
+  border-color: var(--theme-widget-border);
+}
+
+.theme-muted-text {
+  color: var(--theme-text-muted);
+}
+
+@media (min-width: 480px) {
+  .app-frame {
+    background-size: 100% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aquarium-liquid-a,
+  .aquarium-liquid-b,
+  .theme-aquarium-bubbles span {
+    animation: none;
+  }
 }

@@ -39,10 +39,9 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
   if (theme === "kitty") {
     return (
       <div className="theme-ornaments theme-ornaments-kitty" aria-hidden="true">
-        <span className="kitty-bow kitty-bow-a" />
-        <span className="kitty-bow kitty-bow-b" />
-        <span className="kitty-paw kitty-paw-a" />
-        <span className="kitty-paw kitty-paw-b" />
+        <span className="theme-blob kitty-blob-a" />
+        <span className="theme-blob kitty-blob-b" />
+        <span className="theme-sheen kitty-sheen" />
       </div>
     );
   }
@@ -50,8 +49,9 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
   if (theme === "aquarium") {
     return (
       <div className="theme-ornaments theme-ornaments-aquarium" aria-hidden="true">
-        <span className="aquarium-liquid aquarium-liquid-a" />
-        <span className="aquarium-liquid aquarium-liquid-b" />
+        <span className="theme-blob aquarium-liquid aquarium-liquid-a" />
+        <span className="theme-blob aquarium-liquid aquarium-liquid-b" />
+        <span className="theme-sheen aquarium-sheen" />
         <AquariumBubbles />
       </div>
     );
@@ -59,9 +59,9 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
 
   return (
     <div className="theme-ornaments theme-ornaments-sun" aria-hidden="true">
-      <span className="sun-cycle-orb" />
-      <span className="sun-cycle-haze sun-cycle-haze-a" />
-      <span className="sun-cycle-haze sun-cycle-haze-b" />
+      <span className="theme-blob sun-cycle-orb" />
+      <span className="theme-blob sun-cycle-haze sun-cycle-haze-a" />
+      <span className="theme-blob sun-cycle-haze sun-cycle-haze-b" />
     </div>
   );
 }

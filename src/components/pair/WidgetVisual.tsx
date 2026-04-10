@@ -164,7 +164,7 @@ export default function WidgetVisual({
     return (
       <article
         className={cx(
-          "relative col-span-2 min-h-[190px] overflow-hidden rounded-[32px] border border-white/10 bg-[#101a35] p-4 shadow-[0_20px_54px_rgba(3,7,18,0.24)]",
+          "theme-widget-card relative col-span-2 min-h-[190px] overflow-hidden rounded-[32px] border p-4",
           className,
         )}
       >
@@ -174,7 +174,7 @@ export default function WidgetVisual({
         <div className="relative z-10 grid min-h-[158px] grid-cols-[128px_minmax(0,1fr)] items-center gap-4">
           <div className="relative h-[154px]">
             <div className="absolute inset-1 rotate-[-7deg] rounded-[28px] bg-white/16 shadow-[0_18px_42px_rgba(3,7,18,0.26)]" />
-            <div className="relative h-full rotate-[-2deg] overflow-hidden rounded-[28px] border border-white/22 bg-white/16 p-2 shadow-[0_18px_46px_rgba(3,7,18,0.32)] backdrop-blur-md">
+            <div className="theme-photo-frame relative h-full rotate-[-2deg] overflow-hidden rounded-[28px] border p-2 shadow-[0_18px_46px_rgba(3,7,18,0.32)] backdrop-blur-md">
               <div className="h-full overflow-hidden rounded-[22px] bg-black/22">
                 {widget.imageDataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -184,7 +184,7 @@ export default function WidgetVisual({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-[13px] font-semibold text-white/64">
+                  <div className="theme-muted-text flex h-full items-center justify-center text-[13px] font-semibold">
                     фото
                   </div>
                 )}
@@ -194,11 +194,11 @@ export default function WidgetVisual({
 
           <div className="min-w-0">
             <div className={cx("mb-3 flex items-start justify-between gap-2", hasActions && "pr-14")}>
-              <span className="rounded-full bg-black/24 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-white/82 backdrop-blur-md">
+              <span className="theme-chip rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] backdrop-blur-md">
                 {widgetLabel(widget.type)}
               </span>
               {widget.dateISO ? (
-                <span className="shrink-0 rounded-full bg-black/24 px-2.5 py-1 text-[10px] font-bold text-white/84 backdrop-blur-md">
+                <span className="theme-chip shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-md">
                   {formatWidgetDate(widget.dateISO, "short")}
                 </span>
               ) : null}
@@ -209,7 +209,7 @@ export default function WidgetVisual({
             </h3>
             {helperText ? (
               <p
-                className="mt-2.5 text-[13px] font-medium leading-relaxed text-white/70"
+                className="theme-muted-text mt-2.5 text-[13px] font-medium leading-relaxed"
                 style={clampStyle(3)}
               >
                 {helperText}
@@ -230,7 +230,7 @@ export default function WidgetVisual({
     return (
       <article
         className={cx(
-          "relative col-span-2 min-h-[146px] overflow-hidden rounded-[30px] border border-white/10 bg-[#101a35] p-4 shadow-[0_18px_44px_rgba(3,7,18,0.22)]",
+          "theme-widget-card relative col-span-2 min-h-[146px] overflow-hidden rounded-[30px] border p-4",
           className,
         )}
       >
@@ -238,7 +238,7 @@ export default function WidgetVisual({
         {actions}
 
         <div className="relative z-10 grid grid-cols-[104px_minmax(0,1fr)] items-center gap-4">
-          <div className="flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[24px] border border-white/12 bg-black/28 text-[32px] font-bold text-white/82 shadow-[0_18px_36px_rgba(3,7,18,0.3)]">
+          <div className="theme-photo-frame flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-[24px] border text-[32px] font-bold text-white/82 shadow-[0_18px_36px_rgba(3,7,18,0.3)]">
             {widget.imageDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -252,18 +252,18 @@ export default function WidgetVisual({
           </div>
 
           <div className="min-w-0">
-            <div className="mb-3 inline-flex rounded-full bg-black/22 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/74 backdrop-blur-md">
+            <div className="theme-chip mb-3 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur-md">
               {widgetLabel(widget.type)}
             </div>
             <h3 className="text-[22px] font-extrabold leading-[1.04]" style={clampStyle(2)}>
               {title}
             </h3>
-            <p className="mt-1 text-[15px] font-semibold leading-tight text-white/84" style={clampStyle(1)}>
+            <p className="theme-muted-text mt-1 text-[15px] font-semibold leading-tight" style={clampStyle(1)}>
               {artist}
             </p>
             {note ? (
               <p
-                className="mt-2 text-[12px] font-medium leading-snug text-white/62"
+                className="theme-muted-text mt-2 text-[12px] font-medium leading-snug opacity-80"
                 style={clampStyle(1)}
               >
                 {note}
@@ -280,7 +280,7 @@ export default function WidgetVisual({
   return (
     <article
       className={cx(
-        "relative col-span-2 min-h-[222px] overflow-hidden rounded-[32px] border border-white/10 bg-[#101a35] p-4 shadow-[0_20px_50px_rgba(3,7,18,0.24)]",
+        "theme-widget-card relative col-span-2 min-h-[222px] overflow-hidden rounded-[32px] border p-4",
         className,
       )}
     >
@@ -291,21 +291,21 @@ export default function WidgetVisual({
 
       <div className="relative z-10 flex h-full min-h-[190px] flex-col justify-between">
         <div className={cx("flex items-start justify-between gap-3", hasActions && "pr-16")}>
-          <span className="rounded-full bg-black/24 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/82 backdrop-blur-md">
+          <span className="theme-chip rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] backdrop-blur-md">
             {widgetLabel(widget.type)}
           </span>
-          <span className="shrink-0 rounded-full bg-black/24 px-3 py-1.5 text-[11px] font-bold text-white/84 backdrop-blur-md">
+          <span className="theme-chip shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold backdrop-blur-md">
             {widget.dateISO ? formatWidgetDate(widget.dateISO, "long") : "Дата события"}
           </span>
         </div>
 
-        <div className="max-w-full rounded-[26px] bg-black/34 px-4 py-4 backdrop-blur-md">
+        <div className="theme-glass max-w-full rounded-[26px] px-4 py-4 backdrop-blur-md">
           <h3 className="text-[26px] font-extrabold leading-[1.02]" style={clampStyle(2)}>
             {title}
           </h3>
           {subtitle ? (
             <p
-              className="mt-2.5 max-w-[250px] text-[13px] font-medium leading-relaxed text-white/70"
+              className="theme-muted-text mt-2.5 max-w-[250px] text-[13px] font-medium leading-relaxed"
               style={clampStyle(2)}
             >
               {subtitle}
