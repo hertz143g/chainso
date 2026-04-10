@@ -153,7 +153,7 @@ export default function MainScreen() {
 
       <div className="mt-0 flex justify-center gap-6">
         <div className="flex flex-col items-center">
-          <div className="h-[150px] w-[150px] overflow-hidden rounded-full bg-[#d9d9d9] ring-[3px] ring-[#36A2FF]">
+          <div className="theme-avatar-ring h-[150px] w-[150px] overflow-hidden rounded-full bg-[#d9d9d9] ring-[3px]">
             {settings.photo1DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -167,7 +167,7 @@ export default function MainScreen() {
         </div>
 
         <div className="flex flex-col items-center">
-          <div className="h-[150px] w-[150px] overflow-hidden rounded-full bg-[#d9d9d9] ring-[3px] ring-[#36A2FF]">
+          <div className="theme-avatar-ring h-[150px] w-[150px] overflow-hidden rounded-full bg-[#d9d9d9] ring-[3px]">
             {settings.photo2DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -188,7 +188,7 @@ export default function MainScreen() {
 
         <div className="mt-2 h-[10px] overflow-hidden rounded-full bg-white/90">
           <div
-            className="h-full rounded-full bg-[#3F86FF]"
+            className="theme-primary-button h-full rounded-full"
             style={{ width: `${progress.bar}%` }}
           />
         </div>

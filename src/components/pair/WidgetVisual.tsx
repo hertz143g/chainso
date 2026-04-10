@@ -164,39 +164,59 @@ export default function WidgetVisual({
     return (
       <article
         className={cx(
-          "relative aspect-square overflow-hidden rounded-[28px] border border-white/10 bg-[#101a35] p-3 shadow-[0_18px_44px_rgba(3,7,18,0.24)]",
+          "relative col-span-2 min-h-[190px] overflow-hidden rounded-[32px] border border-white/10 bg-[#101a35] p-4 shadow-[0_20px_54px_rgba(3,7,18,0.24)]",
           className,
         )}
       >
         <ColorBackdrop widget={widget} />
-        <FullImageLayer imageDataUrl={widget.imageDataUrl} alt={title} variant="memory" />
-        {hasImage ? <ColorBackdrop widget={widget} imageOverlay /> : null}
         {actions}
 
-        <div className="relative z-10 flex h-full flex-col justify-between">
-          <div className="flex items-start justify-between gap-2">
-            <span className="rounded-full bg-black/24 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-white/82 backdrop-blur-md">
-              {widgetLabel(widget.type)}
-            </span>
-            {widget.dateISO && !hasActions ? (
-              <span className="rounded-full bg-black/24 px-2 py-1 text-[10px] font-bold text-white/84 backdrop-blur-md">
-                {formatWidgetDate(widget.dateISO, "short")}
-              </span>
-            ) : null}
+        <div className="relative z-10 grid min-h-[158px] grid-cols-[128px_minmax(0,1fr)] items-center gap-4">
+          <div className="relative h-[154px]">
+            <div className="absolute inset-1 rotate-[-7deg] rounded-[28px] bg-white/16 shadow-[0_18px_42px_rgba(3,7,18,0.26)]" />
+            <div className="relative h-full rotate-[-2deg] overflow-hidden rounded-[28px] border border-white/22 bg-white/16 p-2 shadow-[0_18px_46px_rgba(3,7,18,0.32)] backdrop-blur-md">
+              <div className="h-full overflow-hidden rounded-[22px] bg-black/22">
+                {widget.imageDataUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={widget.imageDataUrl}
+                    alt={title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-[13px] font-semibold text-white/64">
+                    фото
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-[22px] bg-black/34 px-3 py-3 backdrop-blur-md">
-            <h3 className="text-[18px] font-extrabold leading-[1.02]" style={clampStyle(2)}>
+          <div className="min-w-0">
+            <div className={cx("mb-3 flex items-start justify-between gap-2", hasActions && "pr-14")}>
+              <span className="rounded-full bg-black/24 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-white/82 backdrop-blur-md">
+                {widgetLabel(widget.type)}
+              </span>
+              {widget.dateISO ? (
+                <span className="shrink-0 rounded-full bg-black/24 px-2.5 py-1 text-[10px] font-bold text-white/84 backdrop-blur-md">
+                  {formatWidgetDate(widget.dateISO, "short")}
+                </span>
+              ) : null}
+            </div>
+
+            <h3 className="text-[24px] font-extrabold leading-[1.02]" style={clampStyle(2)}>
               {title}
             </h3>
             {helperText ? (
               <p
-                className="mt-1.5 text-[11px] font-medium leading-snug text-white/68"
-                style={clampStyle(2)}
+                className="mt-2.5 text-[13px] font-medium leading-relaxed text-white/70"
+                style={clampStyle(3)}
               >
                 {helperText}
               </p>
             ) : null}
+
+            <div className="mt-4 h-1 w-16 rounded-full bg-white/24" />
           </div>
         </div>
       </article>

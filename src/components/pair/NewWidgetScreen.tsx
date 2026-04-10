@@ -385,7 +385,7 @@ export default function NewWidgetScreen() {
         <div className="w-8" />
       </div>
 
-      <form onSubmit={onSubmit} className="mt-6 rounded-[22px] bg-[#0e1b3d] p-4">
+      <form onSubmit={onSubmit} className="theme-panel mt-6 rounded-[22px] p-4">
         <div>
           <div className="text-[16px] font-extrabold underline decoration-[#4AA7FF] underline-offset-4">
             Тип виджета:
@@ -423,7 +423,7 @@ export default function NewWidgetScreen() {
             placeholder={
               current.type === "track" ? "Название трека" : "Название виджета"
             }
-            className="w-full rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+            className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
           />
 
           {current.type === "event" ? (
@@ -432,13 +432,13 @@ export default function NewWidgetScreen() {
                 type="date"
                 value={current.dateISO}
                 onChange={(event) => patchDraft({ dateISO: event.target.value })}
-                className="w-full rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+                className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <input
                 value={current.subtitle}
                 onChange={(event) => patchDraft({ subtitle: event.target.value })}
                 placeholder="Подпись под событием"
-                className="w-full rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+                className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
               />
             </>
           ) : null}
@@ -449,14 +449,14 @@ export default function NewWidgetScreen() {
                 type="date"
                 value={current.dateISO}
                 onChange={(event) => patchDraft({ dateISO: event.target.value })}
-                className="w-full rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+                className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <textarea
                 value={current.note}
                 onChange={(event) => patchDraft({ note: event.target.value })}
                 placeholder="Короткая подпись"
                 rows={3}
-                className="w-full rounded-[22px] bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+                className="theme-input w-full rounded-[22px] px-4 py-3 text-[14px] outline-none"
               />
             </>
           ) : null}
@@ -467,14 +467,14 @@ export default function NewWidgetScreen() {
                 value={current.artist}
                 onChange={(event) => patchDraft({ artist: event.target.value })}
                 placeholder="Исполнитель"
-                className="w-full rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+                className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <textarea
                 value={current.note}
                 onChange={(event) => patchDraft({ note: event.target.value })}
                 placeholder="Подпись или заметка"
                 rows={3}
-                className="w-full rounded-[22px] bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+                className="theme-input w-full rounded-[22px] px-4 py-3 text-[14px] outline-none"
               />
             </>
           ) : null}
@@ -549,7 +549,7 @@ export default function NewWidgetScreen() {
         <button
           type="submit"
           disabled={!canSave || isSaving || isUploadingImage}
-          className="mt-6 w-full rounded-[18px] bg-[#3F86FF] py-3 text-[16px] font-semibold text-white disabled:opacity-55"
+          className="theme-primary-button mt-6 w-full rounded-[18px] py-3 text-[16px] font-semibold disabled:opacity-55"
         >
           {isEditing ? "Сохранить изменения" : "Добавить виджет"}
         </button>

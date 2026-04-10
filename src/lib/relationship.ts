@@ -1,6 +1,7 @@
 // src/lib/relationship.ts
 export type WidgetType = "event" | "memory" | "track";
 export type WidgetColorMode = "solid" | "adaptive";
+export type AppTheme = "sun-cycle" | "kitty" | "aquarium";
 
 export type BaseWidget = {
   id: string;
@@ -41,6 +42,7 @@ export type RelationshipSettings = {
   name1: string;
   name2: string;
   startDateISO: string; // "2024-02-09"
+  theme: AppTheme;
   photo1DataUrl?: string;
   photo2DataUrl?: string;
   widgets: RelationshipWidget[];
@@ -91,6 +93,7 @@ export function getDefaultSettings(): RelationshipSettings {
     name1: "Иван",
     name2: "Ксения",
     startDateISO: "2024-02-09",
+    theme: "sun-cycle",
     photo1DataUrl: undefined,
     photo2DataUrl: undefined,
     widgets: createDefaultWidgets(),
@@ -207,6 +210,11 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
   return null;
 }
 
+function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
+  if (theme === "kitty" || theme === "aquarium" || theme === "sun-cycle") return theme;
+  return fallback;
+}
+
 function normalizeSettings(
   parsed: Partial<RelationshipSettings> | null | undefined,
 ): RelationshipSettings {
@@ -232,6 +240,7 @@ function normalizeSettings(
       typeof parsed.startDateISO === "string" && parsed.startDateISO.length > 0
         ? parsed.startDateISO
         : fallback.startDateISO,
+    theme: parseTheme(parsed.theme, fallback.theme),
     photo1DataUrl:
       typeof parsed.photo1DataUrl === "string" ? parsed.photo1DataUrl : undefined,
     photo2DataUrl:

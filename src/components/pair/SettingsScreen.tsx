@@ -6,10 +6,33 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
+  type AppTheme,
   type RelationshipSettings,
   updateSettings,
 } from "@/lib/relationship";
 import { prepareImageForStorage } from "@/lib/widgetAppearance";
+
+const THEME_OPTIONS: Array<{
+  id: AppTheme;
+  title: string;
+  description: string;
+}> = [
+  {
+    id: "sun-cycle",
+    title: "От рассвета до заката",
+    description: "Живая версия текущей темы: фон меняется утром, днем, на закате и ночью.",
+  },
+  {
+    id: "kitty",
+    title: "Kitty love",
+    description: "Мягкая розовая тема: мило, воздушно, но без перегруза интерфейса.",
+  },
+  {
+    id: "aquarium",
+    title: "Аквариум",
+    description: "Liquid glass, водные блики и пузырьки в более спокойном Apple-стиле.",
+  },
+];
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -98,12 +121,12 @@ export default function SettingsScreen() {
         <div className="w-8" />
       </div>
 
-      <form onSubmit={onSubmit} className="mt-6 rounded-[22px] bg-[#0e1b3d] p-4">
+      <form onSubmit={onSubmit} className="theme-panel mt-6 rounded-[22px] p-4">
         <div className="mb-4 flex items-center gap-3">
           <button
             type="button"
             onClick={() => onPickPhoto(1)}
-            className="relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e5e5] ring-2 ring-[#4aa7ff]"
+            className="theme-avatar-ring relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e5e5] ring-2"
           >
             {current.photo1DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -126,7 +149,7 @@ export default function SettingsScreen() {
             value={current.name1}
             onChange={(event) => patchDraft({ name1: event.target.value })}
             placeholder="Имя"
-            className="flex-1 rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+            className="theme-input flex-1 rounded-full px-4 py-3 text-[14px] outline-none"
           />
         </div>
 
@@ -134,7 +157,7 @@ export default function SettingsScreen() {
           <button
             type="button"
             onClick={() => onPickPhoto(2)}
-            className="relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e5e5] ring-2 ring-[#4aa7ff]"
+            className="theme-avatar-ring relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5e5e5] ring-2"
           >
             {current.photo2DataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -157,7 +180,7 @@ export default function SettingsScreen() {
             value={current.name2}
             onChange={(event) => patchDraft({ name2: event.target.value })}
             placeholder="Имя"
-            className="flex-1 rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+            className="theme-input flex-1 rounded-full px-4 py-3 text-[14px] outline-none"
           />
         </div>
 
@@ -166,13 +189,47 @@ export default function SettingsScreen() {
           type="date"
           value={current.startDateISO}
           onChange={(event) => patchDraft({ startDateISO: event.target.value })}
-          className="w-full rounded-full bg-[#e5e5e5] px-4 py-3 text-[14px] text-black outline-none"
+          className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
         />
+
+        <div className="mt-6">
+          <div className="mb-3 text-[13px] font-semibold text-white/84">Тема приложения:</div>
+          <div className="space-y-3">
+            {THEME_OPTIONS.map((theme) => {
+              const selected = current.theme === theme.id;
+
+              return (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => patchDraft({ theme: theme.id })}
+                  className={`w-full rounded-[22px] border px-4 py-3 text-left transition ${
+                    selected
+                      ? "border-white/80 bg-white/18 shadow-[0_16px_36px_rgba(3,7,18,0.18)]"
+                      : "border-white/16 bg-white/8"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-[15px] font-extrabold">{theme.title}</div>
+                    <span
+                      className={`h-3 w-3 shrink-0 rounded-full ${
+                        selected ? "bg-white" : "bg-white/28"
+                      }`}
+                    />
+                  </div>
+                  <div className="mt-1.5 text-[12px] leading-relaxed text-white/70">
+                    {theme.description}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <button
           type="submit"
           disabled={isSaving || isUploadingPhoto1 || isUploadingPhoto2}
-          className="mt-6 w-full rounded-[18px] bg-[#3F86FF] py-3 text-[16px] font-semibold text-white disabled:opacity-60"
+          className="theme-primary-button mt-6 w-full rounded-[18px] py-3 text-[16px] font-semibold disabled:opacity-60"
         >
           Сохранить
         </button>
