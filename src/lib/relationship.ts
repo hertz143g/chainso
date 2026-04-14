@@ -57,6 +57,12 @@ export type TrackWidget = BaseWidget & {
 
 export type RelationshipWidget = EventWidget | MemoryWidget | TrackWidget;
 
+export type AlbumPhoto = {
+  id: string;
+  imageDataUrl: string;
+  createdAtISO: string;
+};
+
 export type RelationshipSettings = {
   name1: string;
   name2: string;
@@ -68,6 +74,7 @@ export type RelationshipSettings = {
   photo1DataUrl?: string;
   photo2DataUrl?: string;
   widgets: RelationshipWidget[];
+  albumPhotos: AlbumPhoto[];
 };
 
 const KEY = "chainso_settings_v2";
@@ -130,6 +137,7 @@ export function getDefaultSettings(): RelationshipSettings {
     photo1DataUrl: undefined,
     photo2DataUrl: undefined,
     widgets: createDefaultWidgets(),
+    albumPhotos: [],
   };
 }
 
@@ -143,6 +151,7 @@ function cloneSettings(settings: RelationshipSettings): RelationshipSettings {
       ...widget,
       accentPalette: widget.accentPalette ? [...widget.accentPalette] : undefined,
     })),
+    albumPhotos: settings.albumPhotos.map((photo) => ({ ...photo })),
   };
 }
 
@@ -246,6 +255,20 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
   return null;
 }
 
+function parseAlbumPhoto(photo: unknown): AlbumPhoto | null {
+  if (!photo || typeof photo !== "object") return null;
+
+  const raw = photo as Record<string, unknown>;
+  if (typeof raw.imageDataUrl !== "string") return null;
+
+  return {
+    id: typeof raw.id === "string" ? raw.id : createWidgetId(),
+    imageDataUrl: raw.imageDataUrl,
+    createdAtISO:
+      typeof raw.createdAtISO === "string" ? raw.createdAtISO : new Date().toISOString(),
+  };
+}
+
 function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
   if (
     theme === "sun-cycle" ||
@@ -318,6 +341,12 @@ function normalizeSettings(
         .map(parseWidget)
         .filter((widget): widget is RelationshipWidget => widget !== null)
     : fallback.widgets;
+  const parsedAlbumPhotos = Array.isArray(parsed.albumPhotos) ? parsed.albumPhotos : null;
+  const albumPhotos = parsedAlbumPhotos
+    ? parsedAlbumPhotos
+        .map(parseAlbumPhoto)
+        .filter((photo): photo is AlbumPhoto => photo !== null)
+    : fallback.albumPhotos;
 
   return {
     name1: typeof parsed.name1 === "string" && parsed.name1.trim().length > 0
@@ -342,6 +371,7 @@ function normalizeSettings(
     photo2DataUrl:
       typeof parsed.photo2DataUrl === "string" ? parsed.photo2DataUrl : undefined,
     widgets,
+    albumPhotos,
   };
 }
 

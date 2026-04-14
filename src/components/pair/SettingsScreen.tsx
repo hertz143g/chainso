@@ -77,7 +77,7 @@ const TIME_STYLE_OPTIONS: Array<{
   title: string;
 }> = [
   { id: "glass", title: "Стекло" },
-  { id: "hourglass", title: "Линия" },
+  { id: "hourglass", title: "Капли" },
   { id: "orbits", title: "Импульс" },
 ];
 
@@ -205,12 +205,19 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
   }
 
   return (
-    <div className="theme-glass mx-auto flex h-10 w-full items-center justify-between rounded-[18px] px-2 text-[10px] font-black">
-      <span>08</span>
-      <span className="h-px flex-1 bg-[var(--theme-ring)] opacity-45" />
-      <span className="theme-primary-button rounded-full px-2 py-1">24</span>
-      <span className="h-px flex-1 bg-[var(--theme-ring)] opacity-45" />
-      <span>16</span>
+    <div className="mx-auto grid h-10 w-full grid-cols-3 gap-1.5">
+      {["08", "24", "16"].map((value, index) => (
+        <span
+          key={value}
+          className="theme-glass relative flex items-center justify-center overflow-hidden rounded-b-[16px] rounded-t-[8px] text-[10px] font-black"
+        >
+          <span
+            className="absolute inset-x-0 bottom-0 bg-[var(--theme-primary)] opacity-45"
+            style={{ height: `${38 + index * 18}%` }}
+          />
+          <span className="relative z-10">{value}</span>
+        </span>
+      ))}
     </div>
   );
 }
