@@ -228,8 +228,8 @@ function AvatarStylePreview({ style }: { style: AvatarDisplayStyle }) {
   if (style === "halo") {
     return (
       <div className="mx-auto flex h-12 w-20 items-center justify-center gap-1.5">
-        <span className="theme-avatar-surface h-10 w-8 rounded-[14px] border border-[var(--theme-widget-border)]" />
-        <span className="theme-avatar-surface h-10 w-8 rounded-[14px] border border-[var(--theme-widget-border)]" />
+        <span className="theme-avatar-surface h-10 w-9 rounded-[14px] border border-[var(--theme-widget-border)]" />
+        <span className="theme-avatar-surface h-10 w-9 rounded-[14px] border border-[var(--theme-widget-border)]" />
       </div>
     );
   }

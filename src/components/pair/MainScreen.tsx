@@ -84,9 +84,9 @@ function CoupleAvatar({
 
   if (style === "duo-card") {
     return (
-      <div className="flex w-[156px] flex-col items-center">
-        <div className="theme-glass w-[146px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
-          <div className="theme-avatar-ring theme-avatar-surface aspect-[4/5] w-full overflow-hidden rounded-[26px] ring-2">
+      <div className="flex w-[158px] flex-col items-center">
+        <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+          <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
             {image}
           </div>
           <div className="mt-2 truncate text-center text-[16px] font-extrabold leading-tight">
@@ -99,9 +99,9 @@ function CoupleAvatar({
 
   if (style === "halo") {
     return (
-      <div className="flex w-[156px] flex-col items-center">
-        <div className="theme-glass w-[146px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
-          <div className="theme-avatar-ring theme-avatar-surface aspect-[4/5] w-full overflow-hidden rounded-[26px] ring-2">
+      <div className="flex w-[158px] flex-col items-center">
+        <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+          <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
             {image}
           </div>
           <div className="mt-2 truncate text-center text-[16px] font-extrabold leading-tight">
@@ -135,21 +135,18 @@ function CoupleCameo({
 }) {
   return (
     <div className="relative w-full pb-2 pt-3">
-      <div className="relative mx-auto flex w-[294px] items-center justify-center">
+      <div className="relative mx-auto flex w-[316px] items-center justify-center">
         <div className="theme-avatar-ring theme-avatar-surface relative z-20 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo1DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photo1DataUrl} alt={name1} className="h-full w-full object-cover" />
           ) : null}
         </div>
-        <div className="theme-avatar-ring theme-avatar-surface relative z-10 -ml-14 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
+        <div className="theme-avatar-ring theme-avatar-surface relative z-10 -ml-8 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo2DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photo2DataUrl} alt={name2} className="h-full w-full object-cover" />
           ) : null}
-        </div>
-        <div className="theme-primary-button absolute left-1/2 top-1/2 z-30 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[18px] font-black shadow-[0_12px_30px_var(--theme-shadow)] ring-4 ring-[var(--theme-glass-bg)]">
-          ♥
         </div>
       </div>
       <div className="mt-3 flex justify-center">
