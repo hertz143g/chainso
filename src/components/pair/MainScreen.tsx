@@ -85,14 +85,13 @@ function CoupleAvatar({
   if (style === "duo-card") {
     return (
       <div className="flex w-[156px] flex-col items-center">
-        <div className="theme-glass relative flex h-[156px] w-[132px] items-center justify-center rounded-full p-2 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
-          <div className="absolute inset-2 rounded-full border border-[var(--theme-widget-border)]" />
-          <div className="theme-avatar-ring theme-avatar-surface relative h-full w-full overflow-hidden rounded-full ring-2">
+        <div className="theme-glass w-[146px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+          <div className="theme-avatar-ring theme-avatar-surface aspect-[4/5] w-full overflow-hidden rounded-[26px] ring-2">
             {image}
           </div>
-        </div>
-        <div className="theme-chip -mt-2 rounded-full px-4 py-1.5 text-[16px] font-bold shadow-[0_10px_28px_var(--theme-shadow)]">
-          {name}
+          <div className="mt-2 truncate text-center text-[16px] font-extrabold leading-tight">
+            {name}
+          </div>
         </div>
       </div>
     );
@@ -101,14 +100,11 @@ function CoupleAvatar({
   if (style === "halo") {
     return (
       <div className="flex w-[156px] flex-col items-center">
-        <div className="relative h-[156px] w-[146px]">
-          <div className="absolute inset-2 rotate-[-7deg] rounded-[38px] bg-[var(--theme-ring)] opacity-25" />
-          <div className="theme-glass absolute inset-0 rotate-[3deg] rounded-[40px] p-2 shadow-[0_18px_50px_var(--theme-shadow)] backdrop-blur-md">
-            <div className="theme-avatar-ring theme-avatar-surface h-full w-full overflow-hidden rounded-[32px] ring-2">
-              {image}
-            </div>
+        <div className="theme-glass w-[146px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+          <div className="theme-avatar-ring theme-avatar-surface aspect-[4/5] w-full overflow-hidden rounded-[26px] ring-2">
+            {image}
           </div>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--theme-primary)] px-4 py-1.5 text-[15px] font-extrabold text-[var(--theme-on-primary)] shadow-[0_10px_28px_var(--theme-shadow)]">
+          <div className="mt-2 truncate text-center text-[16px] font-extrabold leading-tight">
             {name}
           </div>
         </div>
@@ -138,27 +134,28 @@ function CoupleCameo({
   photo2DataUrl?: string;
 }) {
   return (
-    <div className="theme-glass relative w-full rounded-[46px] px-4 pb-4 pt-5 shadow-[0_22px_60px_var(--theme-shadow)] backdrop-blur-md">
-      <div className="relative mx-auto flex w-[286px] items-center justify-center">
-        <div className="theme-avatar-ring theme-avatar-surface relative z-20 h-[164px] w-[164px] overflow-hidden rounded-full ring-[3px] shadow-[0_18px_46px_var(--theme-shadow)]">
+    <div className="relative w-full pb-2 pt-3">
+      <div className="relative mx-auto flex w-[294px] items-center justify-center">
+        <div className="theme-avatar-ring theme-avatar-surface relative z-20 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo1DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photo1DataUrl} alt={name1} className="h-full w-full object-cover" />
           ) : null}
         </div>
-        <div className="theme-avatar-ring theme-avatar-surface relative z-10 -ml-9 h-[164px] w-[164px] overflow-hidden rounded-full ring-[3px] shadow-[0_18px_46px_var(--theme-shadow)]">
+        <div className="theme-avatar-ring theme-avatar-surface relative z-10 -ml-14 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo2DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photo2DataUrl} alt={name2} className="h-full w-full object-cover" />
           ) : null}
         </div>
-        <div className="theme-primary-button absolute left-1/2 top-1/2 z-30 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[20px] font-black shadow-[0_12px_30px_var(--theme-shadow)] ring-4 ring-[var(--theme-glass-bg)]">
+        <div className="theme-primary-button absolute left-1/2 top-1/2 z-30 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[18px] font-black shadow-[0_12px_30px_var(--theme-shadow)] ring-4 ring-[var(--theme-glass-bg)]">
           ♥
         </div>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-3 text-center">
-        <div className="theme-chip rounded-full px-3 py-2 text-[17px] font-extrabold">{name1}</div>
-        <div className="theme-chip rounded-full px-3 py-2 text-[17px] font-extrabold">{name2}</div>
+      <div className="mt-3 flex justify-center">
+        <div className="theme-glass rounded-full px-5 py-2 text-[17px] font-extrabold shadow-[0_12px_30px_var(--theme-shadow)] backdrop-blur-md">
+          {name1} · {name2}
+        </div>
       </div>
     </div>
   );
@@ -248,29 +245,23 @@ function TimeDisplay({
   }
 
   return (
-    <div className="theme-time-tray relative grid min-h-[136px] w-full grid-cols-[1fr_82px_1fr] items-center overflow-hidden rounded-[38px] px-4 py-5 text-center">
-      <div className="absolute inset-x-8 top-1/2 h-px bg-[var(--theme-ring)] opacity-30" />
-      <div>
-        <div className="text-[34px] font-black leading-none">{hours}</div>
-        <div className="theme-muted-text mt-1 text-[11px] font-bold uppercase tracking-[0.14em]">
-          часов
-        </div>
+    <div className="theme-time-tray relative min-h-[126px] w-full overflow-hidden rounded-[36px] px-4 py-4">
+      <div className="absolute left-8 right-8 top-[58px] h-px bg-[var(--theme-ring)] opacity-35" />
+      <div className="relative z-10 grid grid-cols-3 gap-2 text-center">
+        {units.map((unit) => (
+          <div key={unit.label} className="min-w-0">
+            <div className="mx-auto mb-2 h-3 w-3 rounded-full bg-[var(--theme-primary)] shadow-[0_0_16px_var(--theme-primary)]" />
+            <div className="text-[33px] font-black leading-none tracking-[-0.04em]">
+              {unit.value}
+            </div>
+            <div className="theme-muted-text mt-1 text-[11px] font-bold uppercase tracking-[0.12em]">
+              {unit.label}
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="relative mx-auto h-[94px] w-[58px]">
-        <div className="absolute inset-x-0 top-0 h-[42px] rounded-t-full border-2 border-[var(--theme-ring)] bg-[var(--theme-control-bg)]" />
-        <div className="absolute inset-x-0 bottom-0 h-[42px] rounded-b-full border-2 border-[var(--theme-ring)] bg-[var(--theme-control-bg)]" />
-        <div className="absolute left-1/2 top-[42px] h-2 w-2 -translate-x-1/2 rounded-full bg-[var(--theme-primary)] shadow-[0_0_18px_var(--theme-primary)]" />
-        <div className="absolute left-1/2 top-[50px] h-7 w-px -translate-x-1/2 bg-[linear-gradient(180deg,var(--theme-primary),transparent)]" />
-        <div className="absolute inset-x-4 bottom-4 h-3 rounded-full bg-[var(--theme-primary)] opacity-80" />
-      </div>
-      <div>
-        <div className="text-[34px] font-black leading-none">{seconds}</div>
-        <div className="theme-muted-text mt-1 text-[11px] font-bold uppercase tracking-[0.14em]">
-          секунд
-        </div>
-      </div>
-      <div className="theme-chip absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[11px] font-black">
-        {minutes} минут
+      <div className="theme-chip absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em]">
+        линия времени
       </div>
     </div>
   );

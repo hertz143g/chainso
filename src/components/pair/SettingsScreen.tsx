@@ -77,7 +77,7 @@ const TIME_STYLE_OPTIONS: Array<{
   title: string;
 }> = [
   { id: "glass", title: "Стекло" },
-  { id: "hourglass", title: "Песок" },
+  { id: "hourglass", title: "Линия" },
   { id: "orbits", title: "Импульс" },
 ];
 
@@ -86,7 +86,7 @@ const AVATAR_STYLE_OPTIONS: Array<{
   title: string;
 }> = [
   { id: "classic", title: "Круги" },
-  { id: "halo", title: "Кадры" },
+  { id: "halo", title: "Портреты" },
   { id: "duo-card", title: "Камео" },
 ];
 
@@ -205,13 +205,11 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
   }
 
   return (
-    <div className="theme-glass mx-auto grid h-10 w-full grid-cols-[1fr_24px_1fr] items-center rounded-[18px] px-2 text-center text-[10px] font-black">
+    <div className="theme-glass mx-auto flex h-10 w-full items-center justify-between rounded-[18px] px-2 text-[10px] font-black">
       <span>08</span>
-      <span className="relative mx-auto h-8 w-5">
-        <span className="absolute inset-x-0 top-0 mx-auto h-3.5 w-4 rounded-t-full border border-[var(--theme-ring)]" />
-        <span className="absolute inset-x-0 bottom-0 mx-auto h-3.5 w-4 rounded-b-full border border-[var(--theme-ring)]" />
-        <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--theme-primary)]" />
-      </span>
+      <span className="h-px flex-1 bg-[var(--theme-ring)] opacity-45" />
+      <span className="theme-primary-button rounded-full px-2 py-1">24</span>
+      <span className="h-px flex-1 bg-[var(--theme-ring)] opacity-45" />
       <span>16</span>
     </div>
   );
@@ -220,9 +218,9 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
 function AvatarStylePreview({ style }: { style: AvatarDisplayStyle }) {
   if (style === "duo-card") {
     return (
-      <div className="theme-glass mx-auto flex h-12 w-20 items-center justify-center rounded-full px-2">
-        <span className="theme-avatar-surface h-8 w-8 rounded-full border border-[var(--theme-widget-border)]" />
-        <span className="theme-primary-button -ml-2 h-8 w-8 rounded-full border border-[var(--theme-widget-border)]" />
+      <div className="mx-auto flex h-12 w-20 items-center justify-center">
+        <span className="theme-avatar-ring theme-avatar-surface h-9 w-9 rounded-full ring-2" />
+        <span className="theme-avatar-ring theme-primary-button -ml-3 h-9 w-9 rounded-full ring-2 ring-[var(--theme-card-border)]" />
       </div>
     );
   }
@@ -230,8 +228,8 @@ function AvatarStylePreview({ style }: { style: AvatarDisplayStyle }) {
   if (style === "halo") {
     return (
       <div className="mx-auto flex h-12 w-20 items-center justify-center gap-1.5">
-        <span className="theme-avatar-surface h-9 w-8 rotate-[-7deg] rounded-[14px] border border-[var(--theme-widget-border)]" />
-        <span className="theme-avatar-surface h-9 w-8 rotate-[7deg] rounded-[14px] border border-[var(--theme-widget-border)]" />
+        <span className="theme-avatar-surface h-10 w-8 rounded-[14px] border border-[var(--theme-widget-border)]" />
+        <span className="theme-avatar-surface h-10 w-8 rounded-[14px] border border-[var(--theme-widget-border)]" />
       </div>
     );
   }
