@@ -213,9 +213,9 @@ function TimeDisplay({
   seconds: string;
 }) {
   const units = [
-    { value: hours, label: "часов" },
-    { value: minutes, label: "минут" },
-    { value: seconds, label: "секунд" },
+    { value: hours, label: "часов", max: 24 },
+    { value: minutes, label: "минут", max: 60 },
+    { value: seconds, label: "секунд", max: 60 },
   ];
 
   if (style === "glass") {
@@ -292,7 +292,12 @@ function TimeDisplay({
           >
             <div
               className="absolute inset-x-0 bottom-0 bg-[var(--theme-primary)] opacity-25"
-              style={{ height: `${unit.label === "часов" ? 42 : unit.label === "минут" ? 62 : 78}%` }}
+              style={{
+                height: `${Math.min(
+                  100,
+                  Math.max(8, (Number(unit.value) / unit.max) * 100),
+                )}%`,
+              }}
             />
             <div className="relative z-10 text-[31px] font-black leading-none tracking-[-0.04em]">
               {unit.value}
