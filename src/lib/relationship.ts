@@ -63,6 +63,13 @@ export type AlbumPhoto = {
   createdAtISO: string;
 };
 
+export type DrawingCanvas = {
+  id: string;
+  imageDataUrl: string;
+  createdAtISO: string;
+  updatedAtISO: string;
+};
+
 export type RelationshipSettings = {
   name1: string;
   name2: string;
@@ -74,6 +81,7 @@ export type RelationshipSettings = {
   photo1DataUrl?: string;
   photo2DataUrl?: string;
   widgets: RelationshipWidget[];
+  drawingCanvases: DrawingCanvas[];
   albumPhotos: AlbumPhoto[];
 };
 
@@ -137,6 +145,7 @@ export function getDefaultSettings(): RelationshipSettings {
     photo1DataUrl: undefined,
     photo2DataUrl: undefined,
     widgets: createDefaultWidgets(),
+    drawingCanvases: [],
     albumPhotos: [],
   };
 }
@@ -151,6 +160,7 @@ function cloneSettings(settings: RelationshipSettings): RelationshipSettings {
       ...widget,
       accentPalette: widget.accentPalette ? [...widget.accentPalette] : undefined,
     })),
+    drawingCanvases: settings.drawingCanvases.map((canvas) => ({ ...canvas })),
     albumPhotos: settings.albumPhotos.map((photo) => ({ ...photo })),
   };
 }
@@ -269,6 +279,23 @@ function parseAlbumPhoto(photo: unknown): AlbumPhoto | null {
   };
 }
 
+function parseDrawingCanvas(canvas: unknown): DrawingCanvas | null {
+  if (!canvas || typeof canvas !== "object") return null;
+
+  const raw = canvas as Record<string, unknown>;
+  if (typeof raw.imageDataUrl !== "string") return null;
+
+  const nowISO = new Date().toISOString();
+  const createdAtISO = typeof raw.createdAtISO === "string" ? raw.createdAtISO : nowISO;
+
+  return {
+    id: typeof raw.id === "string" ? raw.id : createWidgetId(),
+    imageDataUrl: raw.imageDataUrl,
+    createdAtISO,
+    updatedAtISO: typeof raw.updatedAtISO === "string" ? raw.updatedAtISO : createdAtISO,
+  };
+}
+
 function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
   if (
     theme === "sun-cycle" ||
@@ -347,6 +374,14 @@ function normalizeSettings(
         .map(parseAlbumPhoto)
         .filter((photo): photo is AlbumPhoto => photo !== null)
     : fallback.albumPhotos;
+  const parsedDrawingCanvases = Array.isArray(parsed.drawingCanvases)
+    ? parsed.drawingCanvases
+    : null;
+  const drawingCanvases = parsedDrawingCanvases
+    ? parsedDrawingCanvases
+        .map(parseDrawingCanvas)
+        .filter((canvas): canvas is DrawingCanvas => canvas !== null)
+    : fallback.drawingCanvases;
 
   return {
     name1: typeof parsed.name1 === "string" && parsed.name1.trim().length > 0
@@ -371,6 +406,7 @@ function normalizeSettings(
     photo2DataUrl:
       typeof parsed.photo2DataUrl === "string" ? parsed.photo2DataUrl : undefined,
     widgets,
+    drawingCanvases,
     albumPhotos,
   };
 }

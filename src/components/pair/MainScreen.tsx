@@ -15,7 +15,9 @@ import {
   formatDateLong,
   formatTogether,
   getGoalProgress,
+  ruPlural,
   type AvatarDisplayStyle,
+  type DrawingCanvas,
   type RelationshipWidget,
   type TimeDisplayStyle,
   updateSettings,
@@ -24,6 +26,26 @@ import { prepareImageForStorage } from "@/lib/widgetAppearance";
 
 function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
+}
+
+const DRAWING_CANVAS_WIDTH = 840;
+const DRAWING_CANVAS_HEIGHT = 520;
+const DRAWING_CANVAS_BACKGROUND = "#fffaf4";
+
+type DrawingTool = "brush" | "eraser";
+
+function fillDrawingCanvasBackground(context: CanvasRenderingContext2D) {
+  context.fillStyle = DRAWING_CANVAS_BACKGROUND;
+  context.fillRect(0, 0, DRAWING_CANVAS_WIDTH, DRAWING_CANVAS_HEIGHT);
+}
+
+function getCanvasPoint(canvas: HTMLCanvasElement, event: React.PointerEvent<HTMLCanvasElement>) {
+  const rect = canvas.getBoundingClientRect();
+
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+    y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+  };
 }
 
 function WidgetActions({
@@ -213,17 +235,10 @@ function TimeDisplay({
   seconds: string;
 }) {
   const units = [
-    { value: hours, label: "часов", shortLabel: "ч", max: 24 },
-    { value: minutes, label: "минут", shortLabel: "м", max: 60 },
-    { value: seconds, label: "секунд", shortLabel: "с", max: 60 },
-  ].map((unit) => {
-    const numericValue = Number(unit.value);
-    const fill = Number.isFinite(numericValue)
-      ? Math.min(100, Math.max(0, (numericValue / unit.max) * 100))
-      : 0;
-
-    return { ...unit, fill };
-  });
+    { value: hours, label: "часов", max: 24 },
+    { value: minutes, label: "минут", max: 60 },
+    { value: seconds, label: "секунд", max: 60 },
+  ];
 
   if (style === "glass") {
     return (
@@ -290,52 +305,331 @@ function TimeDisplay({
   }
 
   return (
-    <div className="theme-time-tray relative min-h-[148px] w-full overflow-hidden rounded-[38px] px-4 py-4">
-      <div className="absolute inset-x-8 top-4 h-px bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent opacity-35" />
+    <div className="theme-time-tray relative min-h-[136px] w-full overflow-hidden rounded-[36px] px-4 py-4">
       <div className="relative z-10 grid grid-cols-3 gap-3 text-center">
-        {units.map((unit, index) => (
-          <div
-            key={unit.label}
-            className="time-liquid-cell theme-glass group relative min-w-0 overflow-hidden rounded-[30px] px-2 py-4 transition duration-300 hover:-translate-y-1 active:scale-[0.98]"
-            style={
-              {
-                "--fill": `${unit.fill}%`,
-                "--liquid-delay": `${index * -0.72}s`,
-              } as CSSProperties
-            }
-          >
-            <div className="time-liquid-fill">
-              <span className="time-liquid-wave time-liquid-wave-a" />
-              <span className="time-liquid-wave time-liquid-wave-b" />
-              <span className="time-liquid-glow" />
-              <span className="time-liquid-bubble left-[20%] h-1.5 w-1.5" />
-              <span
-                className="time-liquid-bubble left-[52%] h-2 w-2"
-                style={{ animationDelay: `${index * -0.72 - 1.1}s` }}
+        {units.map((unit) => {
+          const numericValue = Number(unit.value);
+          const fill = Number.isFinite(numericValue)
+            ? Math.min(100, Math.max(8, (numericValue / unit.max) * 100))
+            : 8;
+
+          return (
+            <div
+              key={unit.label}
+              className="theme-glass relative min-w-0 overflow-hidden rounded-b-[30px] rounded-t-[18px] px-2 py-4"
+            >
+              <div
+                className="absolute inset-x-0 bottom-0 bg-[var(--theme-primary)] opacity-25"
+                style={{ height: `${fill}%` }}
               />
-              <span
-                className="time-liquid-bubble left-[74%] h-1 w-1"
-                style={{ animationDelay: `${index * -0.72 - 2.2}s` }}
-              />
+              <div className="relative z-10 text-[31px] font-black leading-none tracking-[-0.04em]">
+                {unit.value}
+              </div>
+              <div className="theme-muted-text relative z-10 mt-2 text-[10px] font-bold uppercase tracking-[0.12em]">
+                {unit.label}
+              </div>
             </div>
-            <div className="absolute inset-x-3 bottom-3 z-10 h-1.5 overflow-hidden rounded-full bg-[var(--theme-control-bg)]">
-              <span
-                className="block h-full rounded-full bg-[var(--theme-primary)] transition-[width] duration-700 ease-out"
-                style={{ width: `${unit.fill}%` }}
-              />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DrawingCanvasEditor({
+  canvas,
+  onClose,
+  onSave,
+}: {
+  canvas?: DrawingCanvas;
+  onClose: () => void;
+  onSave: (imageDataUrl: string) => void;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = useRef(false);
+  const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+  const [tool, setTool] = useState<DrawingTool>("brush");
+  const [color, setColor] = useState("#1f2937");
+  const [size, setSize] = useState(9);
+
+  useEffect(() => {
+    const canvasElement = canvasRef.current;
+    const context = canvasElement?.getContext("2d");
+    if (!canvasElement || !context) return;
+
+    let isActive = true;
+    fillDrawingCanvasBackground(context);
+
+    if (canvas?.imageDataUrl) {
+      const image = new window.Image();
+      image.onload = () => {
+        if (!isActive) return;
+        fillDrawingCanvasBackground(context);
+        context.drawImage(image, 0, 0, DRAWING_CANVAS_WIDTH, DRAWING_CANVAS_HEIGHT);
+      };
+      image.src = canvas.imageDataUrl;
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [canvas?.id, canvas?.imageDataUrl]);
+
+  const applyStrokeStyle = (context: CanvasRenderingContext2D) => {
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.globalCompositeOperation = "source-over";
+    context.strokeStyle = tool === "eraser" ? DRAWING_CANVAS_BACKGROUND : color;
+    context.fillStyle = tool === "eraser" ? DRAWING_CANVAS_BACKGROUND : color;
+    context.lineWidth = tool === "eraser" ? size * 1.8 : size;
+  };
+
+  const drawDot = (context: CanvasRenderingContext2D, point: { x: number; y: number }) => {
+    context.beginPath();
+    context.arc(point.x, point.y, context.lineWidth / 2, 0, Math.PI * 2);
+    context.fill();
+  };
+
+  const beginDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    const canvasElement = canvasRef.current;
+    const context = canvasElement?.getContext("2d");
+    if (!canvasElement || !context) return;
+
+    const point = getCanvasPoint(canvasElement, event);
+    canvasElement.setPointerCapture(event.pointerId);
+    isDrawingRef.current = true;
+    lastPointRef.current = point;
+    applyStrokeStyle(context);
+    drawDot(context, point);
+  };
+
+  const draw = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!isDrawingRef.current) return;
+
+    event.preventDefault();
+    const canvasElement = canvasRef.current;
+    const context = canvasElement?.getContext("2d");
+    if (!canvasElement || !context) return;
+
+    const point = getCanvasPoint(canvasElement, event);
+    const previousPoint = lastPointRef.current ?? point;
+    applyStrokeStyle(context);
+    context.beginPath();
+    context.moveTo(previousPoint.x, previousPoint.y);
+    context.lineTo(point.x, point.y);
+    context.stroke();
+    lastPointRef.current = point;
+  };
+
+  const endDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    isDrawingRef.current = false;
+    lastPointRef.current = null;
+  };
+
+  const clearCanvas = () => {
+    if (typeof window !== "undefined" && !window.confirm("Очистить холст?")) return;
+
+    const context = canvasRef.current?.getContext("2d");
+    if (!context) return;
+    fillDrawingCanvasBackground(context);
+  };
+
+  const saveCanvas = () => {
+    const sourceCanvas = canvasRef.current;
+    if (!sourceCanvas) return;
+
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = DRAWING_CANVAS_WIDTH;
+    exportCanvas.height = DRAWING_CANVAS_HEIGHT;
+
+    const context = exportCanvas.getContext("2d");
+    if (!context) return;
+
+    fillDrawingCanvasBackground(context);
+    context.drawImage(sourceCanvas, 0, 0);
+    onSave(exportCanvas.toDataURL("image/jpeg", 0.9));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(5,8,18,0.74)] px-4 py-4 backdrop-blur-2xl">
+      <div className="mx-auto flex min-h-full w-full max-w-[920px] flex-col justify-center">
+        <div className="theme-panel rounded-[34px] p-3">
+          <div className="flex items-center justify-between gap-3 px-1 pb-3">
+            <div>
+              <div className="text-[24px] font-extrabold leading-tight">
+                {canvas ? "Редактировать холст" : "Новый холст"}
+              </div>
+              <div className="theme-muted-text mt-1 text-[13px] font-semibold">
+                Нарисуй что-нибудь свое и нажми Готово.
+              </div>
             </div>
-            <div className="relative z-10 text-[33px] font-black leading-none tracking-[-0.05em]">
-              {unit.value}
+            <button
+              type="button"
+              onClick={saveCanvas}
+              className="theme-primary-button flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] font-black shadow-[0_12px_26px_var(--theme-shadow)]"
+              aria-label="Сохранить и закрыть редактор холста"
+            >
+              ✓
+            </button>
+          </div>
+
+          <div className="overflow-hidden rounded-[28px] border border-[var(--theme-card-border)] bg-[#fffaf4] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
+            <canvas
+              ref={canvasRef}
+              width={DRAWING_CANVAS_WIDTH}
+              height={DRAWING_CANVAS_HEIGHT}
+              className="block h-auto w-full touch-none"
+              onPointerDown={beginDrawing}
+              onPointerMove={draw}
+              onPointerUp={endDrawing}
+              onPointerCancel={endDrawing}
+            />
+          </div>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="theme-glass grid gap-3 rounded-[24px] p-3 sm:grid-cols-[auto_auto_1fr] sm:items-center">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTool("brush")}
+                  className={cx(
+                    "theme-icon-button rounded-full border px-4 py-2 text-[13px] font-bold",
+                    tool === "brush" && "theme-icon-button-active",
+                  )}
+                >
+                  Кисть
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTool("eraser")}
+                  className={cx(
+                    "theme-icon-button rounded-full border px-4 py-2 text-[13px] font-bold",
+                    tool === "eraser" && "theme-icon-button-active",
+                  )}
+                >
+                  Ластик
+                </button>
+              </div>
+
+              <label className="flex items-center gap-2 text-[13px] font-bold">
+                Цвет
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(event) => setColor(event.currentTarget.value)}
+                  className="h-9 w-12 cursor-pointer rounded-full border-0 bg-transparent p-0"
+                  aria-label="Цвет кисти"
+                />
+              </label>
+
+              <label className="grid gap-1 text-[12px] font-bold">
+                Толщина: {size}
+                <input
+                  type="range"
+                  min="3"
+                  max="30"
+                  value={size}
+                  onChange={(event) => setSize(Number(event.currentTarget.value))}
+                  className="accent-[var(--theme-primary)]"
+                  aria-label="Толщина кисти"
+                />
+              </label>
             </div>
-            <div className="theme-muted-text relative z-10 mt-2 text-[10px] font-bold uppercase tracking-[0.12em]">
-              {unit.label}
-            </div>
-            <div className="pointer-events-none absolute right-3 top-3 z-10 rounded-full border border-[var(--theme-card-border)] px-1.5 py-0.5 text-[9px] font-black text-[var(--theme-text-muted)]">
-              {unit.shortLabel}
+
+            <div className="flex gap-2 sm:justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                className="theme-icon-button rounded-full border px-4 py-2 text-[13px] font-bold"
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                onClick={clearCanvas}
+                className="theme-icon-button rounded-full border px-4 py-2 text-[13px] font-bold"
+              >
+                Очистить
+              </button>
+              <button
+                type="button"
+                onClick={saveCanvas}
+                className="theme-primary-button rounded-full px-5 py-2 text-[13px] font-extrabold shadow-[0_14px_28px_var(--theme-shadow)]"
+              >
+                Готово
+              </button>
             </div>
           </div>
-        ))}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function NewDrawingCanvasCard({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="theme-dashed-card flex aspect-[4/3] min-w-[230px] flex-col items-center justify-center rounded-[30px] border-2 border-dashed px-5 text-center transition duration-200 hover:-translate-y-0.5 hover:border-[var(--theme-ring)]"
+    >
+      <span className="theme-action-chip flex h-14 w-14 items-center justify-center rounded-full border text-[34px] font-light leading-none">
+        +
+      </span>
+      <span className="mt-3 text-[16px] font-extrabold">Добавить холст</span>
+      <span className="theme-muted-text mt-1 text-[12px] font-semibold">
+        Откроется мини-paint
+      </span>
+    </button>
+  );
+}
+
+function DrawingCanvasCard({
+  canvas,
+  isEditing,
+  onOpen,
+  onDelete,
+}: {
+  canvas: DrawingCanvas;
+  isEditing: boolean;
+  onOpen: (canvasId: string) => void;
+  onDelete: (canvasId: string) => void;
+}) {
+  return (
+    <div className="relative aspect-[4/3] min-w-[230px]">
+      <button
+        type="button"
+        onClick={() => onOpen(canvas.id)}
+        className="theme-glass h-full w-full overflow-hidden rounded-[30px] border border-[var(--theme-card-border)] text-left shadow-[0_18px_44px_var(--theme-shadow)] transition duration-200 hover:-translate-y-0.5"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={canvas.imageDataUrl}
+          alt="Холст"
+          className="h-[72%] w-full bg-[#fffaf4] object-cover"
+        />
+        <div className="px-3 py-2">
+          <div className="text-[14px] font-extrabold">Холст</div>
+          <div className="theme-muted-text mt-0.5 truncate text-[11px] font-semibold">
+            {formatDateLong(canvas.updatedAtISO.slice(0, 10))}
+          </div>
+        </div>
+      </button>
+      {isEditing ? (
+        <button
+          type="button"
+          onClick={() => onDelete(canvas.id)}
+          className="theme-icon-button absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border text-[18px] font-bold"
+          aria-label="Удалить холст"
+        >
+          ×
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -346,6 +640,7 @@ export default function MainScreen() {
   const [now, setNow] = useState(() => new Date());
   const [isEditingWidgets, setIsEditingWidgets] = useState(false);
   const [isUploadingAlbum, setIsUploadingAlbum] = useState(false);
+  const [editingCanvasId, setEditingCanvasId] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -360,6 +655,10 @@ export default function MainScreen() {
       progress: getGoalProgress(currentDiff.days),
     };
   }, [settings.startDateISO, now]);
+  const activeDrawingCanvas = useMemo(() => {
+    if (!editingCanvasId || editingCanvasId === "new") return undefined;
+    return settings.drawingCanvases.find((canvas) => canvas.id === editingCanvasId);
+  }, [editingCanvasId, settings.drawingCanvases]);
 
   const onDeleteWidget = (widgetId: string) => {
     if (typeof window !== "undefined") {
@@ -437,13 +736,79 @@ export default function MainScreen() {
     }));
   };
 
+  const onSaveDrawingCanvas = (imageDataUrl: string) => {
+    const timestamp = new Date().toISOString();
+    const currentCanvasId = editingCanvasId;
+
+    updateSettings((prev) => {
+      if (currentCanvasId && currentCanvasId !== "new") {
+        return {
+          ...prev,
+          drawingCanvases: prev.drawingCanvases.map((canvas) =>
+            canvas.id === currentCanvasId
+              ? {
+                  ...canvas,
+                  imageDataUrl,
+                  updatedAtISO: timestamp,
+                }
+              : canvas,
+          ),
+        };
+      }
+
+      return {
+        ...prev,
+        drawingCanvases: [
+          {
+            id: createWidgetId(),
+            imageDataUrl,
+            createdAtISO: timestamp,
+            updatedAtISO: timestamp,
+          },
+          ...prev.drawingCanvases,
+        ],
+      };
+    });
+
+    setEditingCanvasId(null);
+  };
+
+  const onDeleteDrawingCanvas = (canvasId: string) => {
+    if (typeof window !== "undefined") {
+      const shouldDelete = window.confirm("Удалить этот холст?");
+      if (!shouldDelete) return;
+    }
+
+    updateSettings((prev) => ({
+      ...prev,
+      drawingCanvases: prev.drawingCanvases.filter((canvas) => canvas.id !== canvasId),
+    }));
+  };
+
   const albumDateLabel =
     settings.albumPhotos.length > 0
       ? formatDateLong(settings.albumPhotos[0]?.createdAtISO.slice(0, 10) ?? settings.startDateISO)
       : "Добавь первые фото";
+  const canvasCountLabel =
+    settings.drawingCanvases.length > 0
+      ? `${settings.drawingCanvases.length} ${ruPlural(
+          settings.drawingCanvases.length,
+          "холст",
+          "холста",
+          "холстов",
+        )}`
+      : "Нажми плюс и нарисуй первый";
 
   return (
     <div className="theme-screen">
+      {editingCanvasId ? (
+        <DrawingCanvasEditor
+          canvas={activeDrawingCanvas}
+          onClose={() => setEditingCanvasId(null)}
+          onSave={onSaveDrawingCanvas}
+        />
+      ) : null}
+
       <div className="relative h-[52px]">
         <div className="absolute left-0 top-3">
           <button
@@ -594,6 +959,35 @@ export default function MainScreen() {
       >
         + добавить виджет
       </Link>
+
+      <div className="mt-10 flex items-center justify-between gap-3">
+        <div>
+          <div className="text-[28px] font-extrabold">Холсты</div>
+          <div className="theme-muted-text mt-1 text-[13px] font-semibold">
+            {canvasCountLabel}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setEditingCanvasId("new")}
+          className="theme-action-chip rounded-full border px-3 py-1.5 text-[12px] font-bold"
+        >
+          + холст
+        </button>
+      </div>
+
+      <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <NewDrawingCanvasCard onClick={() => setEditingCanvasId("new")} />
+        {settings.drawingCanvases.map((canvas) => (
+          <DrawingCanvasCard
+            key={canvas.id}
+            canvas={canvas}
+            isEditing={isEditingWidgets}
+            onOpen={setEditingCanvasId}
+            onDelete={onDeleteDrawingCanvas}
+          />
+        ))}
+      </div>
 
       <div className="mt-10 flex items-center justify-between">
         <div className="text-[28px] font-extrabold">Альбом</div>
