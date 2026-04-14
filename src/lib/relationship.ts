@@ -1,9 +1,24 @@
 // src/lib/relationship.ts
 export type WidgetType = "event" | "memory" | "track";
 export type WidgetColorMode = "solid" | "adaptive";
-export type AppTheme = "sun-cycle" | "linen" | "sage" | "aurora";
+export type AppTheme =
+  | "sun-cycle"
+  | "linen"
+  | "sage"
+  | "aurora"
+  | "noir"
+  | "ember"
+  | "neo"
+  | "custom";
 export type TimeDisplayStyle = "cards" | "glass" | "orbits";
 export type AvatarDisplayStyle = "classic" | "halo" | "duo-card";
+
+export type CustomThemeSettings = {
+  backgroundColor: string;
+  surfaceColor: string;
+  primaryColor: string;
+  textColor: string;
+};
 
 export type BaseWidget = {
   id: string;
@@ -47,6 +62,7 @@ export type RelationshipSettings = {
   name2: string;
   startDateISO: string; // "2024-02-09"
   theme: AppTheme;
+  customTheme: CustomThemeSettings;
   timeDisplayStyle: TimeDisplayStyle;
   avatarDisplayStyle: AvatarDisplayStyle;
   photo1DataUrl?: string;
@@ -58,6 +74,13 @@ const KEY = "chainso_settings_v2";
 const LEGACY_KEY = "chainso_settings_v1";
 const SETTINGS_UPDATED_EVENT = "chainso:settings-updated";
 let cachedSettings: RelationshipSettings | null = null;
+
+const DEFAULT_CUSTOM_THEME: CustomThemeSettings = {
+  backgroundColor: "#101828",
+  surfaceColor: "#1D2939",
+  primaryColor: "#84CAFF",
+  textColor: "#F8FBFF",
+};
 
 function createDefaultWidgets(): RelationshipWidget[] {
   return [
@@ -101,6 +124,7 @@ export function getDefaultSettings(): RelationshipSettings {
     name2: "Ксения",
     startDateISO: "2024-02-09",
     theme: "sun-cycle",
+    customTheme: { ...DEFAULT_CUSTOM_THEME },
     timeDisplayStyle: "cards",
     avatarDisplayStyle: "classic",
     photo1DataUrl: undefined,
@@ -114,6 +138,7 @@ export const defaultSettings = getDefaultSettings();
 function cloneSettings(settings: RelationshipSettings): RelationshipSettings {
   return {
     ...settings,
+    customTheme: { ...settings.customTheme },
     widgets: settings.widgets.map((widget) => ({
       ...widget,
       accentPalette: widget.accentPalette ? [...widget.accentPalette] : undefined,
@@ -222,7 +247,16 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
 }
 
 function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
-  if (theme === "sun-cycle" || theme === "linen" || theme === "sage" || theme === "aurora") {
+  if (
+    theme === "sun-cycle" ||
+    theme === "linen" ||
+    theme === "sage" ||
+    theme === "aurora" ||
+    theme === "noir" ||
+    theme === "ember" ||
+    theme === "neo" ||
+    theme === "custom"
+  ) {
     return theme;
   }
   if (theme === "kitty") return "linen";
@@ -239,6 +273,35 @@ function parseTimeDisplayStyle(style: unknown, fallback: TimeDisplayStyle): Time
 function parseAvatarDisplayStyle(style: unknown, fallback: AvatarDisplayStyle): AvatarDisplayStyle {
   if (style === "classic" || style === "halo" || style === "duo-card") return style;
   return fallback;
+}
+
+function parseHexColor(color: unknown, fallback: string) {
+  if (typeof color !== "string") return fallback;
+  const trimmed = color.trim();
+
+  if (/^#[0-9a-fA-F]{6}$/.test(trimmed)) return trimmed;
+  if (/^#[0-9a-fA-F]{3}$/.test(trimmed)) {
+    return `#${trimmed
+      .slice(1)
+      .split("")
+      .map((char) => `${char}${char}`)
+      .join("")}`;
+  }
+
+  return fallback;
+}
+
+function parseCustomTheme(theme: unknown, fallback: CustomThemeSettings): CustomThemeSettings {
+  if (!theme || typeof theme !== "object") return { ...fallback };
+
+  const raw = theme as Record<string, unknown>;
+
+  return {
+    backgroundColor: parseHexColor(raw.backgroundColor, fallback.backgroundColor),
+    surfaceColor: parseHexColor(raw.surfaceColor, fallback.surfaceColor),
+    primaryColor: parseHexColor(raw.primaryColor, fallback.primaryColor),
+    textColor: parseHexColor(raw.textColor, fallback.textColor),
+  };
 }
 
 function normalizeSettings(
@@ -267,6 +330,7 @@ function normalizeSettings(
         ? parsed.startDateISO
         : fallback.startDateISO,
     theme: parseTheme(parsed.theme, fallback.theme),
+    customTheme: parseCustomTheme(parsed.customTheme, fallback.customTheme),
     timeDisplayStyle: parseTimeDisplayStyle(parsed.timeDisplayStyle, fallback.timeDisplayStyle),
     avatarDisplayStyle: parseAvatarDisplayStyle(
       parsed.avatarDisplayStyle,

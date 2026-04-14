@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import WidgetVisual, {
   relationshipWidgetToVisualData,
 } from "@/components/pair/WidgetVisual";
@@ -85,11 +85,16 @@ function CoupleAvatar({
 
   if (style === "duo-card") {
     return (
-      <div className="theme-glass flex w-[156px] flex-col items-center rounded-[38px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
-        <div className="theme-avatar-ring theme-avatar-surface h-[138px] w-full overflow-hidden rounded-[32px] ring-2">
-          {image}
+      <div className="flex w-[156px] flex-col items-center">
+        <div className="theme-glass relative flex h-[156px] w-[132px] items-center justify-center rounded-full p-2 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+          <div className="absolute inset-2 rounded-full border border-[var(--theme-widget-border)]" />
+          <div className="theme-avatar-ring theme-avatar-surface relative h-full w-full overflow-hidden rounded-full ring-2">
+            {image}
+          </div>
         </div>
-        <div className="mt-2 text-[17px] font-bold leading-tight">{name}</div>
+        <div className="theme-chip -mt-2 rounded-full px-4 py-1.5 text-[16px] font-bold shadow-[0_10px_28px_var(--theme-shadow)]">
+          {name}
+        </div>
       </div>
     );
   }
@@ -97,13 +102,17 @@ function CoupleAvatar({
   if (style === "halo") {
     return (
       <div className="flex w-[156px] flex-col items-center">
-        <div className="relative h-[156px] w-[156px] rounded-full">
-          <div className="absolute inset-[-8px] rounded-full bg-[radial-gradient(circle,var(--theme-ring),transparent_62%)] opacity-35 blur-md" />
-          <div className="theme-avatar-ring theme-avatar-surface relative h-full w-full overflow-hidden rounded-full ring-[4px] shadow-[0_18px_52px_var(--theme-shadow)]">
-            {image}
+        <div className="relative h-[156px] w-[146px]">
+          <div className="absolute inset-2 rotate-[-7deg] rounded-[38px] bg-[var(--theme-ring)] opacity-25" />
+          <div className="theme-glass absolute inset-0 rotate-[3deg] rounded-[40px] p-2 shadow-[0_18px_50px_var(--theme-shadow)] backdrop-blur-md">
+            <div className="theme-avatar-ring theme-avatar-surface h-full w-full overflow-hidden rounded-[32px] ring-2">
+              {image}
+            </div>
+          </div>
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--theme-primary)] px-4 py-1.5 text-[15px] font-extrabold text-[var(--theme-on-primary)] shadow-[0_10px_28px_var(--theme-shadow)]">
+            {name}
           </div>
         </div>
-        <div className="mt-3 text-[18px] font-semibold">{name}</div>
       </div>
     );
   }
@@ -152,17 +161,46 @@ function TimeDisplay({
   }
 
   if (style === "orbits") {
+    const secondsAngle = Number(seconds) * 6;
+
     return (
-      <div className="flex w-full justify-center gap-2">
-        {units.map((unit) => (
-          <div
-            key={unit.label}
-            className="theme-primary-button flex h-[92px] w-[92px] flex-col items-center justify-center rounded-full text-center shadow-[0_16px_42px_var(--theme-shadow)] ring-4 ring-[var(--theme-control-bg)]"
-          >
-            <div className="text-[27px] font-extrabold leading-none">{unit.value}</div>
-            <div className="mt-1 text-[11px] font-bold opacity-90">{unit.label}</div>
+      <div className="theme-time-tray relative min-h-[132px] w-full overflow-hidden rounded-[36px] p-4">
+        <div className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-[var(--theme-primary)] opacity-10 blur-2xl" />
+        <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_104px] items-center gap-4">
+          <div className="min-w-0">
+            <div className="theme-chip inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em]">
+              live pulse
+            </div>
+            <div className="mt-3 flex items-end gap-2">
+              <span className="text-[42px] font-black leading-none tracking-[-0.07em]">
+                {hours}
+              </span>
+              <span className="pb-1 text-[22px] font-black leading-none opacity-55">:</span>
+              <span className="text-[42px] font-black leading-none tracking-[-0.07em]">
+                {minutes}
+              </span>
+            </div>
+            <div className="theme-muted-text mt-2 text-[12px] font-bold">
+              часы и минуты, секунды справа
+            </div>
           </div>
-        ))}
+
+          <div
+            className="flex h-[104px] w-[104px] items-center justify-center rounded-full p-2 shadow-[0_16px_42px_var(--theme-shadow)]"
+            style={
+              {
+                background: `conic-gradient(var(--theme-primary) ${secondsAngle}deg, var(--theme-control-bg) 0deg)`,
+              } as CSSProperties
+            }
+          >
+            <div className="theme-glass flex h-full w-full flex-col items-center justify-center rounded-full">
+              <div className="text-[30px] font-black leading-none">{seconds}</div>
+              <div className="theme-muted-text mt-1 text-[10px] font-bold uppercase tracking-[0.14em]">
+                sec
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

@@ -221,6 +221,120 @@ body {
     linear-gradient(180deg, #dfeeff 0%, #f2f1ff 50%, #d4f0ea 100%);
 }
 
+.app-theme-noir {
+  --theme-surface: rgba(19, 24, 36, 0.76);
+  --theme-surface-soft: rgba(255, 255, 255, 0.08);
+  --theme-widget-bg: rgba(18, 23, 34, 0.82);
+  --theme-widget-border: rgba(230, 238, 255, 0.16);
+  --theme-chip-bg: rgba(236, 241, 255, 0.1);
+  --theme-glass-bg: rgba(20, 26, 39, 0.6);
+  --theme-photo-frame: rgba(245, 248, 255, 0.14);
+  --theme-photo-inner: rgba(255, 255, 255, 0.06);
+  --theme-control-bg: rgba(255, 255, 255, 0.08);
+  --theme-control-active-bg: rgba(139, 164, 210, 0.18);
+  --theme-control-border: rgba(230, 238, 255, 0.18);
+  --theme-control-active-border: rgba(184, 204, 241, 0.62);
+  --theme-progress-track: rgba(236, 241, 255, 0.72);
+  --theme-dashed-border: rgba(230, 238, 255, 0.34);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.05);
+  --theme-avatar-bg: rgba(237, 241, 249, 0.86);
+  --theme-overlay-bg: rgba(2, 4, 10, 0.58);
+  --theme-image-overlay-soft: rgba(1, 3, 8, 0.12);
+  --theme-image-overlay-mid: rgba(1, 3, 8, 0.28);
+  --theme-image-overlay-strong: rgba(1, 3, 8, 0.72);
+  --theme-text: #f6f8ff;
+  --theme-text-muted: rgba(235, 240, 255, 0.7);
+  --theme-primary: #b8ccf1;
+  --theme-on-primary: #08111f;
+  --theme-ring: #d7e4ff;
+  --theme-input-bg: rgba(244, 247, 255, 0.94);
+  --theme-input-text: #101827;
+  --theme-card-border: rgba(230, 238, 255, 0.16);
+  --theme-shadow: rgba(0, 0, 0, 0.34);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(184, 204, 241, 0.2), transparent min(42vw, 230px)),
+    radial-gradient(circle at 84% 20%, rgba(255, 255, 255, 0.1), transparent min(50vw, 280px)),
+    linear-gradient(180deg, #070b13 0%, #121826 56%, #080b12 100%);
+}
+
+.app-theme-ember {
+  --theme-surface: rgba(36, 22, 18, 0.74);
+  --theme-surface-soft: rgba(255, 218, 176, 0.1);
+  --theme-widget-bg: rgba(39, 23, 18, 0.8);
+  --theme-widget-border: rgba(255, 224, 188, 0.16);
+  --theme-chip-bg: rgba(255, 207, 153, 0.1);
+  --theme-glass-bg: rgba(42, 25, 18, 0.58);
+  --theme-photo-frame: rgba(255, 224, 188, 0.16);
+  --theme-photo-inner: rgba(255, 207, 153, 0.06);
+  --theme-control-bg: rgba(255, 224, 188, 0.08);
+  --theme-control-active-bg: rgba(255, 140, 82, 0.18);
+  --theme-control-border: rgba(255, 224, 188, 0.18);
+  --theme-control-active-border: rgba(255, 177, 104, 0.6);
+  --theme-progress-track: rgba(255, 234, 214, 0.72);
+  --theme-dashed-border: rgba(255, 224, 188, 0.32);
+  --theme-dashed-bg: rgba(255, 224, 188, 0.05);
+  --theme-avatar-bg: rgba(255, 239, 224, 0.86);
+  --theme-overlay-bg: rgba(14, 5, 2, 0.58);
+  --theme-image-overlay-soft: rgba(14, 5, 2, 0.1);
+  --theme-image-overlay-mid: rgba(14, 5, 2, 0.28);
+  --theme-image-overlay-strong: rgba(14, 5, 2, 0.72);
+  --theme-text: #fff6ee;
+  --theme-text-muted: rgba(255, 239, 224, 0.7);
+  --theme-primary: #ff9f5f;
+  --theme-on-primary: #21100a;
+  --theme-ring: #ffc48e;
+  --theme-input-bg: rgba(255, 246, 238, 0.94);
+  --theme-input-text: #2b140b;
+  --theme-card-border: rgba(255, 224, 188, 0.16);
+  --theme-shadow: rgba(0, 0, 0, 0.36);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 159, 95, 0.28), transparent min(42vw, 240px)),
+    radial-gradient(circle at 86% 22%, rgba(255, 70, 70, 0.12), transparent min(50vw, 280px)),
+    linear-gradient(180deg, #120806 0%, #281611 56%, #0f0806 100%);
+}
+
+.app-theme-neo {
+  --theme-surface: rgba(2, 18, 9, 0.76);
+  --theme-surface-soft: rgba(0, 255, 128, 0.1);
+  --theme-widget-bg: rgba(2, 16, 8, 0.84);
+  --theme-widget-border: rgba(49, 255, 145, 0.22);
+  --theme-chip-bg: rgba(0, 255, 128, 0.12);
+  --theme-glass-bg: rgba(2, 18, 9, 0.68);
+  --theme-photo-frame: rgba(49, 255, 145, 0.16);
+  --theme-photo-inner: rgba(0, 255, 128, 0.05);
+  --theme-control-bg: rgba(0, 255, 128, 0.08);
+  --theme-control-active-bg: rgba(0, 255, 128, 0.2);
+  --theme-control-border: rgba(49, 255, 145, 0.24);
+  --theme-control-active-border: rgba(116, 255, 179, 0.72);
+  --theme-progress-track: rgba(168, 255, 203, 0.72);
+  --theme-dashed-border: rgba(49, 255, 145, 0.36);
+  --theme-dashed-bg: rgba(0, 255, 128, 0.05);
+  --theme-avatar-bg: rgba(213, 255, 231, 0.9);
+  --theme-overlay-bg: rgba(0, 6, 2, 0.62);
+  --theme-image-overlay-soft: rgba(0, 6, 2, 0.08);
+  --theme-image-overlay-mid: rgba(0, 6, 2, 0.26);
+  --theme-image-overlay-strong: rgba(0, 6, 2, 0.74);
+  --theme-text: #d8ffe7;
+  --theme-text-muted: rgba(216, 255, 231, 0.7);
+  --theme-primary: #31ff91;
+  --theme-on-primary: #001506;
+  --theme-ring: #74ffb3;
+  --theme-input-bg: rgba(220, 255, 235, 0.94);
+  --theme-input-text: #001506;
+  --theme-card-border: rgba(49, 255, 145, 0.2);
+  --theme-shadow: rgba(0, 0, 0, 0.42);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(49, 255, 145, 0.16), transparent min(42vw, 230px)),
+    radial-gradient(circle at 88% 24%, rgba(0, 255, 128, 0.12), transparent min(50vw, 280px)),
+    linear-gradient(180deg, #000501 0%, #021208 56%, #000401 100%);
+}
+
+.app-theme-custom {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(132, 202, 255, 0.2), transparent min(42vw, 230px)),
+    linear-gradient(180deg, #101828 0%, #182230 58%, #1d2939 100%);
+}
+
 .theme-ornaments {
   pointer-events: none;
   position: absolute;
@@ -361,6 +475,123 @@ body {
   animation: aurora-sheen-drift 11s ease-in-out infinite alternate;
 }
 
+.noir-blob-a {
+  left: -120px;
+  top: 70px;
+  width: min(72vw, 320px);
+  height: min(72vw, 320px);
+  background: #b8ccf1;
+  opacity: 0.16;
+}
+
+.noir-blob-b {
+  right: -140px;
+  bottom: 110px;
+  width: min(82vw, 360px);
+  height: min(82vw, 360px);
+  background: #ffffff;
+  opacity: 0.08;
+}
+
+.noir-sheen {
+  left: -32vw;
+  top: 24vh;
+  opacity: 0.18;
+}
+
+.ember-blob-a {
+  left: -110px;
+  top: 76px;
+  width: min(72vw, 320px);
+  height: min(72vw, 320px);
+  background: #ff9f5f;
+  opacity: 0.24;
+}
+
+.ember-blob-b {
+  right: -130px;
+  bottom: 110px;
+  width: min(82vw, 360px);
+  height: min(82vw, 360px);
+  background: #ff4a4a;
+  opacity: 0.12;
+}
+
+.ember-sheen {
+  left: -28vw;
+  top: 28vh;
+  background: linear-gradient(90deg, transparent, rgba(255, 197, 142, 0.22), transparent);
+  opacity: 0.22;
+}
+
+.custom-blob-a {
+  left: -110px;
+  top: 76px;
+  width: min(72vw, 320px);
+  height: min(72vw, 320px);
+  background: var(--theme-primary);
+  opacity: 0.24;
+}
+
+.custom-blob-b {
+  right: -130px;
+  bottom: 110px;
+  width: min(82vw, 360px);
+  height: min(82vw, 360px);
+  background: var(--theme-text);
+  opacity: 0.1;
+}
+
+.custom-sheen {
+  left: -30vw;
+  top: 25vh;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--theme-primary) 24%, transparent), transparent);
+  opacity: 0.24;
+}
+
+.neo-blob-a {
+  left: -110px;
+  top: 80px;
+  width: min(70vw, 310px);
+  height: min(70vw, 310px);
+  background: #31ff91;
+  opacity: 0.18;
+}
+
+.neo-blob-b {
+  right: -120px;
+  bottom: 120px;
+  width: min(80vw, 350px);
+  height: min(80vw, 350px);
+  background: #00b85c;
+  opacity: 0.14;
+}
+
+.theme-matrix-rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.42;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 82%, transparent 100%);
+}
+
+.theme-matrix-rain span {
+  position: absolute;
+  top: -18%;
+  left: var(--matrix-left);
+  width: 1ch;
+  color: #31ff91;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 14px rgba(49, 255, 145, 0.74);
+  writing-mode: vertical-rl;
+  animation: matrix-fall var(--matrix-duration) linear infinite;
+  animation-delay: var(--matrix-delay);
+}
+
 .theme-floating-dots span {
   --bubble-index: 0;
   --bubble-left: 10%;
@@ -409,6 +640,20 @@ body {
   }
   to {
     transform: translate3d(10vw, 3vh, 0) rotate(-9deg);
+  }
+}
+
+@keyframes matrix-fall {
+  from {
+    transform: translate3d(0, -8vh, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.95;
+  }
+  to {
+    transform: translate3d(0, 126vh, 0);
+    opacity: 0;
   }
 }
 
@@ -568,6 +813,7 @@ body {
   .aurora-sheen,
   .sage-blob-a,
   .sage-blob-b,
+  .theme-matrix-rain span,
   .theme-floating-dots span {
     animation: none;
   }

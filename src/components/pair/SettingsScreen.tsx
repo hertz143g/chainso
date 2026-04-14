@@ -8,6 +8,7 @@ import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   type AppTheme,
   type AvatarDisplayStyle,
+  type CustomThemeSettings,
   type RelationshipSettings,
   type TimeDisplayStyle,
   updateSettings,
@@ -39,6 +40,36 @@ const THEME_OPTIONS: Array<{
     title: "Воздушная аврора",
     description: "Свежая светлая тема: голубой, лавандовый и чистые стеклянные поверхности.",
   },
+  {
+    id: "noir",
+    title: "Графитовый шелк",
+    description: "Темная спокойная тема: графит, холодный свет и дорогие матовые панели.",
+  },
+  {
+    id: "ember",
+    title: "Ночной янтарь",
+    description: "Темная теплая тема с огненными акцентами, но без кислотного перегруза.",
+  },
+  {
+    id: "neo",
+    title: "Neo Matrix",
+    description: "Черно-зеленая тема для хакерского вайба: код, свечение и цифровой дождь.",
+  },
+  {
+    id: "custom",
+    title: "Своя тема",
+    description: "Настрой фон, панели, акцент и текст под себя.",
+  },
+];
+
+const CUSTOM_THEME_FIELDS: Array<{
+  key: keyof CustomThemeSettings;
+  label: string;
+}> = [
+  { key: "backgroundColor", label: "Фон" },
+  { key: "surfaceColor", label: "Панели" },
+  { key: "primaryColor", label: "Акцент" },
+  { key: "textColor", label: "Текст" },
 ];
 
 const TIME_STYLE_OPTIONS: Array<{
@@ -47,7 +78,7 @@ const TIME_STYLE_OPTIONS: Array<{
 }> = [
   { id: "cards", title: "Карточки" },
   { id: "glass", title: "Стекло" },
-  { id: "orbits", title: "Орбиты" },
+  { id: "orbits", title: "Импульс" },
 ];
 
 const AVATAR_STYLE_OPTIONS: Array<{
@@ -55,11 +86,66 @@ const AVATAR_STYLE_OPTIONS: Array<{
   title: string;
 }> = [
   { id: "classic", title: "Круги" },
-  { id: "halo", title: "Свечение" },
-  { id: "duo-card", title: "Дуо" },
+  { id: "halo", title: "Кадры" },
+  { id: "duo-card", title: "Камео" },
 ];
 
-function ThemePreviewDots({ theme }: { theme: AppTheme }) {
+function ThemePreviewDots({
+  theme,
+  customTheme,
+}: {
+  theme: AppTheme;
+  customTheme: CustomThemeSettings;
+}) {
+  if (theme === "custom") {
+    return (
+      <div
+        className="relative h-10 w-16 overflow-hidden rounded-[16px]"
+        style={{
+          background: `linear-gradient(135deg, ${customTheme.backgroundColor}, ${customTheme.surfaceColor})`,
+        }}
+      >
+        <span
+          className="absolute left-3 top-2 h-5 w-5 rounded-full"
+          style={{ backgroundColor: customTheme.primaryColor }}
+        />
+        <span
+          className="absolute bottom-2 right-3 h-3 w-7 rounded-full"
+          style={{ backgroundColor: customTheme.textColor }}
+        />
+      </div>
+    );
+  }
+
+  if (theme === "neo") {
+    return (
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#000501,#021208,#31ff91)]">
+        <span className="absolute left-2 top-1 text-[9px] font-black tracking-[0.2em] text-[#31ff91]">
+          0101
+        </span>
+        <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#31ff91]/80 blur-[2px]" />
+      </div>
+    );
+  }
+
+  if (theme === "ember") {
+    return (
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#120806,#281611,#ff9f5f)]">
+        <span className="absolute left-2 top-2 h-5 w-6 rounded-full bg-[#ff9f5f]/75 blur-[4px]" />
+        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full bg-[#ffc48e]" />
+      </div>
+    );
+  }
+
+  if (theme === "noir") {
+    return (
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#070b13,#121826,#b8ccf1)]">
+        <span className="absolute left-3 top-2 h-4 w-7 rounded-full bg-white/35 blur-[5px]" />
+        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full bg-[#d7e4ff]/80" />
+      </div>
+    );
+  }
+
   if (theme === "aurora") {
     return (
       <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#dfeeff,#f2f1ff,#d4f0ea)]">
@@ -107,15 +193,13 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
 
   if (style === "orbits") {
     return (
-      <div className="mx-auto flex justify-center gap-1.5">
-        {["08", "24", "16"].map((value) => (
-          <span
-            key={value}
-            className="theme-primary-button flex h-9 w-9 items-center justify-center rounded-full text-[10px] font-extrabold"
-          >
-            {value}
-          </span>
-        ))}
+      <div className="theme-glass relative mx-auto h-10 w-full overflow-hidden rounded-[18px] px-2 py-1.5">
+        <div className="absolute left-2 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border border-[var(--theme-ring)]" />
+        <div className="relative ml-3 flex h-full items-center justify-end gap-1 text-[10px] font-black">
+          <span className="theme-primary-button rounded-full px-2 py-1">08</span>
+          <span>24</span>
+          <span className="theme-muted-text">16</span>
+        </div>
       </div>
     );
   }
@@ -137,18 +221,18 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
 function AvatarStylePreview({ style }: { style: AvatarDisplayStyle }) {
   if (style === "duo-card") {
     return (
-      <div className="theme-glass mx-auto flex h-12 w-20 items-center justify-center gap-1 rounded-[18px]">
-        <span className="theme-avatar-surface h-8 w-8 rounded-[14px]" />
-        <span className="theme-avatar-surface h-8 w-8 rounded-[14px]" />
+      <div className="theme-glass mx-auto flex h-12 w-20 items-center justify-center rounded-full px-2">
+        <span className="theme-avatar-surface h-8 w-8 rounded-full border border-[var(--theme-widget-border)]" />
+        <span className="theme-primary-button -ml-2 h-8 w-8 rounded-full border border-[var(--theme-widget-border)]" />
       </div>
     );
   }
 
   if (style === "halo") {
     return (
-      <div className="mx-auto flex h-12 w-20 items-center justify-center gap-1">
-        <span className="theme-avatar-ring theme-avatar-surface h-9 w-9 rounded-full ring-4" />
-        <span className="theme-avatar-ring theme-avatar-surface h-9 w-9 rounded-full ring-4" />
+      <div className="mx-auto flex h-12 w-20 items-center justify-center gap-1.5">
+        <span className="theme-avatar-surface h-9 w-8 rotate-[-7deg] rounded-[14px] border border-[var(--theme-widget-border)]" />
+        <span className="theme-avatar-surface h-9 w-8 rotate-[7deg] rounded-[14px] border border-[var(--theme-widget-border)]" />
       </div>
     );
   }
@@ -335,7 +419,7 @@ export default function SettingsScreen() {
                   }`}
                 >
                   <div className="grid grid-cols-[64px_minmax(0,1fr)_14px] items-center gap-3">
-                    <ThemePreviewDots theme={theme.id} />
+                    <ThemePreviewDots theme={theme.id} customTheme={current.customTheme} />
                     <div className="min-w-0">
                       <div className="text-[15px] font-extrabold">{theme.title}</div>
                       <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
@@ -353,6 +437,40 @@ export default function SettingsScreen() {
             })}
           </div>
         </div>
+
+        {current.theme === "custom" ? (
+          <div className="theme-option-card mt-4 rounded-[24px] border px-3.5 py-4">
+            <div className="text-[14px] font-extrabold">Настройка своей темы</div>
+            <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
+              Эти цвета применяются ко всему интерфейсу: фону, карточкам, кнопкам и тексту.
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              {CUSTOM_THEME_FIELDS.map((field) => (
+                <label key={field.key} className="theme-form-label text-[12px] font-semibold">
+                  {field.label}
+                  <div className="theme-input mt-2 flex items-center gap-2 rounded-full px-3 py-2">
+                    <input
+                      type="color"
+                      value={current.customTheme[field.key]}
+                      onChange={(event) =>
+                        patchDraft({
+                          customTheme: {
+                            ...current.customTheme,
+                            [field.key]: event.target.value,
+                          },
+                        })
+                      }
+                      className="h-8 w-8 shrink-0 cursor-pointer rounded-full border-0 bg-transparent p-0"
+                    />
+                    <span className="text-[12px] font-bold text-[var(--theme-input-text)]">
+                      {current.customTheme[field.key]}
+                    </span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-6">
           <div className="theme-form-label mb-3 text-[13px] font-semibold">Блок времени:</div>
