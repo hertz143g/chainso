@@ -213,10 +213,17 @@ function TimeDisplay({
   seconds: string;
 }) {
   const units = [
-    { value: hours, label: "часов", max: 24 },
-    { value: minutes, label: "минут", max: 60 },
-    { value: seconds, label: "секунд", max: 60 },
-  ];
+    { value: hours, label: "часов", shortLabel: "ч", max: 24 },
+    { value: minutes, label: "минут", shortLabel: "м", max: 60 },
+    { value: seconds, label: "секунд", shortLabel: "с", max: 60 },
+  ].map((unit) => {
+    const numericValue = Number(unit.value);
+    const fill = Number.isFinite(numericValue)
+      ? Math.min(100, Math.max(0, (numericValue / unit.max) * 100))
+      : 0;
+
+    return { ...unit, fill };
+  });
 
   if (style === "glass") {
     return (
@@ -283,27 +290,48 @@ function TimeDisplay({
   }
 
   return (
-    <div className="theme-time-tray relative min-h-[136px] w-full overflow-hidden rounded-[36px] px-4 py-4">
+    <div className="theme-time-tray relative min-h-[148px] w-full overflow-hidden rounded-[38px] px-4 py-4">
+      <div className="absolute inset-x-8 top-4 h-px bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent opacity-35" />
       <div className="relative z-10 grid grid-cols-3 gap-3 text-center">
-        {units.map((unit) => (
+        {units.map((unit, index) => (
           <div
             key={unit.label}
-            className="theme-glass relative min-w-0 overflow-hidden rounded-b-[30px] rounded-t-[18px] px-2 py-4"
+            className="time-liquid-cell theme-glass group relative min-w-0 overflow-hidden rounded-[30px] px-2 py-4 transition duration-300 hover:-translate-y-1 active:scale-[0.98]"
+            style={
+              {
+                "--fill": `${unit.fill}%`,
+                "--liquid-delay": `${index * -0.72}s`,
+              } as CSSProperties
+            }
           >
-            <div
-              className="absolute inset-x-0 bottom-0 bg-[var(--theme-primary)] opacity-25"
-              style={{
-                height: `${Math.min(
-                  100,
-                  Math.max(8, (Number(unit.value) / unit.max) * 100),
-                )}%`,
-              }}
-            />
-            <div className="relative z-10 text-[31px] font-black leading-none tracking-[-0.04em]">
+            <div className="time-liquid-fill">
+              <span className="time-liquid-wave time-liquid-wave-a" />
+              <span className="time-liquid-wave time-liquid-wave-b" />
+              <span className="time-liquid-glow" />
+              <span className="time-liquid-bubble left-[20%] h-1.5 w-1.5" />
+              <span
+                className="time-liquid-bubble left-[52%] h-2 w-2"
+                style={{ animationDelay: `${index * -0.72 - 1.1}s` }}
+              />
+              <span
+                className="time-liquid-bubble left-[74%] h-1 w-1"
+                style={{ animationDelay: `${index * -0.72 - 2.2}s` }}
+              />
+            </div>
+            <div className="absolute inset-x-3 bottom-3 z-10 h-1.5 overflow-hidden rounded-full bg-[var(--theme-control-bg)]">
+              <span
+                className="block h-full rounded-full bg-[var(--theme-primary)] transition-[width] duration-700 ease-out"
+                style={{ width: `${unit.fill}%` }}
+              />
+            </div>
+            <div className="relative z-10 text-[33px] font-black leading-none tracking-[-0.05em]">
               {unit.value}
             </div>
             <div className="theme-muted-text relative z-10 mt-2 text-[10px] font-bold uppercase tracking-[0.12em]">
               {unit.label}
+            </div>
+            <div className="pointer-events-none absolute right-3 top-3 z-10 rounded-full border border-[var(--theme-card-border)] px-1.5 py-0.5 text-[9px] font-black text-[var(--theme-text-muted)]">
+              {unit.shortLabel}
             </div>
           </div>
         ))}
