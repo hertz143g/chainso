@@ -18,7 +18,6 @@ import {
   type TimeDisplayStyle,
   updateSettings,
 } from "@/lib/relationship";
-import TimeBox from "../ui/TimeBox";
 
 function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -127,6 +126,44 @@ function CoupleAvatar({
   );
 }
 
+function CoupleCameo({
+  name1,
+  name2,
+  photo1DataUrl,
+  photo2DataUrl,
+}: {
+  name1: string;
+  name2: string;
+  photo1DataUrl?: string;
+  photo2DataUrl?: string;
+}) {
+  return (
+    <div className="theme-glass relative w-full rounded-[46px] px-4 pb-4 pt-5 shadow-[0_22px_60px_var(--theme-shadow)] backdrop-blur-md">
+      <div className="relative mx-auto flex w-[286px] items-center justify-center">
+        <div className="theme-avatar-ring theme-avatar-surface relative z-20 h-[164px] w-[164px] overflow-hidden rounded-full ring-[3px] shadow-[0_18px_46px_var(--theme-shadow)]">
+          {photo1DataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo1DataUrl} alt={name1} className="h-full w-full object-cover" />
+          ) : null}
+        </div>
+        <div className="theme-avatar-ring theme-avatar-surface relative z-10 -ml-9 h-[164px] w-[164px] overflow-hidden rounded-full ring-[3px] shadow-[0_18px_46px_var(--theme-shadow)]">
+          {photo2DataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo2DataUrl} alt={name2} className="h-full w-full object-cover" />
+          ) : null}
+        </div>
+        <div className="theme-primary-button absolute left-1/2 top-1/2 z-30 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[20px] font-black shadow-[0_12px_30px_var(--theme-shadow)] ring-4 ring-[var(--theme-glass-bg)]">
+          ♥
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-center">
+        <div className="theme-chip rounded-full px-3 py-2 text-[17px] font-extrabold">{name1}</div>
+        <div className="theme-chip rounded-full px-3 py-2 text-[17px] font-extrabold">{name2}</div>
+      </div>
+    </div>
+  );
+}
+
 function TimeDisplay({
   style,
   hours,
@@ -164,12 +201,14 @@ function TimeDisplay({
     const secondsAngle = Number(seconds) * 6;
 
     return (
-      <div className="theme-time-tray relative min-h-[132px] w-full overflow-hidden rounded-[36px] p-4">
+      <div className="theme-time-tray relative min-h-[142px] w-full overflow-hidden rounded-[38px] p-4">
         <div className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-[var(--theme-primary)] opacity-10 blur-2xl" />
+        <div className="absolute left-4 right-4 top-3 h-px bg-[linear-gradient(90deg,transparent,var(--theme-ring),transparent)] opacity-50" />
         <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_104px] items-center gap-4">
           <div className="min-w-0">
-            <div className="theme-chip inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em]">
-              live pulse
+            <div className="theme-chip inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--theme-primary)] shadow-[0_0_12px_var(--theme-primary)]" />
+              импульс
             </div>
             <div className="mt-3 flex items-end gap-2">
               <span className="text-[42px] font-black leading-none tracking-[-0.07em]">
@@ -180,8 +219,9 @@ function TimeDisplay({
                 {minutes}
               </span>
             </div>
-            <div className="theme-muted-text mt-2 text-[12px] font-bold">
-              часы и минуты, секунды справа
+            <div className="theme-muted-text mt-2 flex gap-5 text-[11px] font-bold uppercase tracking-[0.12em]">
+              <span>часы</span>
+              <span>минуты</span>
             </div>
           </div>
 
@@ -193,10 +233,12 @@ function TimeDisplay({
               } as CSSProperties
             }
           >
-            <div className="theme-glass flex h-full w-full flex-col items-center justify-center rounded-full">
+            <div className="theme-glass relative flex h-full w-full flex-col items-center justify-center rounded-full">
+              <span className="absolute h-5 w-5 rounded-full bg-[var(--theme-primary)] opacity-25 blur-md" />
+              <span className="absolute h-3 w-3 animate-ping rounded-full bg-[var(--theme-primary)] opacity-30" />
               <div className="text-[30px] font-black leading-none">{seconds}</div>
               <div className="theme-muted-text mt-1 text-[10px] font-bold uppercase tracking-[0.14em]">
-                sec
+                сек
               </div>
             </div>
           </div>
@@ -206,10 +248,30 @@ function TimeDisplay({
   }
 
   return (
-    <div className="theme-time-tray flex gap-2 rounded-[33px] px-5 py-4">
-      {units.map((unit) => (
-        <TimeBox key={unit.label} value={unit.value} label={unit.label} />
-      ))}
+    <div className="theme-time-tray relative grid min-h-[136px] w-full grid-cols-[1fr_82px_1fr] items-center overflow-hidden rounded-[38px] px-4 py-5 text-center">
+      <div className="absolute inset-x-8 top-1/2 h-px bg-[var(--theme-ring)] opacity-30" />
+      <div>
+        <div className="text-[34px] font-black leading-none">{hours}</div>
+        <div className="theme-muted-text mt-1 text-[11px] font-bold uppercase tracking-[0.14em]">
+          часов
+        </div>
+      </div>
+      <div className="relative mx-auto h-[94px] w-[58px]">
+        <div className="absolute inset-x-0 top-0 h-[42px] rounded-t-full border-2 border-[var(--theme-ring)] bg-[var(--theme-control-bg)]" />
+        <div className="absolute inset-x-0 bottom-0 h-[42px] rounded-b-full border-2 border-[var(--theme-ring)] bg-[var(--theme-control-bg)]" />
+        <div className="absolute left-1/2 top-[42px] h-2 w-2 -translate-x-1/2 rounded-full bg-[var(--theme-primary)] shadow-[0_0_18px_var(--theme-primary)]" />
+        <div className="absolute left-1/2 top-[50px] h-7 w-px -translate-x-1/2 bg-[linear-gradient(180deg,var(--theme-primary),transparent)]" />
+        <div className="absolute inset-x-4 bottom-4 h-3 rounded-full bg-[var(--theme-primary)] opacity-80" />
+      </div>
+      <div>
+        <div className="text-[34px] font-black leading-none">{seconds}</div>
+        <div className="theme-muted-text mt-1 text-[11px] font-bold uppercase tracking-[0.14em]">
+          секунд
+        </div>
+      </div>
+      <div className="theme-chip absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[11px] font-black">
+        {minutes} минут
+      </div>
     </div>
   );
 }
@@ -305,16 +367,27 @@ export default function MainScreen() {
       </div>
 
       <div className="mt-0 flex justify-center gap-4">
-        <CoupleAvatar
-          name={settings.name1}
-          photoDataUrl={settings.photo1DataUrl}
-          style={settings.avatarDisplayStyle}
-        />
-        <CoupleAvatar
-          name={settings.name2}
-          photoDataUrl={settings.photo2DataUrl}
-          style={settings.avatarDisplayStyle}
-        />
+        {settings.avatarDisplayStyle === "duo-card" ? (
+          <CoupleCameo
+            name1={settings.name1}
+            name2={settings.name2}
+            photo1DataUrl={settings.photo1DataUrl}
+            photo2DataUrl={settings.photo2DataUrl}
+          />
+        ) : (
+          <>
+            <CoupleAvatar
+              name={settings.name1}
+              photoDataUrl={settings.photo1DataUrl}
+              style={settings.avatarDisplayStyle}
+            />
+            <CoupleAvatar
+              name={settings.name2}
+              photoDataUrl={settings.photo2DataUrl}
+              style={settings.avatarDisplayStyle}
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-7">

@@ -76,8 +76,8 @@ const TIME_STYLE_OPTIONS: Array<{
   id: TimeDisplayStyle;
   title: string;
 }> = [
-  { id: "cards", title: "Карточки" },
   { id: "glass", title: "Стекло" },
+  { id: "hourglass", title: "Песок" },
   { id: "orbits", title: "Импульс" },
 ];
 
@@ -205,15 +205,14 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
   }
 
   return (
-    <div className="mx-auto flex justify-center gap-1">
-      {["08", "24", "16"].map((value) => (
-        <span
-          key={value}
-          className="theme-primary-button rounded-[10px] px-2 py-2 text-[10px] font-extrabold"
-        >
-          {value}
-        </span>
-      ))}
+    <div className="theme-glass mx-auto grid h-10 w-full grid-cols-[1fr_24px_1fr] items-center rounded-[18px] px-2 text-center text-[10px] font-black">
+      <span>08</span>
+      <span className="relative mx-auto h-8 w-5">
+        <span className="absolute inset-x-0 top-0 mx-auto h-3.5 w-4 rounded-t-full border border-[var(--theme-ring)]" />
+        <span className="absolute inset-x-0 bottom-0 mx-auto h-3.5 w-4 rounded-b-full border border-[var(--theme-ring)]" />
+        <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--theme-primary)]" />
+      </span>
+      <span>16</span>
     </div>
   );
 }

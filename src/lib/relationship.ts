@@ -10,7 +10,7 @@ export type AppTheme =
   | "ember"
   | "neo"
   | "custom";
-export type TimeDisplayStyle = "cards" | "glass" | "orbits";
+export type TimeDisplayStyle = "hourglass" | "glass" | "orbits";
 export type AvatarDisplayStyle = "classic" | "halo" | "duo-card";
 
 export type CustomThemeSettings = {
@@ -125,7 +125,7 @@ export function getDefaultSettings(): RelationshipSettings {
     startDateISO: "2024-02-09",
     theme: "sun-cycle",
     customTheme: { ...DEFAULT_CUSTOM_THEME },
-    timeDisplayStyle: "cards",
+    timeDisplayStyle: "glass",
     avatarDisplayStyle: "classic",
     photo1DataUrl: undefined,
     photo2DataUrl: undefined,
@@ -266,7 +266,8 @@ function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
 }
 
 function parseTimeDisplayStyle(style: unknown, fallback: TimeDisplayStyle): TimeDisplayStyle {
-  if (style === "cards" || style === "glass" || style === "orbits") return style;
+  if (style === "hourglass" || style === "glass" || style === "orbits") return style;
+  if (style === "cards") return "hourglass";
   return fallback;
 }
 
