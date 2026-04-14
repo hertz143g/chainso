@@ -1,7 +1,9 @@
 // src/lib/relationship.ts
 export type WidgetType = "event" | "memory" | "track";
 export type WidgetColorMode = "solid" | "adaptive";
-export type AppTheme = "sun-cycle" | "kitty" | "aquarium" | "pearl";
+export type AppTheme = "sun-cycle" | "linen" | "sage" | "aurora";
+export type TimeDisplayStyle = "cards" | "glass" | "orbits";
+export type AvatarDisplayStyle = "classic" | "halo" | "duo-card";
 
 export type BaseWidget = {
   id: string;
@@ -45,6 +47,8 @@ export type RelationshipSettings = {
   name2: string;
   startDateISO: string; // "2024-02-09"
   theme: AppTheme;
+  timeDisplayStyle: TimeDisplayStyle;
+  avatarDisplayStyle: AvatarDisplayStyle;
   photo1DataUrl?: string;
   photo2DataUrl?: string;
   widgets: RelationshipWidget[];
@@ -97,6 +101,8 @@ export function getDefaultSettings(): RelationshipSettings {
     name2: "Ксения",
     startDateISO: "2024-02-09",
     theme: "sun-cycle",
+    timeDisplayStyle: "cards",
+    avatarDisplayStyle: "classic",
     photo1DataUrl: undefined,
     photo2DataUrl: undefined,
     widgets: createDefaultWidgets(),
@@ -216,9 +222,22 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
 }
 
 function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
-  if (theme === "kitty" || theme === "aquarium" || theme === "sun-cycle" || theme === "pearl") {
+  if (theme === "sun-cycle" || theme === "linen" || theme === "sage" || theme === "aurora") {
     return theme;
   }
+  if (theme === "kitty") return "linen";
+  if (theme === "aquarium") return "sage";
+  if (theme === "pearl") return "aurora";
+  return fallback;
+}
+
+function parseTimeDisplayStyle(style: unknown, fallback: TimeDisplayStyle): TimeDisplayStyle {
+  if (style === "cards" || style === "glass" || style === "orbits") return style;
+  return fallback;
+}
+
+function parseAvatarDisplayStyle(style: unknown, fallback: AvatarDisplayStyle): AvatarDisplayStyle {
+  if (style === "classic" || style === "halo" || style === "duo-card") return style;
   return fallback;
 }
 
@@ -248,6 +267,11 @@ function normalizeSettings(
         ? parsed.startDateISO
         : fallback.startDateISO,
     theme: parseTheme(parsed.theme, fallback.theme),
+    timeDisplayStyle: parseTimeDisplayStyle(parsed.timeDisplayStyle, fallback.timeDisplayStyle),
+    avatarDisplayStyle: parseAvatarDisplayStyle(
+      parsed.avatarDisplayStyle,
+      fallback.avatarDisplayStyle,
+    ),
     photo1DataUrl:
       typeof parsed.photo1DataUrl === "string" ? parsed.photo1DataUrl : undefined,
     photo2DataUrl:

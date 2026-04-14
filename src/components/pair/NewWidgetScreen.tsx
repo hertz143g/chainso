@@ -188,13 +188,58 @@ function buildWidgetFromDraft(
   return widget;
 }
 
+function WidgetTypeSketch({ type }: { type: WidgetType }) {
+  if (type === "memory") {
+    return (
+      <div className="theme-widget-card grid min-h-[92px] grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 overflow-hidden rounded-[22px] border p-2">
+        <div className="theme-photo-frame aspect-square rounded-[18px] border p-1">
+          <div className="theme-photo-inner h-full rounded-[14px]" />
+        </div>
+        <div className="flex min-w-0 flex-col justify-center">
+          <div className="theme-chip h-4 w-14 rounded-full" />
+          <div className="mt-3 h-3 w-full rounded-full bg-[var(--theme-text)] opacity-70" />
+          <div className="mt-2 h-2.5 w-3/4 rounded-full bg-[var(--theme-text-muted)] opacity-70" />
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "track") {
+    return (
+      <div className="theme-widget-card grid min-h-[82px] grid-cols-[64px_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-[22px] border p-2.5">
+        <div className="theme-photo-frame aspect-square rounded-[18px] border" />
+        <div className="min-w-0">
+          <div className="theme-chip h-4 w-16 rounded-full" />
+          <div className="mt-3 h-3 w-full rounded-full bg-[var(--theme-text)] opacity-70" />
+          <div className="mt-2 h-2.5 w-2/3 rounded-full bg-[var(--theme-text-muted)] opacity-70" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="theme-widget-card flex min-h-[98px] flex-col justify-between overflow-hidden rounded-[22px] border p-2.5">
+      <div className="flex justify-between">
+        <div className="theme-chip h-4 w-16 rounded-full" />
+        <div className="theme-chip h-4 w-14 rounded-full" />
+      </div>
+      <div className="theme-glass rounded-[18px] p-2">
+        <div className="h-3 w-4/5 rounded-full bg-[var(--theme-text)] opacity-70" />
+        <div className="mt-2 h-2.5 w-2/3 rounded-full bg-[var(--theme-text-muted)] opacity-70" />
+      </div>
+    </div>
+  );
+}
+
 function WidgetTypeCard({
+  type,
   title,
   caption,
   selected,
   className,
   onClick,
 }: {
+  type: WidgetType;
   title: string;
   caption: string;
   selected: boolean;
@@ -209,10 +254,11 @@ function WidgetTypeCard({
         selected ? "theme-option-card-selected" : ""
       } ${className}`}
     >
-      <div className="flex h-full flex-col justify-between">
+      <div className="mb-3">
         <div className="text-[15px] font-bold">{title}</div>
-        <div className="theme-subtle-text text-[12px]">{caption}</div>
+        <div className="theme-subtle-text mt-0.5 text-[12px]">{caption}</div>
       </div>
+      <WidgetTypeSketch type={type} />
     </button>
   );
 }
@@ -484,26 +530,29 @@ export default function NewWidgetScreen() {
             Тип виджета:
           </div>
 
-          <div className="mt-5 grid grid-cols-[1.65fr_1fr] gap-4">
+          <div className="mt-5 space-y-3">
             <WidgetTypeCard
+              type="event"
               title="Событие"
               caption="Большая карточка с датой"
               selected={current.type === "event"}
-              className="min-h-[170px]"
+              className="w-full"
               onClick={() => selectType("event")}
             />
             <WidgetTypeCard
+              type="memory"
               title="Момент"
-              caption="Фото как главный акцент"
+              caption="Квадратное фото слева, подпись справа"
               selected={current.type === "memory"}
-              className="min-h-[104px]"
+              className="w-full"
               onClick={() => selectType("memory")}
             />
             <WidgetTypeCard
+              type="track"
               title="Трек"
               caption="Широкая музыкальная карточка"
               selected={current.type === "track"}
-              className="col-span-2 min-h-[112px]"
+              className="w-full"
               onClick={() => selectType("track")}
             />
           </div>

@@ -14,19 +14,19 @@ function getSunPhase(date = new Date()): SunPhase {
   return "night";
 }
 
-function AquariumBubbles() {
+function FloatingDots() {
   return (
-    <div className="theme-aquarium-bubbles">
-      {Array.from({ length: 11 }).map((_, index) => (
+    <div className="theme-floating-dots">
+      {Array.from({ length: 9 }).map((_, index) => (
         <span
           key={index}
           style={
             {
               "--bubble-index": index,
-              "--bubble-left": `${8 + index * 8}%`,
-              "--bubble-size": `${10 + (index % 4) * 5}px`,
-              "--bubble-duration": `${8 + index * 0.9}s`,
-              "--bubble-delay": `${index * -0.85}s`,
+              "--bubble-left": `${10 + index * 9}%`,
+              "--bubble-size": `${9 + (index % 3) * 5}px`,
+              "--bubble-duration": `${9 + index * 0.75}s`,
+              "--bubble-delay": `${index * -0.7}s`,
             } as CSSProperties
           }
         />
@@ -36,34 +36,34 @@ function AquariumBubbles() {
 }
 
 function ThemeAtmosphere({ theme }: { theme: string }) {
-  if (theme === "kitty") {
+  if (theme === "linen") {
     return (
-      <div className="theme-ornaments theme-ornaments-kitty" aria-hidden="true">
-        <span className="theme-blob kitty-blob-a" />
-        <span className="theme-blob kitty-blob-b" />
-        <span className="theme-sheen kitty-sheen" />
+      <div className="theme-ornaments theme-ornaments-linen" aria-hidden="true">
+        <span className="theme-blob linen-blob-a" />
+        <span className="theme-blob linen-blob-b" />
+        <span className="theme-sheen linen-sheen" />
       </div>
     );
   }
 
-  if (theme === "aquarium") {
+  if (theme === "sage") {
     return (
-      <div className="theme-ornaments theme-ornaments-aquarium" aria-hidden="true">
-        <span className="theme-blob aquarium-liquid aquarium-liquid-a" />
-        <span className="theme-blob aquarium-liquid aquarium-liquid-b" />
-        <span className="theme-sheen aquarium-sheen" />
-        <AquariumBubbles />
+      <div className="theme-ornaments theme-ornaments-sage" aria-hidden="true">
+        <span className="theme-blob sage-blob-a" />
+        <span className="theme-blob sage-blob-b" />
+        <span className="theme-sheen sage-sheen" />
       </div>
     );
   }
 
-  if (theme === "pearl") {
+  if (theme === "aurora") {
     return (
-      <div className="theme-ornaments theme-ornaments-pearl" aria-hidden="true">
-        <span className="theme-blob pearl-blob-a" />
-        <span className="theme-blob pearl-blob-b" />
-        <span className="theme-blob pearl-blob-c" />
-        <span className="theme-sheen pearl-sheen" />
+      <div className="theme-ornaments theme-ornaments-aurora" aria-hidden="true">
+        <span className="theme-blob aurora-blob-a" />
+        <span className="theme-blob aurora-blob-b" />
+        <span className="theme-blob aurora-blob-c" />
+        <span className="theme-sheen aurora-sheen" />
+        <FloatingDots />
       </div>
     );
   }

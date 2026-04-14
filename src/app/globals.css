@@ -113,114 +113,112 @@ body {
     linear-gradient(180deg, #050816 0%, #0e1b3d 62%, #24395f 100%);
 }
 
-.app-theme-kitty {
-  --theme-surface: rgba(112, 45, 86, 0.5);
-  --theme-surface-soft: rgba(255, 255, 255, 0.2);
-  --theme-widget-bg: rgba(104, 41, 82, 0.58);
-  --theme-widget-border: rgba(255, 255, 255, 0.32);
-  --theme-chip-bg: rgba(84, 28, 65, 0.28);
-  --theme-glass-bg: rgba(94, 30, 72, 0.34);
-  --theme-photo-frame: rgba(255, 255, 255, 0.2);
-  --theme-photo-inner: rgba(90, 34, 70, 0.18);
-  --theme-control-bg: rgba(255, 255, 255, 0.18);
-  --theme-control-active-bg: rgba(243, 95, 159, 0.22);
-  --theme-control-border: rgba(255, 255, 255, 0.34);
-  --theme-control-active-border: rgba(255, 235, 245, 0.88);
-  --theme-progress-track: rgba(255, 250, 253, 0.84);
-  --theme-dashed-border: rgba(255, 255, 255, 0.48);
-  --theme-dashed-bg: rgba(255, 255, 255, 0.14);
-  --theme-avatar-bg: rgba(255, 246, 251, 0.88);
-  --theme-image-overlay-soft: rgba(64, 22, 49, 0.08);
-  --theme-image-overlay-mid: rgba(64, 22, 49, 0.18);
-  --theme-image-overlay-strong: rgba(64, 22, 49, 0.62);
-  --theme-text: #fff9fc;
-  --theme-text-muted: rgba(255, 247, 252, 0.72);
-  --theme-primary: #f35f9f;
-  --theme-on-primary: #ffffff;
-  --theme-ring: #ffe1ef;
-  --theme-input-bg: rgba(255, 248, 252, 0.96);
-  --theme-input-text: #441631;
-  --theme-card-border: rgba(255, 255, 255, 0.28);
-  --theme-shadow: rgba(92, 22, 58, 0.2);
+.app-theme-linen {
+  --theme-surface: rgba(255, 250, 239, 0.72);
+  --theme-surface-soft: rgba(255, 255, 255, 0.38);
+  --theme-widget-bg: rgba(255, 247, 231, 0.82);
+  --theme-widget-border: rgba(98, 68, 44, 0.16);
+  --theme-chip-bg: rgba(255, 255, 255, 0.52);
+  --theme-glass-bg: rgba(255, 252, 244, 0.62);
+  --theme-photo-frame: rgba(255, 255, 255, 0.7);
+  --theme-photo-inner: rgba(112, 83, 56, 0.08);
+  --theme-control-bg: rgba(255, 255, 255, 0.48);
+  --theme-control-active-bg: rgba(221, 143, 91, 0.18);
+  --theme-control-border: rgba(110, 76, 49, 0.18);
+  --theme-control-active-border: rgba(173, 103, 59, 0.44);
+  --theme-progress-track: rgba(255, 255, 255, 0.72);
+  --theme-dashed-border: rgba(133, 94, 62, 0.28);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.32);
+  --theme-avatar-bg: rgba(255, 252, 246, 0.9);
+  --theme-image-overlay-soft: rgba(58, 41, 28, 0.04);
+  --theme-image-overlay-mid: rgba(58, 41, 28, 0.12);
+  --theme-image-overlay-strong: rgba(58, 41, 28, 0.46);
+  --theme-text: #33261d;
+  --theme-text-muted: rgba(51, 38, 29, 0.64);
+  --theme-primary: #c97945;
+  --theme-on-primary: #fffaf4;
+  --theme-ring: #b86e42;
+  --theme-input-bg: rgba(255, 253, 248, 0.96);
+  --theme-input-text: #33261d;
+  --theme-card-border: rgba(110, 76, 49, 0.14);
+  --theme-shadow: rgba(103, 63, 24, 0.14);
   background:
-    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.62), transparent min(34vw, 190px)),
-    radial-gradient(circle at 82% 14%, rgba(255, 142, 194, 0.38), transparent min(46vw, 250px)),
-    radial-gradient(circle at 20% 82%, rgba(255, 222, 239, 0.34), transparent min(56vw, 300px)),
-    linear-gradient(180deg, #de77a5 0%, #f1a9c8 48%, #f6d9e5 100%);
+    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.86), transparent min(40vw, 220px)),
+    radial-gradient(circle at 84% 18%, rgba(255, 193, 139, 0.32), transparent min(46vw, 260px)),
+    radial-gradient(circle at 18% 82%, rgba(220, 238, 205, 0.28), transparent min(56vw, 310px)),
+    linear-gradient(180deg, #f5dfc5 0%, #f8ead8 48%, #d9e5cf 100%);
 }
 
-.app-theme-aquarium {
-  --theme-surface: rgba(6, 55, 76, 0.54);
-  --theme-surface-soft: rgba(255, 255, 255, 0.13);
-  --theme-widget-bg: rgba(5, 47, 70, 0.6);
-  --theme-widget-border: rgba(194, 250, 255, 0.26);
-  --theme-chip-bg: rgba(3, 34, 54, 0.3);
-  --theme-glass-bg: rgba(5, 40, 58, 0.36);
-  --theme-photo-frame: rgba(234, 255, 255, 0.18);
-  --theme-photo-inner: rgba(2, 34, 52, 0.18);
-  --theme-control-bg: rgba(255, 255, 255, 0.12);
-  --theme-control-active-bg: rgba(53, 201, 234, 0.2);
-  --theme-control-border: rgba(194, 250, 255, 0.26);
-  --theme-control-active-border: rgba(184, 245, 255, 0.82);
-  --theme-progress-track: rgba(233, 254, 255, 0.82);
-  --theme-dashed-border: rgba(190, 250, 255, 0.44);
-  --theme-dashed-bg: rgba(255, 255, 255, 0.08);
-  --theme-avatar-bg: rgba(230, 253, 255, 0.82);
-  --theme-image-overlay-soft: rgba(3, 28, 42, 0.08);
-  --theme-image-overlay-mid: rgba(3, 28, 42, 0.18);
-  --theme-image-overlay-strong: rgba(3, 28, 42, 0.66);
-  --theme-text: #f2feff;
-  --theme-text-muted: rgba(231, 253, 255, 0.72);
-  --theme-primary: #35c9ea;
-  --theme-on-primary: #052133;
-  --theme-ring: #b8f5ff;
-  --theme-input-bg: rgba(235, 253, 255, 0.94);
-  --theme-input-text: #073244;
-  --theme-card-border: rgba(187, 246, 255, 0.26);
-  --theme-shadow: rgba(0, 24, 42, 0.28);
+.app-theme-sage {
+  --theme-surface: rgba(245, 250, 236, 0.72);
+  --theme-surface-soft: rgba(255, 255, 255, 0.32);
+  --theme-widget-bg: rgba(247, 251, 239, 0.78);
+  --theme-widget-border: rgba(66, 95, 72, 0.16);
+  --theme-chip-bg: rgba(255, 255, 255, 0.5);
+  --theme-glass-bg: rgba(255, 255, 248, 0.58);
+  --theme-photo-frame: rgba(255, 255, 255, 0.62);
+  --theme-photo-inner: rgba(71, 96, 70, 0.08);
+  --theme-control-bg: rgba(255, 255, 255, 0.42);
+  --theme-control-active-bg: rgba(99, 143, 102, 0.18);
+  --theme-control-border: rgba(66, 95, 72, 0.18);
+  --theme-control-active-border: rgba(83, 124, 86, 0.42);
+  --theme-progress-track: rgba(255, 255, 255, 0.72);
+  --theme-dashed-border: rgba(78, 111, 82, 0.3);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.28);
+  --theme-avatar-bg: rgba(252, 255, 247, 0.9);
+  --theme-image-overlay-soft: rgba(28, 53, 35, 0.04);
+  --theme-image-overlay-mid: rgba(28, 53, 35, 0.13);
+  --theme-image-overlay-strong: rgba(28, 53, 35, 0.48);
+  --theme-text: #223126;
+  --theme-text-muted: rgba(34, 49, 38, 0.62);
+  --theme-primary: #638f66;
+  --theme-on-primary: #fafff6;
+  --theme-ring: #557d58;
+  --theme-input-bg: rgba(253, 255, 249, 0.96);
+  --theme-input-text: #223126;
+  --theme-card-border: rgba(66, 95, 72, 0.14);
+  --theme-shadow: rgba(44, 72, 48, 0.14);
   background:
-    radial-gradient(circle at 18% 10%, rgba(179, 255, 248, 0.24), transparent min(40vw, 220px)),
-    radial-gradient(circle at 88% 24%, rgba(69, 189, 255, 0.26), transparent min(54vw, 300px)),
-    radial-gradient(circle at 42% 84%, rgba(119, 243, 219, 0.16), transparent min(62vw, 340px)),
-    linear-gradient(180deg, #052135 0%, #075170 54%, #041d31 100%);
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, 0.72), transparent min(42vw, 230px)),
+    radial-gradient(circle at 88% 20%, rgba(180, 217, 159, 0.34), transparent min(52vw, 290px)),
+    radial-gradient(circle at 42% 86%, rgba(242, 204, 141, 0.22), transparent min(60vw, 330px)),
+    linear-gradient(180deg, #dbe8ce 0%, #f3edd6 52%, #bed7c0 100%);
 }
 
-.app-theme-pearl {
-  --theme-surface: rgba(10, 13, 21, 0.72);
-  --theme-surface-soft: rgba(255, 255, 255, 0.11);
-  --theme-widget-bg: rgba(12, 15, 24, 0.78);
-  --theme-widget-border: rgba(235, 240, 255, 0.18);
-  --theme-chip-bg: rgba(225, 235, 255, 0.12);
-  --theme-glass-bg: rgba(16, 20, 32, 0.56);
-  --theme-photo-frame: rgba(235, 240, 255, 0.16);
-  --theme-photo-inner: rgba(255, 255, 255, 0.08);
-  --theme-control-bg: rgba(245, 248, 255, 0.1);
-  --theme-control-active-bg: rgba(202, 224, 255, 0.18);
-  --theme-control-border: rgba(235, 240, 255, 0.2);
-  --theme-control-active-border: rgba(235, 231, 255, 0.72);
-  --theme-progress-track: rgba(236, 240, 255, 0.76);
-  --theme-dashed-border: rgba(235, 240, 255, 0.36);
-  --theme-dashed-bg: rgba(255, 255, 255, 0.06);
-  --theme-avatar-bg: rgba(235, 240, 255, 0.86);
-  --theme-overlay-bg: rgba(1, 3, 8, 0.56);
-  --theme-image-overlay-soft: rgba(1, 3, 8, 0.1);
-  --theme-image-overlay-mid: rgba(1, 3, 8, 0.28);
-  --theme-image-overlay-strong: rgba(1, 3, 8, 0.72);
-  --theme-text: #f8fbff;
-  --theme-text-muted: rgba(234, 240, 255, 0.72);
-  --theme-primary: #d7dfff;
-  --theme-on-primary: #07111f;
-  --theme-ring: #f3eaff;
-  --theme-input-bg: rgba(246, 248, 255, 0.94);
-  --theme-input-text: #0a0f1c;
-  --theme-card-border: rgba(236, 241, 255, 0.18);
-  --theme-shadow: rgba(0, 0, 0, 0.34);
+.app-theme-aurora {
+  --theme-surface: rgba(244, 249, 255, 0.7);
+  --theme-surface-soft: rgba(255, 255, 255, 0.36);
+  --theme-widget-bg: rgba(248, 251, 255, 0.78);
+  --theme-widget-border: rgba(74, 97, 139, 0.16);
+  --theme-chip-bg: rgba(255, 255, 255, 0.5);
+  --theme-glass-bg: rgba(255, 255, 255, 0.58);
+  --theme-photo-frame: rgba(255, 255, 255, 0.66);
+  --theme-photo-inner: rgba(74, 97, 139, 0.08);
+  --theme-control-bg: rgba(255, 255, 255, 0.42);
+  --theme-control-active-bg: rgba(104, 143, 211, 0.18);
+  --theme-control-border: rgba(74, 97, 139, 0.18);
+  --theme-control-active-border: rgba(115, 142, 204, 0.42);
+  --theme-progress-track: rgba(255, 255, 255, 0.76);
+  --theme-dashed-border: rgba(78, 99, 150, 0.3);
+  --theme-dashed-bg: rgba(255, 255, 255, 0.3);
+  --theme-avatar-bg: rgba(251, 253, 255, 0.9);
+  --theme-image-overlay-soft: rgba(31, 45, 78, 0.04);
+  --theme-image-overlay-mid: rgba(31, 45, 78, 0.14);
+  --theme-image-overlay-strong: rgba(31, 45, 78, 0.5);
+  --theme-text: #1f2b45;
+  --theme-text-muted: rgba(31, 43, 69, 0.62);
+  --theme-primary: #6d89d8;
+  --theme-on-primary: #fbfcff;
+  --theme-ring: #7b75cb;
+  --theme-input-bg: rgba(252, 253, 255, 0.96);
+  --theme-input-text: #1f2b45;
+  --theme-card-border: rgba(74, 97, 139, 0.14);
+  --theme-shadow: rgba(46, 61, 96, 0.14);
   background:
-    radial-gradient(circle at 18% 8%, rgba(235, 231, 255, 0.24), transparent min(42vw, 230px)),
-    radial-gradient(circle at 86% 18%, rgba(154, 215, 255, 0.16), transparent min(48vw, 260px)),
-    radial-gradient(circle at 22% 86%, rgba(255, 214, 238, 0.12), transparent min(56vw, 300px)),
-    conic-gradient(from 210deg at 64% 26%, rgba(255, 255, 255, 0.12), rgba(154, 215, 255, 0.04), rgba(255, 214, 238, 0.1), rgba(255, 255, 255, 0.03)),
-    linear-gradient(180deg, #05070d 0%, #111827 52%, #070b13 100%);
+    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, 0.78), transparent min(42vw, 230px)),
+    radial-gradient(circle at 86% 18%, rgba(134, 217, 226, 0.32), transparent min(48vw, 270px)),
+    radial-gradient(circle at 22% 86%, rgba(207, 180, 255, 0.34), transparent min(58vw, 320px)),
+    linear-gradient(180deg, #dfeeff 0%, #f2f1ff 50%, #d4f0ea 100%);
 }
 
 .theme-ornaments {
@@ -279,93 +277,91 @@ body {
   background: #ff8a65;
 }
 
-.kitty-blob-a {
+.linen-blob-a {
   right: -100px;
   top: 84px;
   width: min(78vw, 330px);
   height: min(78vw, 330px);
-  background: #ffb6d6;
+  background: #ffc18b;
+  opacity: 0.28;
 }
 
-.kitty-blob-b {
+.linen-blob-b {
   left: -110px;
   bottom: -70px;
   width: min(84vw, 360px);
   height: min(84vw, 360px);
-  background: #fff1f7;
-  opacity: 0.28;
+  background: #dceecd;
+  opacity: 0.26;
 }
 
-.kitty-sheen {
+.linen-sheen {
   left: -30vw;
   top: 30vh;
+  opacity: 0.22;
 }
 
-.aquarium-liquid {
-  background: rgba(205, 255, 252, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: inset 0 1px 28px rgba(255, 255, 255, 0.28);
-  filter: blur(18px);
-}
-
-.aquarium-liquid-a {
+.sage-blob-a {
   top: 88px;
   left: -80px;
   width: 260px;
   height: 180px;
-  animation: aquarium-drift 12s ease-in-out infinite alternate;
+  background: #b4d99f;
+  animation: gentle-drift 12s ease-in-out infinite alternate;
 }
 
-.aquarium-liquid-b {
+.sage-blob-b {
   right: -96px;
   bottom: 150px;
   width: 300px;
   height: 210px;
-  animation: aquarium-drift 15s ease-in-out infinite alternate-reverse;
+  background: #f2cc8d;
+  opacity: 0.24;
+  animation: gentle-drift 15s ease-in-out infinite alternate-reverse;
 }
 
-.aquarium-sheen {
+.sage-sheen {
   left: -18vw;
   top: 22vh;
-  opacity: 0.24;
+  opacity: 0.2;
 }
 
-.pearl-blob-a {
+.aurora-blob-a {
   left: -90px;
   top: 52px;
   width: min(68vw, 290px);
   height: min(68vw, 290px);
-  background: #e8e1ff;
-  opacity: 0.22;
+  background: #c9b7ff;
+  opacity: 0.24;
 }
 
-.pearl-blob-b {
+.aurora-blob-b {
   right: -120px;
   top: 180px;
   width: min(78vw, 340px);
   height: min(78vw, 340px);
-  background: #9ad7ff;
-  opacity: 0.2;
+  background: #86d9e2;
+  opacity: 0.26;
 }
 
-.pearl-blob-c {
+.aurora-blob-c {
   left: 18%;
   bottom: -120px;
   width: min(86vw, 380px);
   height: min(86vw, 380px);
-  background: #ffd6ee;
-  opacity: 0.14;
+  background: #fff0b9;
+  opacity: 0.16;
 }
 
-.pearl-sheen {
+.aurora-sheen {
   left: -36vw;
   top: 18vh;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), rgba(159, 215, 255, 0.12), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), rgba(134, 217, 226, 0.16), transparent);
   opacity: 0.26;
-  animation: pearl-sheen-drift 11s ease-in-out infinite alternate;
+  animation: aurora-sheen-drift 11s ease-in-out infinite alternate;
 }
 
-.theme-aquarium-bubbles span {
+.theme-floating-dots span {
   --bubble-index: 0;
   --bubble-left: 10%;
   --bubble-size: 14px;
@@ -398,7 +394,7 @@ body {
   }
 }
 
-@keyframes aquarium-drift {
+@keyframes gentle-drift {
   from {
     transform: translate3d(0, 0, 0) rotate(-4deg);
   }
@@ -407,7 +403,7 @@ body {
   }
 }
 
-@keyframes pearl-sheen-drift {
+@keyframes aurora-sheen-drift {
   from {
     transform: translate3d(-10vw, 0, 0) rotate(-12deg);
   }
@@ -569,10 +565,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aquarium-liquid-a,
-  .aquarium-liquid-b,
-  .pearl-sheen,
-  .theme-aquarium-bubbles span {
+  .aurora-sheen,
+  .sage-blob-a,
+  .sage-blob-b,
+  .theme-floating-dots span {
     animation: none;
   }
 }

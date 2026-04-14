@@ -13,10 +13,16 @@ import {
   format2,
   formatTogether,
   getGoalProgress,
+  type AvatarDisplayStyle,
   type RelationshipWidget,
+  type TimeDisplayStyle,
   updateSettings,
 } from "@/lib/relationship";
 import TimeBox from "../ui/TimeBox";
+
+function cx(...classes: Array<string | false | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 function WidgetActions({
   widgetId,
@@ -60,6 +66,113 @@ function WidgetCard({
       widget={relationshipWidgetToVisualData(widget)}
       actions={isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null}
     />
+  );
+}
+
+function CoupleAvatar({
+  name,
+  photoDataUrl,
+  style,
+}: {
+  name: string;
+  photoDataUrl?: string;
+  style: AvatarDisplayStyle;
+}) {
+  const image = photoDataUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={photoDataUrl} alt={name} className="h-full w-full object-cover" />
+  ) : null;
+
+  if (style === "duo-card") {
+    return (
+      <div className="theme-glass flex w-[156px] flex-col items-center rounded-[38px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+        <div className="theme-avatar-ring theme-avatar-surface h-[138px] w-full overflow-hidden rounded-[32px] ring-2">
+          {image}
+        </div>
+        <div className="mt-2 text-[17px] font-bold leading-tight">{name}</div>
+      </div>
+    );
+  }
+
+  if (style === "halo") {
+    return (
+      <div className="flex w-[156px] flex-col items-center">
+        <div className="relative h-[156px] w-[156px] rounded-full">
+          <div className="absolute inset-[-8px] rounded-full bg-[radial-gradient(circle,var(--theme-ring),transparent_62%)] opacity-35 blur-md" />
+          <div className="theme-avatar-ring theme-avatar-surface relative h-full w-full overflow-hidden rounded-full ring-[4px] shadow-[0_18px_52px_var(--theme-shadow)]">
+            {image}
+          </div>
+        </div>
+        <div className="mt-3 text-[18px] font-semibold">{name}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-[156px] flex-col items-center">
+      <div className="theme-avatar-ring theme-avatar-surface h-[156px] w-[156px] overflow-hidden rounded-full ring-[3px]">
+        {image}
+      </div>
+      <div className="mt-3 text-[18px] font-semibold">{name}</div>
+    </div>
+  );
+}
+
+function TimeDisplay({
+  style,
+  hours,
+  minutes,
+  seconds,
+}: {
+  style: TimeDisplayStyle;
+  hours: string;
+  minutes: string;
+  seconds: string;
+}) {
+  const units = [
+    { value: hours, label: "часов" },
+    { value: minutes, label: "минут" },
+    { value: seconds, label: "секунд" },
+  ];
+
+  if (style === "glass") {
+    return (
+      <div className="theme-time-tray grid w-full grid-cols-3 rounded-[30px] px-4 py-4 text-center">
+        {units.map((unit, index) => (
+          <div
+            key={unit.label}
+            className={cx(index > 0 && "border-l border-[var(--theme-card-border)]")}
+          >
+            <div className="text-[30px] font-extrabold leading-none">{unit.value}</div>
+            <div className="theme-muted-text mt-1 text-[12px] font-semibold">{unit.label}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (style === "orbits") {
+    return (
+      <div className="flex w-full justify-center gap-2">
+        {units.map((unit) => (
+          <div
+            key={unit.label}
+            className="theme-primary-button flex h-[92px] w-[92px] flex-col items-center justify-center rounded-full text-center shadow-[0_16px_42px_var(--theme-shadow)] ring-4 ring-[var(--theme-control-bg)]"
+          >
+            <div className="text-[27px] font-extrabold leading-none">{unit.value}</div>
+            <div className="mt-1 text-[11px] font-bold opacity-90">{unit.label}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="theme-time-tray flex gap-2 rounded-[33px] px-5 py-4">
+      {units.map((unit) => (
+        <TimeBox key={unit.label} value={unit.value} label={unit.label} />
+      ))}
+    </div>
   );
 }
 
@@ -153,34 +266,17 @@ export default function MainScreen() {
         </div>
       </div>
 
-      <div className="mt-0 flex justify-center gap-6">
-        <div className="flex flex-col items-center">
-          <div className="theme-avatar-ring theme-avatar-surface h-[150px] w-[150px] overflow-hidden rounded-full ring-[3px]">
-            {settings.photo1DataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={settings.photo1DataUrl}
-                alt={settings.name1}
-                className="h-full w-full object-cover"
-              />
-            ) : null}
-          </div>
-          <div className="mt-3 text-[18px] font-semibold">{settings.name1}</div>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <div className="theme-avatar-ring theme-avatar-surface h-[150px] w-[150px] overflow-hidden rounded-full ring-[3px]">
-            {settings.photo2DataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={settings.photo2DataUrl}
-                alt={settings.name2}
-                className="h-full w-full object-cover"
-              />
-            ) : null}
-          </div>
-          <div className="mt-3 text-[18px] font-semibold">{settings.name2}</div>
-        </div>
+      <div className="mt-0 flex justify-center gap-4">
+        <CoupleAvatar
+          name={settings.name1}
+          photoDataUrl={settings.photo1DataUrl}
+          style={settings.avatarDisplayStyle}
+        />
+        <CoupleAvatar
+          name={settings.name2}
+          photoDataUrl={settings.photo2DataUrl}
+          style={settings.avatarDisplayStyle}
+        />
       </div>
 
       <div className="mt-7">
@@ -209,11 +305,12 @@ export default function MainScreen() {
       </div>
 
       <div className="mt-4 flex justify-center">
-        <div className="theme-time-tray flex gap-2 rounded-[33px] px-5 py-4">
-          <TimeBox value={format2(diff.hours)} label="часов" />
-          <TimeBox value={format2(diff.minutes)} label="минут" />
-          <TimeBox value={format2(diff.seconds)} label="секунд" />
-        </div>
+        <TimeDisplay
+          style={settings.timeDisplayStyle}
+          hours={format2(diff.hours)}
+          minutes={format2(diff.minutes)}
+          seconds={format2(diff.seconds)}
+        />
       </div>
 
       <div className="mt-7 flex items-center justify-between">

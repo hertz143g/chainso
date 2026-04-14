@@ -7,7 +7,9 @@ import { useRef, useState } from "react";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   type AppTheme,
+  type AvatarDisplayStyle,
   type RelationshipSettings,
+  type TimeDisplayStyle,
   updateSettings,
 } from "@/lib/relationship";
 import { prepareImageForStorage } from "@/lib/widgetAppearance";
@@ -19,50 +21,68 @@ const THEME_OPTIONS: Array<{
 }> = [
   {
     id: "sun-cycle",
-    title: "От рассвета до заката",
+    title: "От заката до рассвета",
     description: "Живая версия текущей темы: фон меняется утром, днем, на закате и ночью.",
   },
   {
-    id: "kitty",
-    title: "Нежная розовая",
-    description: "Мягкая девичья тема: розовый, молочные стеклянные панели и спокойный контраст.",
+    id: "linen",
+    title: "Теплый лен",
+    description: "Светлая спокойная тема: кремовый фон, мягкие карточки и теплые акценты.",
   },
   {
-    id: "aquarium",
-    title: "Аквариум",
-    description: "Liquid glass, водные блики и пузырьки без визуального шума вокруг контента.",
+    id: "sage",
+    title: "Тихий сад",
+    description: "Природная тема с шалфеем, молочными панелями и очень мягким контрастом.",
   },
   {
-    id: "pearl",
-    title: "Темный перламутр",
-    description: "Глубокая темная тема с жемчужными бликами, мягким стеклом и дорогим контрастом.",
+    id: "aurora",
+    title: "Воздушная аврора",
+    description: "Свежая светлая тема: голубой, лавандовый и чистые стеклянные поверхности.",
   },
 ];
 
+const TIME_STYLE_OPTIONS: Array<{
+  id: TimeDisplayStyle;
+  title: string;
+}> = [
+  { id: "cards", title: "Карточки" },
+  { id: "glass", title: "Стекло" },
+  { id: "orbits", title: "Орбиты" },
+];
+
+const AVATAR_STYLE_OPTIONS: Array<{
+  id: AvatarDisplayStyle;
+  title: string;
+}> = [
+  { id: "classic", title: "Круги" },
+  { id: "halo", title: "Свечение" },
+  { id: "duo-card", title: "Дуо" },
+];
+
 function ThemePreviewDots({ theme }: { theme: AppTheme }) {
-  if (theme === "pearl") {
+  if (theme === "aurora") {
     return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#05070d,#273244,#e8e1ff)]">
-        <span className="absolute left-2 top-2 h-5 w-8 rounded-full bg-white/45 blur-[6px]" />
-        <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#9ad7ff]/70 blur-[2px]" />
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#dfeeff,#f2f1ff,#d4f0ea)]">
+        <span className="absolute left-2 top-2 h-5 w-8 rounded-full bg-white/70 blur-[5px]" />
+        <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#86d9e2]/80 blur-[2px]" />
       </div>
     );
   }
 
-  if (theme === "kitty") {
+  if (theme === "linen") {
     return (
-      <div className="flex h-10 w-16 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,#d96f9d,#f6bfd6,#fff2f8)]">
-        <span className="h-5 w-5 rounded-full bg-white/70" />
-        <span className="-ml-1 h-4 w-4 rounded-full bg-[#f35f9f]/70" />
+      <div className="flex h-10 w-16 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,#f5dfc5,#f8ead8,#d9e5cf)]">
+        <span className="h-5 w-5 rounded-full bg-white/75" />
+        <span className="-ml-1 h-4 w-4 rounded-full bg-[#c97945]/65" />
       </div>
     );
   }
 
-  if (theme === "aquarium") {
+  if (theme === "sage") {
     return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#06324a,#0a7894,#bdfbff)]">
-        <span className="absolute left-3 top-2 h-4 w-4 rounded-full border border-white/70 bg-white/12" />
-        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full border border-white/60 bg-white/10" />
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#dbe8ce,#f3edd6,#bed7c0)]">
+        <span className="absolute left-3 top-2 h-4 w-4 rounded-full bg-white/65" />
+        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full bg-[#638f66]/70" />
       </div>
     );
   }
@@ -70,6 +90,73 @@ function ThemePreviewDots({ theme }: { theme: AppTheme }) {
   return (
     <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#0b1326,#315b9e,#ff9f6b)]">
       <span className="absolute left-3 top-2 h-5 w-5 rounded-full bg-[#ffd99d]/80 blur-[1px]" />
+    </div>
+  );
+}
+
+function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
+  if (style === "glass") {
+    return (
+      <div className="theme-glass mx-auto grid h-10 w-full grid-cols-3 items-center rounded-full px-2 text-center text-[10px] font-bold">
+        <span>08</span>
+        <span>24</span>
+        <span>16</span>
+      </div>
+    );
+  }
+
+  if (style === "orbits") {
+    return (
+      <div className="mx-auto flex justify-center gap-1.5">
+        {["08", "24", "16"].map((value) => (
+          <span
+            key={value}
+            className="theme-primary-button flex h-9 w-9 items-center justify-center rounded-full text-[10px] font-extrabold"
+          >
+            {value}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex justify-center gap-1">
+      {["08", "24", "16"].map((value) => (
+        <span
+          key={value}
+          className="theme-primary-button rounded-[10px] px-2 py-2 text-[10px] font-extrabold"
+        >
+          {value}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function AvatarStylePreview({ style }: { style: AvatarDisplayStyle }) {
+  if (style === "duo-card") {
+    return (
+      <div className="theme-glass mx-auto flex h-12 w-20 items-center justify-center gap-1 rounded-[18px]">
+        <span className="theme-avatar-surface h-8 w-8 rounded-[14px]" />
+        <span className="theme-avatar-surface h-8 w-8 rounded-[14px]" />
+      </div>
+    );
+  }
+
+  if (style === "halo") {
+    return (
+      <div className="mx-auto flex h-12 w-20 items-center justify-center gap-1">
+        <span className="theme-avatar-ring theme-avatar-surface h-9 w-9 rounded-full ring-4" />
+        <span className="theme-avatar-ring theme-avatar-surface h-9 w-9 rounded-full ring-4" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex h-12 w-20 items-center justify-center gap-1.5">
+      <span className="theme-avatar-ring theme-avatar-surface h-9 w-9 rounded-full ring-2" />
+      <span className="theme-avatar-ring theme-avatar-surface h-9 w-9 rounded-full ring-2" />
     </div>
   );
 }
@@ -261,6 +348,52 @@ export default function SettingsScreen() {
                       }`}
                     />
                   </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <div className="theme-form-label mb-3 text-[13px] font-semibold">Блок времени:</div>
+          <div className="grid grid-cols-3 gap-2">
+            {TIME_STYLE_OPTIONS.map((option) => {
+              const selected = current.timeDisplayStyle === option.id;
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => patchDraft({ timeDisplayStyle: option.id })}
+                  className={`theme-option-card rounded-[20px] border px-2 py-3 text-center transition ${
+                    selected ? "theme-option-card-selected" : ""
+                  }`}
+                >
+                  <TimeStylePreview style={option.id} />
+                  <div className="mt-2 text-[11px] font-bold">{option.title}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <div className="theme-form-label mb-3 text-[13px] font-semibold">Фото пары:</div>
+          <div className="grid grid-cols-3 gap-2">
+            {AVATAR_STYLE_OPTIONS.map((option) => {
+              const selected = current.avatarDisplayStyle === option.id;
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => patchDraft({ avatarDisplayStyle: option.id })}
+                  className={`theme-option-card rounded-[20px] border px-2 py-3 text-center transition ${
+                    selected ? "theme-option-card-selected" : ""
+                  }`}
+                >
+                  <AvatarStylePreview style={option.id} />
+                  <div className="mt-2 text-[11px] font-bold">{option.title}</div>
                 </button>
               );
             })}
