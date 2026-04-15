@@ -33,6 +33,7 @@ const DRAWING_CANVAS_HEIGHT = 520;
 const DRAWING_CANVAS_BACKGROUND = "#fffaf4";
 
 type DrawingTool = "brush" | "eraser";
+type WidgetDropPlacement = "before" | "after";
 
 function fillDrawingCanvasBackground(context: CanvasRenderingContext2D) {
   context.fillStyle = DRAWING_CANVAS_BACKGROUND;
@@ -48,39 +49,30 @@ function getCanvasPoint(canvas: HTMLCanvasElement, event: React.PointerEvent<HTM
   };
 }
 
+function isInteractiveTarget(target: EventTarget | null) {
+  return target instanceof HTMLElement
+    ? Boolean(target.closest("a, button, input, label, select, textarea"))
+    : false;
+}
+
+function getWidgetDropPlacement(
+  event: React.PointerEvent<HTMLDivElement>,
+  target: HTMLElement,
+): WidgetDropPlacement {
+  const rect = target.getBoundingClientRect();
+
+  return event.clientY > rect.top + rect.height / 2 ? "after" : "before";
+}
+
 function WidgetActions({
   widgetId,
-  index,
-  total,
   onDelete,
-  onMove,
 }: {
   widgetId: string;
-  index: number;
-  total: number;
   onDelete: (widgetId: string) => void;
-  onMove: (widgetId: string, direction: -1 | 1) => void;
 }) {
   return (
     <div className="absolute right-2 top-2 z-30 flex flex-wrap justify-end gap-1.5">
-      <button
-        type="button"
-        onClick={() => onMove(widgetId, -1)}
-        disabled={index === 0}
-        className="theme-icon-button flex h-8 w-8 items-center justify-center rounded-full border text-[15px] font-bold disabled:opacity-35"
-        aria-label="Переместить виджет выше"
-      >
-        ↑
-      </button>
-      <button
-        type="button"
-        onClick={() => onMove(widgetId, 1)}
-        disabled={index === total - 1}
-        className="theme-icon-button flex h-8 w-8 items-center justify-center rounded-full border text-[15px] font-bold disabled:opacity-35"
-        aria-label="Переместить виджет ниже"
-      >
-        ↓
-      </button>
       <Link
         href={`/widget/new?id=${widgetId}`}
         className="theme-icon-button flex h-8 w-8 items-center justify-center rounded-full border text-[15px] font-bold"
@@ -102,34 +94,45 @@ function WidgetActions({
 
 function WidgetCard({
   widget,
-  index,
-  total,
   isEditing,
+  isDragging,
   onDelete,
-  onMove,
+  onDragStart,
+  onDragMove,
+  onDragEnd,
 }: {
   widget: RelationshipWidget;
-  index: number;
-  total: number;
   isEditing: boolean;
+  isDragging: boolean;
   onDelete: (widgetId: string) => void;
-  onMove: (widgetId: string, direction: -1 | 1) => void;
+  onDragStart: (widgetId: string, event: React.PointerEvent<HTMLDivElement>) => void;
+  onDragMove: (event: React.PointerEvent<HTMLDivElement>) => void;
+  onDragEnd: (event: React.PointerEvent<HTMLDivElement>) => void;
 }) {
   return (
-    <WidgetVisual
-      widget={relationshipWidgetToVisualData(widget)}
-      actions={
-        isEditing ? (
-          <WidgetActions
-            widgetId={widget.id}
-            index={index}
-            total={total}
-            onDelete={onDelete}
-            onMove={onMove}
-          />
-        ) : null
-      }
-    />
+    <div
+      data-widget-id={widget.id}
+      className={cx(
+        "relative col-span-2 transition duration-200",
+        isEditing && "cursor-grab select-none touch-none active:cursor-grabbing",
+        isDragging && "z-40 scale-[0.985] opacity-55 shadow-[0_22px_54px_var(--theme-shadow)]",
+      )}
+      onPointerDown={(event) => {
+        if (!isEditing || event.button !== 0 || isInteractiveTarget(event.target)) return;
+        onDragStart(widget.id, event);
+      }}
+      onPointerMove={onDragMove}
+      onPointerUp={onDragEnd}
+      onPointerCancel={onDragEnd}
+    >
+      <WidgetVisual
+        widget={relationshipWidgetToVisualData(widget)}
+        className={isEditing ? "ring-1 ring-[var(--theme-control-active-border)]" : undefined}
+        actions={
+          isEditing ? <WidgetActions widgetId={widget.id} onDelete={onDelete} /> : null
+        }
+      />
+    </div>
   );
 }
 
@@ -571,24 +574,6 @@ function DrawingCanvasEditor({
   );
 }
 
-function NewDrawingCanvasCard({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="theme-dashed-card flex aspect-[4/3] min-w-[230px] flex-col items-center justify-center rounded-[30px] border-2 border-dashed px-5 text-center transition duration-200 hover:-translate-y-0.5 hover:border-[var(--theme-ring)]"
-    >
-      <span className="theme-action-chip flex h-14 w-14 items-center justify-center rounded-full border text-[34px] font-light leading-none">
-        +
-      </span>
-      <span className="mt-3 text-[16px] font-extrabold">Добавить холст</span>
-      <span className="theme-muted-text mt-1 text-[12px] font-semibold">
-        Откроется мини-paint
-      </span>
-    </button>
-  );
-}
-
 function DrawingCanvasCard({
   canvas,
   isEditing,
@@ -637,10 +622,19 @@ function DrawingCanvasCard({
 export default function MainScreen() {
   const settings = useRelationshipSettings();
   const albumInputRef = useRef<HTMLInputElement>(null);
+  const widgetDragRef = useRef<{
+    id: string;
+    pointerId: number;
+    startX: number;
+    startY: number;
+    isDragging: boolean;
+    lastHoverKey: string | null;
+  } | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [isEditingWidgets, setIsEditingWidgets] = useState(false);
   const [isUploadingAlbum, setIsUploadingAlbum] = useState(false);
   const [editingCanvasId, setEditingCanvasId] = useState<string | null>(null);
+  const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -672,25 +666,100 @@ export default function MainScreen() {
     }));
   };
 
-  const onMoveWidget = (widgetId: string, direction: -1 | 1) => {
+  const onReorderWidget = (
+    draggedWidgetId: string,
+    targetWidgetId: string,
+    placement: WidgetDropPlacement,
+  ) => {
     updateSettings((prev) => {
-      const currentIndex = prev.widgets.findIndex((widget) => widget.id === widgetId);
-      if (currentIndex < 0) return prev;
+      if (draggedWidgetId === targetWidgetId) return prev;
 
-      const nextIndex = currentIndex + direction;
-      if (nextIndex < 0 || nextIndex >= prev.widgets.length) return prev;
+      const draggedWidget = prev.widgets.find((widget) => widget.id === draggedWidgetId);
+      if (!draggedWidget) return prev;
 
-      const widgets = [...prev.widgets];
-      const [movedWidget] = widgets.splice(currentIndex, 1);
-      if (!movedWidget) return prev;
+      const withoutDraggedWidget = prev.widgets.filter(
+        (widget) => widget.id !== draggedWidgetId,
+      );
+      const targetIndex = withoutDraggedWidget.findIndex(
+        (widget) => widget.id === targetWidgetId,
+      );
+      if (targetIndex < 0) return prev;
 
-      widgets.splice(nextIndex, 0, movedWidget);
+      const insertIndex = placement === "after" ? targetIndex + 1 : targetIndex;
+      const widgets = [...withoutDraggedWidget];
+      widgets.splice(insertIndex, 0, draggedWidget);
+
+      const orderChanged = widgets.some((widget, index) => widget.id !== prev.widgets[index]?.id);
+      if (!orderChanged) return prev;
 
       return {
         ...prev,
         widgets,
       };
     });
+  };
+
+  const onStartWidgetDrag = (
+    widgetId: string,
+    event: React.PointerEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    widgetDragRef.current = {
+      id: widgetId,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      isDragging: false,
+      lastHoverKey: null,
+    };
+  };
+
+  const onWidgetDragMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const dragState = widgetDragRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId) return;
+
+    const movedDistance = Math.hypot(
+      event.clientX - dragState.startX,
+      event.clientY - dragState.startY,
+    );
+
+    if (!dragState.isDragging) {
+      if (movedDistance < 8) return;
+      dragState.isDragging = true;
+      setDraggingWidgetId(dragState.id);
+    }
+
+    event.preventDefault();
+
+    const target = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLElement>("[data-widget-id]");
+    const targetWidgetId = target?.dataset.widgetId;
+
+    if (!target || !targetWidgetId || targetWidgetId === dragState.id) return;
+
+    const placement = getWidgetDropPlacement(event, target);
+    const hoverKey = `${targetWidgetId}:${placement}`;
+    if (dragState.lastHoverKey === hoverKey) return;
+
+    dragState.lastHoverKey = hoverKey;
+    onReorderWidget(dragState.id, targetWidgetId, placement);
+  };
+
+  const onEndWidgetDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const dragState = widgetDragRef.current;
+
+    if (
+      dragState &&
+      dragState.pointerId === event.pointerId &&
+      event.currentTarget.hasPointerCapture(event.pointerId)
+    ) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    widgetDragRef.current = null;
+    setDraggingWidgetId(null);
   };
 
   const onPickAlbumPhotos = () => {
@@ -928,22 +997,23 @@ export default function MainScreen() {
         <div className="text-[30px] font-extrabold">Виджеты</div>
         {isEditingWidgets ? (
           <div className="theme-action-chip rounded-full border px-3 py-1 text-[12px] font-semibold">
-            Режим редактирования
+            Зажми и перетащи
           </div>
         ) : null}
       </div>
 
       {settings.widgets.length > 0 ? (
         <div className="mt-6 grid grid-cols-2 gap-4">
-          {settings.widgets.map((widget, index) => (
+          {settings.widgets.map((widget) => (
             <WidgetCard
               key={widget.id}
               widget={widget}
-              index={index}
-              total={settings.widgets.length}
               isEditing={isEditingWidgets}
+              isDragging={draggingWidgetId === widget.id}
               onDelete={onDeleteWidget}
-              onMove={onMoveWidget}
+              onDragStart={onStartWidgetDrag}
+              onDragMove={onWidgetDragMove}
+              onDragEnd={onEndWidgetDrag}
             />
           ))}
         </div>
@@ -976,18 +1046,19 @@ export default function MainScreen() {
         </button>
       </div>
 
-      <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <NewDrawingCanvasCard onClick={() => setEditingCanvasId("new")} />
-        {settings.drawingCanvases.map((canvas) => (
-          <DrawingCanvasCard
-            key={canvas.id}
-            canvas={canvas}
-            isEditing={isEditingWidgets}
-            onOpen={setEditingCanvasId}
-            onDelete={onDeleteDrawingCanvas}
-          />
-        ))}
-      </div>
+      {settings.drawingCanvases.length > 0 ? (
+        <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {settings.drawingCanvases.map((canvas) => (
+            <DrawingCanvasCard
+              key={canvas.id}
+              canvas={canvas}
+              isEditing={isEditingWidgets}
+              onOpen={setEditingCanvasId}
+              onDelete={onDeleteDrawingCanvas}
+            />
+          ))}
+        </div>
+      ) : null}
 
       <div className="mt-10 flex items-center justify-between">
         <div className="text-[28px] font-extrabold">Альбом</div>
