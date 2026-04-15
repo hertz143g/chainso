@@ -590,7 +590,7 @@ export default function NewWidgetScreen() {
                 type="date"
                 value={current.dateISO}
                 onChange={(event) => patchDraft({ dateISO: event.target.value })}
-                className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
+                className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <input
                 value={current.subtitle}
@@ -607,7 +607,7 @@ export default function NewWidgetScreen() {
                 type="date"
                 value={current.dateISO}
                 onChange={(event) => patchDraft({ dateISO: event.target.value })}
-                className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
+                className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <textarea
                 value={current.note}

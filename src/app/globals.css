@@ -669,6 +669,27 @@ body {
   color: var(--theme-input-text);
 }
 
+.theme-date-input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.theme-date-input::-webkit-date-and-time-value {
+  min-height: 1.45em;
+  text-align: left;
+}
+
+.theme-date-input::-webkit-calendar-picker-indicator {
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
 .theme-primary-button {
   background: var(--theme-primary);
   color: var(--theme-on-primary);

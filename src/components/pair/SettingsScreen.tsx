@@ -404,7 +404,7 @@ export default function SettingsScreen() {
           type="date"
           value={current.startDateISO}
           onChange={(event) => patchDraft({ startDateISO: event.target.value })}
-          className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
+          className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
         />
 
         <div className="mt-6">
