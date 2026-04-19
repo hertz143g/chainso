@@ -1061,7 +1061,7 @@ export default function MainScreen() {
       ) : null}
 
       <div className="mt-10 flex items-center justify-between">
-        <div className="text-[28px] font-extrabold">Альбом !!!</div>
+        <div className="text-[28px] font-extrabold">Альбом</div>
         <button
           type="button"
           onClick={onPickAlbumPhotos}
