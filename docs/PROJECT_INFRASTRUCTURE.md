@@ -1,741 +1,889 @@
-# Chainso: проект, инфраструктура и дальнейшее развитие
+# Chainso: текущая инфраструктура, управление и roadmap
 
-Документ описывает текущее состояние проекта Chainso, созданную VPS-инфраструктуру, окружения, деплой-процесс, эксплуатационные команды и рекомендации по развитию продукта в полноценный SaaS вокруг NFC-брелков.
+Дата актуализации: 2026-04-19
+
+Этот документ описывает фактическую инфраструктуру Chainso на текущий момент: домены, VPS, Docker-окружения, GitHub Actions deploy, базу данных, команды управления и рекомендации по дальнейшему развитию. Это главный рабочий документ по инфраструктуре проекта.
 
 ## 1. Что такое Chainso
 
-Chainso сейчас является Next.js-приложением для персональной страницы пары. Пользователь открывает страницу, настраивает имена, дату отношений, тему, виджеты, фотоальбом и холсты. На текущем этапе данные сохраняются на клиенте в `localStorage`.
+Chainso - SaaS-проект вокруг NFC-брелков для пар.
 
-Целевая продуктовая модель:
-
-- пара покупает NFC-брелок;
-- NFC открывает публичный URL;
-- URL приводит на страницу пары;
-- владельцы страницы редактируют ее через аккаунт;
-- NFC является публичным указателем, а не способом авторизации.
-
-Текущая реализация пока является frontend/MVP-слоем. Backend, база данных, полноценная авторизация, NFC claim-flow и storage еще не внедрены.
-
-## 2. Текущий стек
+Целевая логика продукта:
 
 ```txt
-Next.js 16.2.4
-React 19.2.3
-TypeScript
-Tailwind CSS 4
-Docker
-Docker Compose
-Caddy 2
-Ubuntu 24.04 VPS
+Пара покупает NFC-брелок
+-> человек тапает NFC
+-> открывается публичный resolver golover.chainso.ru
+-> resolver понимает, какой это брелок
+-> если брелок активирован, ведет на страницу пары lover.chainso.ru
+-> владельцы редактируют страницу через аккаунт и защищенный редактор
 ```
 
-Важные файлы:
+Важно: NFC-брелок должен быть публичным указателем, а не способом авторизации. Права на редактирование должны даваться только через auth и модель доступа в базе.
+
+Сейчас уже поднята инфраструктура под этот путь: VPS, reverse proxy, production/staging окружения, PostgreSQL, Prisma-схема, GitHub Actions deploy.
+
+## 2. Главные домены
 
 ```txt
-src/app/page.tsx                         главная страница
-src/app/settings/page.tsx                настройки
-src/app/widget/new/page.tsx              создание/редактирование виджета
-src/components/pair/MainScreen.tsx       основной экран пары
-src/components/pair/SettingsScreen.tsx   настройки пары/темы/отображения
-src/components/pair/NewWidgetScreen.tsx  создание виджетов
-src/components/pair/WidgetVisual.tsx     визуальный рендер виджетов
-src/components/pair/AppFrame.tsx         общий frame и темы
-src/lib/relationship.ts                  модель настроек и localStorage
-src/lib/widgetAppearance.ts              обработка изображений/палитр
-src/lib/trackLink.ts                     распознавание ссылок на треки
+chainso.ru
+Главный домен. В будущем - лендинг и вход в продукт.
+
+golover.chainso.ru
+NFC resolver. В будущем сюда будут вести NFC-брелки: /t/[publicCode].
+
+lover.chainso.ru
+Публичная страница пары.
+
+staging.chainso.ru
+Тестовое окружение для проверки изменений перед продом.
 ```
 
-Инфраструктурные файлы:
+Текущая маршрутизация:
 
 ```txt
-Dockerfile
-compose.prod.yml
-infra/caddy/Caddyfile
-infra/env/production.example
-infra/scripts/bootstrap-ubuntu-docker.sh
-scripts/deploy-vps.sh
-docs/vps-deploy.md
-docs/PROJECT_INFRASTRUCTURE.md
+chainso.ru              -> production app
+golover.chainso.ru      -> production app
+lover.chainso.ru        -> production app
+staging.chainso.ru      -> staging app
 ```
 
-## 3. Текущая карта доменов
-
-VPS:
+## 3. Сервер
 
 ```txt
-IP: 2.26.28.68
-OS: Ubuntu 24.04.4 LTS
-Deploy path: /opt/chainso
-Docker project: chainso
+VPS IP: 2.26.28.68
+SSH user для деплоя: deploy
+Docker network edge: chainso_edge
+Reverse proxy: Caddy
+App runtime: Next.js standalone в Docker
+Database: PostgreSQL 16 в Docker
 ```
 
-Домены:
+Root-доступ не должен использоваться для ежедневной работы. Деплой и обслуживание делаются через пользователя `deploy`.
+
+Безопасность, которая уже включена:
 
 ```txt
-chainso.ru              главный домен
-golover.chainso.ru      будущий NFC resolver / переход к странице пары
-lover.chainso.ru        будущая публичная страница пары
-staging.chainso.ru      staging
+UFW включен
+Открыты 22/tcp, 80/tcp, 443/tcp
+SSH key-based доступ для deploy
+Password SSH login был отключен
+Production/staging app не публикуют порт 3000 наружу
+PostgreSQL не публикует порт 5432 наружу
 ```
 
-Текущий статус после деплоя:
-
-```txt
-golover.chainso.ru   -> 2.26.28.68, HTTPS работает
-lover.chainso.ru     -> 2.26.28.68, HTTPS работает
-staging.chainso.ru   -> 2.26.28.68, HTTPS работает
-chainso.ru           -> пока указывает на 95.163.244.138, нужно заменить A-запись на 2.26.28.68
-```
-
-Для `chainso.ru` нужно в DNS у регистратора поставить:
-
-```txt
-@  A  2.26.28.68
-```
-
-Пока корневой домен указывает на чужой IP, Caddy не сможет выпустить для него TLS-сертификат.
-
-## 4. Как все взаимодействует сейчас
+## 4. Схема инфраструктуры
 
 ```mermaid
 flowchart TD
-  Browser["Браузер пользователя"] --> DNS["DNS chainso.ru / subdomains"]
+  User["Пользователь"] --> DNS["DNS chainso.ru"]
   DNS --> VPS["VPS 2.26.28.68"]
-  VPS --> Caddy["Caddy container"]
-  Caddy --> NextApp["Next.js standalone container"]
-  NextApp --> Static["Static assets / public"]
-  NextApp --> LocalStorage["Browser localStorage"]
+  VPS --> Caddy["Caddy reverse proxy"]
 
-  Caddy --> LE["Let's Encrypt"]
-  LE --> Caddy
+  Caddy --> ProdApp["Production Next.js app"]
+  Caddy --> StagingApp["Staging Next.js app"]
+
+  ProdApp --> ProdDb["Production PostgreSQL"]
+  StagingApp --> StagingDb["Staging PostgreSQL"]
+
+  GitHub["GitHub repository"] --> Actions["GitHub Actions"]
+  Actions --> SSH["SSH deploy as deploy"]
+  SSH --> VPS
 ```
 
-Объяснение:
+## 5. Docker stacks на VPS
 
-- DNS ведет домены на VPS.
-- Caddy слушает `80`, `443`, автоматически получает TLS-сертификаты и проксирует запросы.
-- Next.js запущен как standalone server внутри Docker.
-- Пользовательские данные пока не уходят на сервер, а сохраняются в `localStorage` браузера.
-- Это хорошо для быстрого MVP, но не подходит для реального multi-tenant SaaS без backend.
+На VPS сейчас три независимых stack-а.
 
-## 5. Docker-архитектура
+### 5.1. Production app
+
+```txt
+Path: /opt/chainso
+Compose project: chainso
+App container: chainso-app-1
+Postgres container: chainso-postgres-1
+Network alias для proxy: chainso-prod-app
+Env file: /opt/chainso/infra/env/production.env
+DB env file: /opt/chainso/infra/env/database.env
+```
+
+Production обслуживает:
+
+```txt
+chainso.ru
+golover.chainso.ru
+lover.chainso.ru
+```
+
+### 5.2. Staging app
+
+```txt
+Path: /opt/chainso-staging
+Compose project: chainso-staging
+App container: chainso-staging-app-1
+Postgres container: chainso-staging-postgres-1
+Network alias для proxy: chainso-staging-app
+Env file: /opt/chainso-staging/infra/env/staging.env
+DB env file: /opt/chainso-staging/infra/env/database.staging.env
+```
+
+Staging обслуживает:
+
+```txt
+staging.chainso.ru
+```
+
+### 5.3. Shared proxy
+
+```txt
+Path: /opt/chainso-proxy
+Compose project: chainso-proxy
+Container: chainso-proxy-caddy-1
+Env file: /opt/chainso-proxy/infra/env/proxy.env
+Config: /opt/chainso-proxy/infra/caddy/Caddyfile
+```
+
+Caddy слушает публичные порты:
+
+```txt
+80/tcp
+443/tcp
+443/udp
+```
+
+Caddy автоматически выпускает и обновляет HTTPS-сертификаты.
+
+## 6. Docker Compose файлы
+
+### 6.1. `compose.prod.yml`
+
+Этот compose используется и для production, и для staging. Разница задается env-файлами.
+
+Сервисы:
+
+```txt
+postgres
+PostgreSQL 16, внутренний volume, внутренняя сеть data.
+
+app
+Next.js standalone app, зависит от healthy postgres, подключен к data и edge сетям.
+
+migrate
+Одноразовый tools-сервис для prisma migrate deploy.
+```
+
+Внешне наружу app не публикуется. Его видит только Caddy по Docker network `chainso_edge`.
+
+### 6.2. `compose.proxy.yml`
+
+Этот compose поднимает общий Caddy proxy.
+
+Он читает:
+
+```txt
+PROD_DOMAINS
+PROD_UPSTREAM
+STAGING_DOMAINS
+STAGING_UPSTREAM
+EDGE_NETWORK
+```
+
+По умолчанию:
+
+```txt
+PROD_UPSTREAM=chainso-prod-app:3000
+STAGING_UPSTREAM=chainso-staging-app:3000
+```
+
+## 7. GitHub Actions deploy
+
+Файл workflow:
+
+```txt
+.github/workflows/deploy.yml
+```
+
+Логика:
+
+```txt
+push в staging -> deploy staging
+push в main    -> deploy production
+manual run     -> можно выбрать staging или production
+```
+
+Схема:
 
 ```mermaid
 flowchart LR
-  Internet["Internet"] --> Ports["VPS ports 80/443"]
-  Ports --> Caddy["caddy:2-alpine"]
-  Caddy --> App["chainso-app:latest"]
-  App --> NextServer["node server.js :3000"]
-
-  CaddyData["volume: caddy_data"] --> Caddy
-  CaddyConfig["volume: caddy_config"] --> Caddy
+  Dev["Локальная разработка"] --> StagingBranch["branch: staging"]
+  StagingBranch --> StagingAction["GitHub Actions deploy staging"]
+  StagingAction --> StagingSite["staging.chainso.ru"]
+  StagingSite --> Review["Проверка вручную"]
+  Review --> MainBranch["branch: main"]
+  MainBranch --> ProdAction["GitHub Actions deploy production"]
+  ProdAction --> ProdSites["chainso.ru / golover / lover"]
 ```
 
-`compose.prod.yml` содержит два сервиса:
+GitHub Secrets:
 
 ```txt
-app
-  build: Dockerfile
-  port внутри сети: 3000
-  healthcheck: HTTP-запрос на 127.0.0.1:3000
-  restart: unless-stopped
+VPS_HOST
+IP сервера.
 
-caddy
-  image: caddy:2-alpine
-  ports: 80, 443, 443/udp
-  reverse_proxy -> app:3000
-  volumes: caddy_data, caddy_config
-  restart: unless-stopped
+VPS_USER
+deploy
+
+VPS_SSH_KEY_B64
+Base64-версия приватного SSH-ключа для deploy.
+
+VPS_SSH_KEY
+Raw private key fallback, если не используется base64.
 ```
 
-`Dockerfile` multi-stage:
+Сейчас основной вариант - `VPS_SSH_KEY_B64`.
 
-```mermaid
-flowchart TD
-  Deps["deps: npm ci"] --> Builder["builder: npm run build"]
-  Builder --> Standalone[".next/standalone"]
-  Standalone --> Runner["runner: node server.js"]
-```
-
-Почему `output: "standalone"` включен в `next.config.ts`:
-
-- Next.js собирает минимальный runtime bundle;
-- контейнер меньше и проще;
-- не нужно тащить весь исходник и dev-зависимости в runtime.
-
-## 6. Окружения
-
-Сейчас фактически есть один Docker stack на VPS, который обслуживает все домены. `staging.chainso.ru` пока смотрит на тот же контейнер, что и production.
-
-Текущее состояние:
+Локальный приватный ключ GitHub Actions:
 
 ```txt
-local       локальная разработка через npm run dev
-production VPS /opt/chainso, Docker Compose
-staging    домен есть, но отдельного приложения/БД пока нет
+/Users/giovanni/.ssh/chainso_github_actions
 ```
 
-Рекомендуемая следующая схема:
+Публичная часть добавлена на сервер:
 
-```mermaid
-flowchart TD
-  Local["local"] --> Git["GitHub"]
-  Git --> CI["CI: lint build tests"]
-  CI --> Staging["staging.chainso.ru"]
-  Staging --> Smoke["smoke tests"]
-  Smoke --> Prod["chainso.ru / lover / golover"]
-
-  Staging --> StagingDB["staging DB"]
-  Prod --> ProdDB["production DB"]
+```txt
+deploy@2.26.28.68:~/.ssh/authorized_keys
 ```
 
-Что стоит сделать дальше:
+## 8. Правильный Git-flow
 
-- завести отдельный compose project `chainso-staging`;
-- запустить staging на отдельном порту/отдельном compose file;
-- подключить отдельную staging-БД;
-- деплоить `main` сначала на staging, потом вручную на production.
-
-## 7. Deploy-процесс
-
-### 7.1. Первый bootstrap VPS
-
-На чистом Ubuntu VPS:
+Ежедневная разработка:
 
 ```bash
-ssh root@2.26.28.68 'bash -s' < infra/scripts/bootstrap-ubuntu-docker.sh
+git switch staging
+git pull --rebase origin staging
+# делаешь изменения
+git add .
+git commit -m "описание изменений"
+git push origin staging
 ```
 
-Скрипт:
+После push автоматически обновится:
 
-- добавляет официальный Docker apt repository;
-- ставит Docker Engine;
-- ставит Docker Compose plugin;
-- включает и запускает `docker.service`.
+```txt
+https://staging.chainso.ru
+```
 
-### 7.2. Деплой приложения
-
-Команда для текущего VPS:
+Когда staging проверен и можно выкатывать в production:
 
 ```bash
-VPS_HOST=2.26.28.68 \
-VPS_USER=root \
-DEPLOY_PATH=/opt/chainso \
-APP_DOMAINS=chainso.ru,golover.chainso.ru,lover.chainso.ru,staging.chainso.ru \
-./scripts/deploy-vps.sh
+git switch main
+git pull origin main
+git merge origin/staging
+git push origin main
 ```
 
-Скрипт делает:
+После push в `main` автоматически обновятся:
 
-```mermaid
-sequenceDiagram
-  participant Dev as Local machine
-  participant VPS as VPS
-  participant Docker as Docker Compose
-
-  Dev->>VPS: ssh mkdir -p /opt/chainso/infra/env
-  Dev->>VPS: rsync project files
-  VPS->>VPS: write infra/env/production.env
-  VPS->>Docker: docker compose up -d --build --remove-orphans
-  Docker->>Docker: build app image
-  Docker->>Docker: recreate app container
-  Docker->>Docker: keep Caddy running
+```txt
+https://chainso.ru
+https://golover.chainso.ru
+https://lover.chainso.ru
 ```
 
-Важно:
+Если делаешь Pull Request в GitHub UI, направление должно быть строго таким:
 
-- `infra/env/production.env` не коммитится;
-- домены можно передавать через `APP_DOMAINS`;
-- запятые в `APP_DOMAINS` скрипт превращает в пробелы для Caddy.
+```txt
+base: main
+compare: staging
+```
 
-## 8. Проверки перед деплоем
+Неправильно:
 
-Локально:
+```txt
+base: staging
+compare: main
+```
+
+Если сделать наоборот, ты вольешь production обратно в staging, и production не обновится.
+
+## 9. Как проверить, что деплой прошел
+
+GitHub Actions:
+
+```txt
+https://github.com/hertz143g/chainso/actions
+```
+
+Проверить домены:
 
 ```bash
-npm run lint
-npm run build
-npm audit
-docker build -t chainso:test .
-```
-
-Smoke-test контейнера:
-
-```bash
-docker run --rm -d --name chainso-test -p 3005:3000 chainso:test
-docker exec chainso-test node -e "fetch('http://127.0.0.1:3000').then(r=>{console.log(r.status, r.headers.get('content-type')); process.exit(r.ok?0:1)}).catch(()=>process.exit(1))"
-docker stop chainso-test
-```
-
-На VPS:
-
-```bash
-ssh root@2.26.28.68
-cd /opt/chainso
-set -a && . infra/env/production.env && set +a
-docker compose -f compose.prod.yml ps
-docker compose -f compose.prod.yml logs -f app
-docker compose -f compose.prod.yml logs -f caddy
-```
-
-Проверка доменов:
-
-```bash
-dig +short chainso.ru
-dig +short golover.chainso.ru
-dig +short lover.chainso.ru
-dig +short staging.chainso.ru
-
-curl -I https://golover.chainso.ru
-curl -I https://lover.chainso.ru
 curl -I https://staging.chainso.ru
+curl -I https://lover.chainso.ru
+curl -I https://golover.chainso.ru
+curl -I https://chainso.ru
 ```
 
-Ожидаемый результат для рабочих поддоменов:
+Ожидаемый базовый результат:
 
 ```txt
 HTTP/2 200
 via: 1.1 Caddy
-content-type: text/html; charset=utf-8
 ```
 
-## 9. Caddy и HTTPS
-
-Caddy автоматически:
-
-- принимает HTTP/HTTPS;
-- выпускает сертификаты Let's Encrypt;
-- редиректит HTTP -> HTTPS;
-- проксирует запросы в Next.js container;
-- добавляет базовые security headers.
-
-Текущий `Caddyfile`:
-
-```caddyfile
-{$APP_DOMAINS} {
-  encode zstd gzip
-
-  header {
-    Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    X-Content-Type-Options "nosniff"
-    X-Frame-Options "DENY"
-    Referrer-Policy "strict-origin-when-cross-origin"
-    Permissions-Policy "camera=(), microphone=(), geolocation=()"
-    -Server
-  }
-
-  reverse_proxy {$APP_UPSTREAM}
-}
-```
-
-Если сертификат не выпускается:
+Проверить контейнеры на VPS:
 
 ```bash
-docker compose -f compose.prod.yml logs -f caddy
-dig +short <domain>
+ssh deploy@2.26.28.68 "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
 ```
 
-Типовые причины:
+Проверить production stack:
 
-- домен еще не указывает на VPS;
-- порт `80` или `443` закрыт;
-- включен чужой proxy/parking на стороне регистратора;
-- DNS TTL еще не обновился.
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && docker compose --env-file infra/env/production.env -f compose.prod.yml ps"
+```
 
-## 10. Текущее состояние данных
+Проверить staging stack:
 
-Сейчас данные пары хранятся в браузере:
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-staging && docker compose --env-file infra/env/staging.env -f compose.prod.yml ps"
+```
+
+Проверить proxy:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-proxy && docker compose --env-file infra/env/proxy.env -f compose.proxy.yml ps"
+```
+
+## 10. Логи
+
+Production app:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && docker compose --env-file infra/env/production.env -f compose.prod.yml logs -f app"
+```
+
+Staging app:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-staging && docker compose --env-file infra/env/staging.env -f compose.prod.yml logs -f app"
+```
+
+Production database:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && docker compose --env-file infra/env/production.env -f compose.prod.yml logs -f postgres"
+```
+
+Staging database:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-staging && docker compose --env-file infra/env/staging.env -f compose.prod.yml logs -f postgres"
+```
+
+Caddy proxy:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-proxy && docker compose --env-file infra/env/proxy.env -f compose.proxy.yml logs -f caddy"
+```
+
+## 11. База данных
+
+Используется PostgreSQL 16 в Docker.
+
+Production:
+
+```txt
+/opt/chainso
+DB env: /opt/chainso/infra/env/database.env
+Docker volume: chainso_postgres_data
+```
+
+Staging:
+
+```txt
+/opt/chainso-staging
+DB env: /opt/chainso-staging/infra/env/database.staging.env
+Docker volume: chainso-staging_postgres_data
+```
+
+Prisma schema:
+
+```txt
+prisma/schema.prisma
+```
+
+Миграции:
+
+```txt
+prisma/migrations/
+```
+
+Сейчас созданы таблицы:
+
+```txt
+User
+Couple
+CoupleMember
+NfcTag
+Order
+Widget
+AlbumPhoto
+DrawingCanvas
+MediaAsset
+ScanEvent
+AuditEvent
+_prisma_migrations
+```
+
+Проверить production таблицы:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && . infra/env/database.env && docker compose --env-file infra/env/production.env -f compose.prod.yml exec -T postgres psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c '\dt'"
+```
+
+Проверить staging таблицы:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-staging && . infra/env/database.staging.env && docker compose --env-file infra/env/staging.env -f compose.prod.yml exec -T postgres psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c '\dt'"
+```
+
+Применить миграции вручную на production:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && set -a && . infra/env/production.env && . infra/env/database.env && set +a && docker compose --profile tools --env-file infra/env/production.env -f compose.prod.yml run --rm migrate"
+```
+
+Применить миграции вручную на staging:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-staging && set -a && . infra/env/staging.env && . infra/env/database.staging.env && set +a && docker compose --profile tools --env-file infra/env/staging.env -f compose.prod.yml run --rm migrate"
+```
+
+Обычно вручную миграции запускать не нужно: deploy script делает это сам.
+
+## 12. Backend-модель, которая уже заложена
+
+В Prisma уже заложено ядро будущего backend:
 
 ```mermaid
-flowchart LR
-  UI["React UI"] --> Hook["useRelationshipSettings"]
-  Hook --> Lib["src/lib/relationship.ts"]
-  Lib --> LS["localStorage chainso_settings_v2"]
+erDiagram
+  User ||--o{ CoupleMember : owns
+  Couple ||--o{ CoupleMember : has
+  Couple ||--o{ Widget : has
+  Couple ||--o{ AlbumPhoto : has
+  Couple ||--o{ DrawingCanvas : has
+  Couple ||--o{ NfcTag : linked
+  Couple ||--o{ MediaAsset : stores
+  Couple ||--o{ ScanEvent : tracks
+  Order ||--o{ NfcTag : includes
+  User ||--o{ Order : places
+  NfcTag ||--o{ ScanEvent : receives
 ```
 
-Плюсы:
-
-- быстро;
-- не нужен backend;
-- удобно для прототипа.
-
-Минусы:
-
-- данные не синхронизируются между устройствами;
-- публичная страница не может быть общей для всех;
-- нельзя безопасно привязать NFC-брелок;
-- нельзя восстановить данные при очистке браузера;
-- невозможно нормальное multi-tenant-разделение клиентов.
-
-Уже убраны демо-данные:
-
-- нет дефолтных имен;
-- нет дефолтной даты;
-- нет дефолтных виджетов;
-- старые demo widgets `default-*` удаляются при нормализации сохраненных настроек.
-
-## 11. Целевая backend-архитектура
-
-```mermaid
-flowchart TD
-  NFC["NFC брелок"] --> Go["golover.chainso.ru/t/{public_code}"]
-  Go --> Resolver["NFC resolver"]
-  Resolver --> Tags["nfc_tags"]
-
-  Tags -->|active| Public["lover.chainso.ru/p/{slug}"]
-  Tags -->|unclaimed| Claim["claim flow"]
-
-  User["Владелец пары"] --> Auth["Auth"]
-  Auth --> App["Личный кабинет"]
-  App --> API["API / Server Actions"]
-  API --> DB["Postgres"]
-  API --> Storage["S3-compatible storage"]
-
-  DB --> Snapshot["published page snapshot"]
-  Snapshot --> Public
-```
-
-Ключевой принцип:
+Ключевая идея:
 
 ```txt
 NFC идентифицирует брелок.
 Auth идентифицирует пользователя.
-couple_members решает, кто может редактировать страницу.
-public_code ведет на страницу, но не дает прав.
+CoupleMember решает, кто может редактировать страницу.
+publicCode ведет на страницу, но не дает прав.
 ```
 
-## 12. Рекомендуемая схема БД
+## 13. Текущее состояние приложения
 
-Минимальные таблицы:
+Frontend сейчас остается основным пользовательским слоем.
+
+Что уже есть в приложении:
 
 ```txt
-users
-couples
-couple_members
-nfc_tags
-orders
-widgets
-album_photos
-drawing_canvases
-media_assets
-scan_events
-audit_events
+страница пары
+настройки
+темы
+виджеты
+альбом
+холсты
+режим редактирования
+localStorage state
+базовая DB/API подготовка
 ```
 
-Смысл:
+Что уже сделано на backend/infrastructure уровне:
 
 ```txt
-users              аккаунты владельцев
-couples            страницы пар
-couple_members     доступ пользователей к редактированию
-nfc_tags           NFC-брелки, public_code, status, couple_id
-orders             заказы
-widgets            виджеты страницы
-album_photos       фотоальбом
-drawing_canvases   холсты
-media_assets       файлы в object storage
-scan_events        аналитика сканов
-audit_events       история изменений
+PostgreSQL поднят отдельно для prod и staging
+Prisma schema создана
+Prisma migration применена
+API route /api/couples/[slug] подготовлен
+Docker build умеет генерировать Prisma client
+Deploy pipeline умеет применять миграции
 ```
 
-Для публичной страницы стоит добавить:
+Что еще не готово как полноценный продукт:
 
 ```txt
-couples.published_json
-couples.public_slug
-couples.status
+auth
+личный кабинет
+реальный editor -> backend save
+публичный route /p/[slug]
+NFC resolver /t/[publicCode]
+activation/claim flow
+object storage для фото/холстов
+админка заказов и NFC-партий
 ```
 
-Тогда публичная страница читает один готовый snapshot, а не собирает страницу из множества таблиц на каждый запрос.
+## 14. NFC-flow, который нужно реализовать дальше
 
-## 13. NFC flow
+Целевая схема:
 
 ```mermaid
 sequenceDiagram
-  participant Tag as NFC tag
+  participant Buyer as Покупатель
+  participant NFC as NFC брелок
   participant Resolver as golover.chainso.ru
-  participant DB as nfc_tags
-  participant User as User
-  participant Auth as Auth
+  participant DB as PostgreSQL
+  participant Page as lover.chainso.ru
+  participant App as Редактор
 
-  Tag->>Resolver: /t/{public_code}
-  Resolver->>DB: find public_code
+  Buyer->>NFC: tap
+  NFC->>Resolver: /t/publicCode
+  Resolver->>DB: найти NfcTag
   alt tag active
-    Resolver->>User: redirect /p/{public_slug}
-  else tag unclaimed
-    Resolver->>User: activation screen
-    User->>Auth: email/code/order claim
-    Auth->>DB: create couple + bind tag
-    Auth->>User: open editor
+    Resolver->>Page: redirect на страницу пары
+  else tag not claimed
+    Resolver->>App: activation screen
+    App->>DB: claim через activationCode/order/email
+    App->>Page: открыть новую страницу пары
   else tag revoked/lost
-    Resolver->>User: support / blocked screen
+    Resolver->>Page: показать безопасную ошибку
   end
 ```
 
-Важно:
-
-- `public_code` можно хранить в NFC URL;
-- `public_code` не является секретом;
-- claim должен требовать второй фактор владения: код из заказа, код из коробки, email OTP или активацию из кабинета.
-
-## 14. Storage для фото и холстов
-
-Сейчас фото и холсты сохраняются как data URL в localStorage. Для production это нужно заменить.
-
-Рекомендуемый подход:
+Рекомендуемый URL в NFC:
 
 ```txt
-Cloudflare R2 / S3 / MinIO
+https://golover.chainso.ru/t/[publicCode]
 ```
 
-Правила:
-
-- не хранить пользовательские изображения в Postgres;
-- сохранять только URL/key/metadata;
-- ограничивать размер файлов;
-- проверять MIME;
-- сжимать изображения в WebP/JPEG;
-- хранить оригинал только если он реально нужен;
-- раздавать через CDN.
-
-## 15. Безопасность VPS
-
-Сейчас для деплоя использовался root-доступ. SSH-ключ добавлен, но пароль root был передан в чат и его нужно считать скомпрометированным.
-
-Сразу сделать:
-
-```bash
-passwd
-```
-
-Рекомендуемые следующие действия:
-
-```bash
-adduser deploy
-usermod -aG docker deploy
-mkdir -p /home/deploy/.ssh
-cp /root/.ssh/authorized_keys /home/deploy/.ssh/authorized_keys
-chown -R deploy:deploy /home/deploy/.ssh
-chmod 700 /home/deploy/.ssh
-chmod 600 /home/deploy/.ssh/authorized_keys
-```
-
-После проверки входа под `deploy`:
+Почему не `lover.chainso.ru` напрямую:
 
 ```txt
-/etc/ssh/sshd_config
-PasswordAuthentication no
-PermitRootLogin prohibit-password
+golover.chainso.ru отвечает за распознавание брелка, статистику сканов и активацию.
+lover.chainso.ru отвечает за саму публичную страницу пары.
 ```
 
-Затем:
+## 15. Управление proxy
+
+Перезапустить Caddy:
 
 ```bash
-systemctl reload ssh
+ssh deploy@2.26.28.68 "cd /opt/chainso-proxy && docker compose --env-file infra/env/proxy.env -f compose.proxy.yml restart caddy"
 ```
 
-Firewall:
+Пересобрать proxy config из репозитория:
 
 ```bash
-ufw allow OpenSSH
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw enable
-ufw status
+VPS_HOST=2.26.28.68 ./scripts/deploy-proxy-vps.sh
 ```
 
-## 16. Backups
+Проверить Caddy config на VPS:
 
-Сейчас на сервере нет БД и пользовательского storage, поэтому критичных пользовательских данных на VPS почти нет. Когда появится backend:
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-proxy && docker compose --env-file infra/env/proxy.env -f compose.proxy.yml exec caddy caddy validate --config /etc/caddy/Caddyfile"
+```
 
-Обязательно:
+## 16. Ручной deploy без GitHub Actions
 
-- ежедневный backup Postgres;
-- offsite backup в S3/R2/Backblaze;
-- retention минимум 7/30/90;
-- тест восстановления раз в месяц;
-- отдельный backup production env/secrets.
+Если GitHub Actions недоступен, можно деплоить локально.
 
-Пример будущей схемы:
+Staging:
+
+```bash
+VPS_HOST=2.26.28.68 ./scripts/deploy-staging-vps.sh
+```
+
+Production:
+
+```bash
+VPS_HOST=2.26.28.68 ./scripts/deploy-production-vps.sh
+```
+
+Proxy:
+
+```bash
+VPS_HOST=2.26.28.68 ./scripts/deploy-proxy-vps.sh
+```
+
+Ручной production deploy стоит использовать аккуратно: он обходит привычный GitHub Actions flow.
+
+## 17. Backup
+
+Сейчас автоматические backup-и еще не настроены. Это важная зона риска.
+
+Ручной backup production DB:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && . infra/env/database.env && docker compose --env-file infra/env/production.env -f compose.prod.yml exec -T postgres pg_dump -U \"\$POSTGRES_USER\" \"\$POSTGRES_DB\"" > chainso-prod-$(date +%Y%m%d-%H%M%S).sql
+```
+
+Ручной backup staging DB:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-staging && . infra/env/database.staging.env && docker compose --env-file infra/env/staging.env -f compose.prod.yml exec -T postgres pg_dump -U \"\$POSTGRES_USER\" \"\$POSTGRES_DB\"" > chainso-staging-$(date +%Y%m%d-%H%M%S).sql
+```
+
+Рекомендация: настроить ежедневные encrypted backups в S3/R2-compatible storage и периодически проверять restore.
+
+## 18. Что делать при типовых проблемах
+
+### Push rejected non-fast-forward
+
+Причина: локальная ветка отстала от GitHub.
+
+Для staging:
+
+```bash
+git switch staging
+git pull --rebase origin staging
+git push origin staging
+```
+
+Для main:
+
+```bash
+git switch main
+git pull --rebase origin main
+git push origin main
+```
+
+Если появились конфликты, не делать force push наугад. Сначала решить конфликт, затем:
+
+```bash
+git add .
+git rebase --continue
+```
+
+### Изменения появились на staging, но не на lover
+
+Причина почти всегда одна из двух:
+
+```txt
+изменения не смержены в main
+PR был создан в обратную сторону
+```
+
+Правильный PR:
+
+```txt
+base: main
+compare: staging
+```
+
+После merge должен появиться GitHub Actions run по ветке `main`.
+
+### GitHub Actions показывает cancelled
+
+`cancelled` не всегда значит, что код сломан. Это значит, что job был отменен. Нужно смотреть новый run и состояние VPS.
+
+Проверить:
+
+```bash
+curl -s 'https://api.github.com/repos/hertz143g/chainso/actions/runs?per_page=3'
+```
+
+### Домен открывается, но показывает старую версию
+
+Проверить:
+
+```bash
+curl -I https://lover.chainso.ru
+ssh deploy@2.26.28.68 "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+```
+
+Потом проверить, был ли deploy именно по `main`, а не по `staging`.
+
+### App unhealthy
+
+Смотреть логи:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && docker compose --env-file infra/env/production.env -f compose.prod.yml logs --tail 200 app"
+```
+
+Проверить DB:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && . infra/env/database.env && docker compose --env-file infra/env/production.env -f compose.prod.yml exec -T postgres pg_isready -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\""
+```
+
+## 19. Безопасность
+
+Что уже хорошо:
+
+```txt
+HTTPS через Caddy
+Security headers
+UFW active
+Отдельный deploy user
+DB не торчит наружу
+App не торчит наружу
+Секреты исключены из rsync
+GitHub Actions ходит по SSH-ключу
+```
+
+Что нужно усилить:
+
+```txt
+регулярные backup-и
+fail2ban или аналог
+Sentry
+uptime monitoring
+rate limit для будущих auth/NFC endpoints
+Cloudflare DNS/WAF перед доменами
+отдельные credentials для staging/prod
+секреты через secret manager или минимум строгий chmod
+audit log для действий владельцев страниц
+```
+
+Особенно важно: пароль root, который когда-либо попадал в чат/историю, нужно считать скомпрометированным и заменить.
+
+## 20. Рекомендации по развитию
+
+### Этап 1. Закрепить текущую инфраструктуру
+
+```txt
+настроить uptime monitor
+настроить Sentry
+настроить backup production DB
+проверить restore backup-а
+добавить basic smoke test после deploy
+добавить branch protection для main
+```
+
+### Этап 2. Перенести данные из localStorage в backend
+
+```txt
+сделать auth
+сделать /app как личный кабинет
+сделать /p/[slug] как публичную страницу пары
+сделать сохранение Couple/Widget/AlbumPhoto/DrawingCanvas в PostgreSQL
+оставить localStorage только как draft/offline cache
+```
+
+### Этап 3. Реализовать NFC layer
+
+```txt
+route golover.chainso.ru/t/[publicCode]
+таблица NfcTag уже готова
+статусы MANUFACTURED/SOLD/CLAIMED/ACTIVE/REVOKED/LOST уже заложены
+activation flow через activationCode/order/email
+scan_events для статистики
+```
+
+### Этап 4. Подключить storage для медиа
+
+```txt
+Cloudflare R2 или S3-compatible storage
+таблица MediaAsset уже готова
+загрузка фото/холстов не в базу, а в object storage
+compression pipeline: WebP/JPEG
+проверка MIME/размера
+CDN cache
+```
+
+### Этап 5. Админка и заказы
+
+```txt
+создание партий NFC
+генерация publicCode/activationCode
+связь order -> nfc_tag -> couple
+статусы заказов
+перевыпуск/блокировка брелков
+поддержка пользователей
+```
+
+### Этап 6. Более зрелая production-инфраструктура
+
+Текущий VPS нормален для MVP. Когда пойдет трафик и продажи, лучше постепенно двигаться к такой схеме:
 
 ```mermaid
-flowchart LR
-  Postgres["Postgres"] --> Dump["pg_dump / WAL"]
-  Dump --> BackupBucket["R2/S3 backups"]
-  Storage["Media bucket"] --> Lifecycle["Versioning / lifecycle"]
+flowchart TD
+  Cloudflare["Cloudflare DNS/WAF/CDN"] --> LB["Load balancer / managed ingress"]
+  LB --> App1["App instance 1"]
+  LB --> App2["App instance 2"]
+  App1 --> ManagedDB["Managed PostgreSQL"]
+  App2 --> ManagedDB
+  App1 --> ObjectStorage["R2/S3 storage"]
+  App2 --> ObjectStorage
+  App1 --> Queue["Queue / background jobs"]
+  App2 --> Queue
+  Monitor["Sentry / logs / metrics"] --> App1
+  Monitor --> App2
 ```
 
-## 17. Логи и мониторинг
-
-Сейчас:
-
-```bash
-docker compose -f compose.prod.yml logs -f app
-docker compose -f compose.prod.yml logs -f caddy
-```
-
-Рекомендовано добавить:
-
-- Sentry для frontend/runtime ошибок;
-- uptime monitor для доменов;
-- basic server metrics: CPU/RAM/disk;
-- алерт на падение контейнера;
-- алерт на истечение/ошибки TLS.
-
-Минимум:
+Не нужно сразу прыгать в Kubernetes. Более разумный путь:
 
 ```txt
-UptimeRobot / Better Stack / Grafana Cloud Free
-Sentry
+VPS MVP
+-> VPS + managed backups + R2
+-> managed Postgres
+-> 2 app instances behind proxy
+-> separate worker for media/jobs
+-> managed platform only когда экономика проекта это оправдывает
 ```
 
-## 18. Работа с DNS
+## 21. Короткая памятка
 
-Для текущего VPS все production/staging домены должны указывать на:
-
-```txt
-2.26.28.68
-```
-
-Записи:
-
-```txt
-@        A  2.26.28.68
-golover  A  2.26.28.68
-lover    A  2.26.28.68
-staging  A  2.26.28.68
-```
-
-Проверка:
+Проверить staging:
 
 ```bash
-dig +short chainso.ru
-dig +short golover.chainso.ru
-dig +short lover.chainso.ru
-dig +short staging.chainso.ru
-```
-
-Если Caddy не получил сертификат, сначала проверять DNS.
-
-## 19. Рекомендуемый roadmap
-
-### Этап 1. Укрепить текущий VPS MVP
-
-- заменить root password;
-- создать `deploy` пользователя;
-- отключить password SSH login;
-- включить firewall;
-- поправить `chainso.ru` DNS;
-- добавить uptime monitor;
-- добавить Sentry.
-
-### Этап 2. Вынести данные из localStorage
-
-- выбрать backend stack: Supabase/Postgres или self-hosted Postgres;
-- сделать таблицы `couples`, `widgets`, `album_photos`, `drawing_canvases`;
-- сделать auth;
-- сделать `/p/[slug]` для публичной страницы;
-- сделать `/app` для редактора.
-
-### Этап 3. NFC layer
-
-- добавить `nfc_tags`;
-- добавить `golover.chainso.ru/t/[publicCode]`;
-- добавить activation/claim flow;
-- добавить статусы `manufactured`, `sold`, `claimed`, `active`, `revoked`, `lost`.
-
-### Этап 4. Storage
-
-- подключить Cloudflare R2/S3;
-- заменить data URL в localStorage на media assets;
-- добавить image compression pipeline;
-- добавить CDN cache.
-
-### Этап 5. Admin и заказы
-
-- админка партий NFC;
-- заказы;
-- связь order -> tag -> couple;
-- поддержка перевыпуска/блокировки брелков.
-
-### Этап 6. Нормальный staging/prod
-
-- отдельный staging stack;
-- отдельная staging DB;
-- CI/CD;
-- миграции;
-- smoke tests перед production.
-
-## 20. Быстрый cheat sheet
-
-Локально:
-
-```bash
-npm run dev
-npm run lint
-npm run build
-npm audit
-```
-
-Деплой:
-
-```bash
-VPS_HOST=2.26.28.68 \
-VPS_USER=root \
-DEPLOY_PATH=/opt/chainso \
-APP_DOMAINS=chainso.ru,golover.chainso.ru,lover.chainso.ru,staging.chainso.ru \
-./scripts/deploy-vps.sh
-```
-
-Проверка VPS:
-
-```bash
-ssh root@2.26.28.68
-cd /opt/chainso
-set -a && . infra/env/production.env && set +a
-docker compose -f compose.prod.yml ps
-docker compose -f compose.prod.yml logs -f app
-docker compose -f compose.prod.yml logs -f caddy
-```
-
-Проверка доменов:
-
-```bash
-curl -I https://golover.chainso.ru
-curl -I https://lover.chainso.ru
 curl -I https://staging.chainso.ru
 ```
 
-Перезапуск:
+Проверить production:
 
 ```bash
-docker compose -f compose.prod.yml restart
+curl -I https://lover.chainso.ru
 ```
 
-Полная пересборка на VPS:
+Деплой staging:
 
 ```bash
-docker compose -f compose.prod.yml up -d --build --remove-orphans
+git switch staging
+git pull --rebase origin staging
+git push origin staging
 ```
 
-## 21. Главные выводы
+Деплой production:
 
-Текущая инфраструктура уже подходит для MVP:
+```bash
+git switch main
+git pull origin main
+git merge origin/staging
+git push origin main
+```
 
-- приложение контейнеризовано;
-- есть reverse proxy;
-- есть HTTPS;
-- есть повторяемый deploy;
-- есть подготовка под перенос на более мощную архитектуру.
+Правильный PR:
 
-Но текущий продукт еще не является полноценным SaaS, потому что:
+```txt
+base: main
+compare: staging
+```
 
-- нет backend;
-- нет server-side идентификации пары;
-- нет auth;
-- нет NFC resolver;
-- нет storage;
-- нет БД;
-- staging пока не отделен от production.
+Посмотреть containers:
 
-Следующий крупный шаг: перенести состояние пары из `localStorage` в backend и ввести модель `couple -> members -> public page -> nfc_tags`.
+```bash
+ssh deploy@2.26.28.68 "docker ps"
+```
+
+Посмотреть app logs production:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso && docker compose --env-file infra/env/production.env -f compose.prod.yml logs -f app"
+```
+
+Посмотреть app logs staging:
+
+```bash
+ssh deploy@2.26.28.68 "cd /opt/chainso-staging && docker compose --env-file infra/env/staging.env -f compose.prod.yml logs -f app"
+```
+
