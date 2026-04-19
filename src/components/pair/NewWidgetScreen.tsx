@@ -25,6 +25,12 @@ import {
 
 const COLOR_OPTIONS = ["#4A86E8", "#E86FA5", "#5AA897", "#F59E0B", "#7C65FF"];
 
+function todayISO() {
+  const date = new Date();
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return offsetDate.toISOString().slice(0, 10);
+}
+
 type WidgetDraft = {
   type: WidgetType;
   title: string;
@@ -44,7 +50,7 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
     return {
       type,
       title: "",
-      dateISO: "",
+      dateISO: todayISO(),
       subtitle: "",
       note: "",
       artist: "",
@@ -75,7 +81,7 @@ function createEmptyDraft(type: WidgetType = "event"): WidgetDraft {
   return {
     type,
     title: "",
-    dateISO: "",
+    dateISO: todayISO(),
     subtitle: "",
     note: "",
     artist: "",
@@ -337,7 +343,7 @@ export default function NewWidgetScreen() {
         ...base,
         ...createEmptyDraft(type),
         title: base.title,
-        dateISO: base.dateISO,
+        dateISO: base.dateISO || todayISO(),
         subtitle: base.subtitle,
         note: base.note,
         artist: base.artist,

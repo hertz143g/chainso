@@ -58,6 +58,7 @@ export function settingsFromCouple(couple: CoupleWithBlocks): CouplePayload {
         eventTitle: typeof metadata.eventTitle === "string" ? metadata.eventTitle : undefined,
         eventDateISO:
           typeof metadata.eventDateISO === "string" ? metadata.eventDateISO : undefined,
+        eventLayout: typeof metadata.eventLayout === "string" ? metadata.eventLayout : undefined,
       });
     }) as Partial<RelationshipSettings>["albumPhotos"];
   const drawingCanvases = couple.drawingCanvases

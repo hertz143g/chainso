@@ -678,16 +678,23 @@ body {
   min-height: 44px;
   appearance: none;
   -webkit-appearance: none;
+  background-color: var(--theme-input-bg);
+  color: var(--theme-input-text) !important;
+  color-scheme: light;
 }
 
 .theme-date-input::-webkit-date-and-time-value {
+  color: var(--theme-input-text);
   min-height: 1.45em;
   text-align: left;
 }
 
 .theme-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
   flex-shrink: 0;
+  filter: invert(0);
   margin-left: 4px;
+  opacity: 0.82;
 }
 
 .theme-primary-button {

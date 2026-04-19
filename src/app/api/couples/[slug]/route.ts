@@ -128,6 +128,7 @@ export async function PUT(request: Request, context: RouteContext) {
                 caption: JSON.stringify({
                   eventTitle: photo.eventTitle,
                   eventDateISO: photo.eventDateISO,
+                  eventLayout: photo.eventLayout,
                 }),
                 sortOrder: index,
               },
