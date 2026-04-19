@@ -49,21 +49,26 @@ jobs:
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_SSH_KEY_B64: ${{ secrets.VPS_SSH_KEY_B64 }}
         run: |
           if [[ -z "$VPS_HOST" ]]; then
             echo "VPS_HOST secret is missing"
             exit 1
           fi
 
-          if [[ -z "$VPS_SSH_KEY" ]]; then
-            echo "VPS_SSH_KEY secret is missing"
+          if [[ -z "$VPS_SSH_KEY" && -z "$VPS_SSH_KEY_B64" ]]; then
+            echo "VPS_SSH_KEY or VPS_SSH_KEY_B64 secret is missing"
             exit 1
           fi
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s' "$VPS_SSH_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
-          printf '\n' >> ~/.ssh/id_ed25519
+          if [[ -n "$VPS_SSH_KEY_B64" ]]; then
+            printf '%s' "$VPS_SSH_KEY_B64" | base64 -d > ~/.ssh/id_ed25519
+          else
+            printf '%s' "$VPS_SSH_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
+            printf '\n' >> ~/.ssh/id_ed25519
+          fi
           chmod 600 ~/.ssh/id_ed25519
 
           ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
