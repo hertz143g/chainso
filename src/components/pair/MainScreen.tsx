@@ -685,67 +685,80 @@ function AlbumEventCard({
   onDeletePhoto: (photoId: string) => void;
 }) {
   const freeSlots = MAX_ALBUM_PHOTOS_PER_EVENT - event.photos.length;
+  const coverPhoto = event.photos[0];
+  const sidePhotos = event.photos.slice(1, MAX_ALBUM_PHOTOS_PER_EVENT);
 
   return (
-    <section className="theme-glass rounded-[30px] border border-[var(--theme-card-border)] p-3 shadow-[0_18px_44px_var(--theme-shadow)]">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="truncate text-[16px] font-extrabold">{event.eventTitle}</div>
-          <div className="theme-muted-text mt-0.5 text-[12px] font-semibold">
-            {formatDateLong(event.eventDateISO)}
+    <section className="theme-glass overflow-hidden rounded-[34px] border border-[var(--theme-card-border)] p-3 shadow-[0_20px_52px_var(--theme-shadow)]">
+      <div className="grid min-h-[210px] grid-cols-[1.4fr_0.72fr] gap-3">
+        <div className="relative overflow-hidden rounded-[26px] bg-[var(--theme-dashed-bg)]">
+          {coverPhoto ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={coverPhoto.imageDataUrl}
+                alt={event.eventTitle}
+                className="h-full min-h-[210px] w-full object-cover"
+              />
+              {isEditing ? (
+                <button
+                  type="button"
+                  onClick={() => onDeletePhoto(coverPhoto.id)}
+                  className="absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 bg-slate-950/90 text-[18px] font-black leading-none text-white shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+                  aria-label="Удалить фото из альбома"
+                >
+                  ×
+                </button>
+              ) : null}
+            </>
+          ) : null}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/72 via-black/18 to-transparent p-4 text-white">
+            <div className="truncate text-[18px] font-black leading-tight">{event.eventTitle}</div>
+            <div className="mt-1 text-[12px] font-bold opacity-85">
+              {formatDateLong(event.eventDateISO)}
+            </div>
           </div>
         </div>
-        {freeSlots > 0 ? (
-          <button
-            type="button"
-            onClick={() => onAddPhotos(event)}
-            disabled={isUploading}
-            className="theme-action-chip shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold disabled:opacity-55"
-          >
-            + фото
-          </button>
-        ) : (
-          <div className="theme-action-chip shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold">
-            3/3
-          </div>
-        )}
-      </div>
 
-      <div className="grid grid-cols-3 gap-2.5">
-        {event.photos.slice(0, MAX_ALBUM_PHOTOS_PER_EVENT).map((photo) => (
-          <div
-            key={photo.id}
-            className="group relative aspect-square overflow-hidden rounded-[22px] bg-[var(--theme-dashed-bg)] shadow-[0_12px_28px_var(--theme-shadow)]"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={photo.imageDataUrl}
-              alt={event.eventTitle}
-              className="h-full w-full object-cover"
-            />
-            {isEditing ? (
-              <button
-                type="button"
-                onClick={() => onDeletePhoto(photo.id)}
-                className="absolute right-1.5 top-1.5 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-slate-950/90 text-[16px] font-black leading-none text-white shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
-                aria-label="Удалить фото из альбома"
-              >
-                ×
-              </button>
-            ) : null}
-          </div>
-        ))}
-        {Array.from({ length: freeSlots }).map((_, index) => (
-          <button
-            key={`${event.eventKey}-slot-${index}`}
-            type="button"
-            onClick={() => onAddPhotos(event)}
-            disabled={isUploading}
-            className="theme-dashed-card flex aspect-square items-center justify-center rounded-[22px] border-2 border-dashed text-[12px] font-bold disabled:opacity-55"
-          >
-            + фото
-          </button>
-        ))}
+        <div className="grid grid-rows-2 gap-3">
+          {sidePhotos.map((photo) => (
+            <div
+              key={photo.id}
+              className="relative overflow-hidden rounded-[24px] bg-[var(--theme-dashed-bg)]"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={photo.imageDataUrl}
+                alt={event.eventTitle}
+                className="h-full min-h-[98px] w-full object-cover"
+              />
+              {isEditing ? (
+                <button
+                  type="button"
+                  onClick={() => onDeletePhoto(photo.id)}
+                  className="absolute right-1.5 top-1.5 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-slate-950/90 text-[16px] font-black leading-none text-white shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+                  aria-label="Удалить фото из альбома"
+                >
+                  ×
+                </button>
+              ) : null}
+            </div>
+          ))}
+
+          {freeSlots > 0 ? (
+            <button
+              type="button"
+              onClick={() => onAddPhotos(event)}
+              disabled={isUploading}
+              className={cx(
+                "theme-dashed-card flex min-h-[98px] items-center justify-center rounded-[24px] border-2 border-dashed px-3 text-center text-[12px] font-extrabold disabled:opacity-55",
+                sidePhotos.length === 0 && "row-span-2",
+              )}
+            >
+              + фото
+            </button>
+          ) : null}
+        </div>
       </div>
     </section>
   );
@@ -770,6 +783,7 @@ export default function MainScreen() {
   const [albumDraftTitle, setAlbumDraftTitle] = useState("");
   const [albumDraftDateISO, setAlbumDraftDateISO] = useState("");
   const [albumUploadTarget, setAlbumUploadTarget] = useState<AlbumUploadTarget | null>(null);
+  const [isAlbumComposerOpen, setIsAlbumComposerOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -793,16 +807,13 @@ export default function MainScreen() {
     albumDraftTitle.trim() && albumDraftDateISO
       ? getAlbumEventKey(albumDraftTitle, albumDraftDateISO)
       : "";
-  const albumDraftExistingEvent = albumEvents.find(
+  const albumDraftMatchesExisting = albumEvents.some(
     (event) => event.eventKey === albumDraftEventKey,
   );
-  const albumDraftMatchesExisting = Boolean(albumDraftExistingEvent);
   const canCreateAlbumEvent =
     Boolean(albumDraftTitle.trim() && albumDraftDateISO) &&
-    (albumDraftMatchesExisting
-      ? (albumDraftExistingEvent?.photos.length ?? MAX_ALBUM_PHOTOS_PER_EVENT) <
-        MAX_ALBUM_PHOTOS_PER_EVENT
-      : albumEvents.length < MAX_ALBUM_EVENTS);
+    !albumDraftMatchesExisting &&
+    albumEvents.length < MAX_ALBUM_EVENTS;
 
   const onDeleteWidget = (widgetId: string) => {
     if (typeof window !== "undefined") {
@@ -941,6 +952,12 @@ export default function MainScreen() {
     });
   };
 
+  const onCloseAlbumComposer = () => {
+    setIsAlbumComposerOpen(false);
+    setAlbumDraftTitle("");
+    setAlbumDraftDateISO("");
+  };
+
   const onAlbumPhotosChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.currentTarget.files ?? []);
     event.currentTarget.value = "";
@@ -960,6 +977,7 @@ export default function MainScreen() {
 
     if (acceptedFiles.length === 0) {
       window.alert("В одно событие можно добавить максимум 3 фото.");
+      setAlbumUploadTarget(null);
       return;
     }
 
@@ -986,8 +1004,7 @@ export default function MainScreen() {
       }));
 
       if (!existingEvent) {
-        setAlbumDraftTitle("");
-        setAlbumDraftDateISO("");
+        onCloseAlbumComposer();
       }
 
       if (files.length > acceptedFiles.length) {
@@ -1265,63 +1282,75 @@ export default function MainScreen() {
             <div className="text-[28px] font-extrabold">Альбом</div>
             <div className="theme-muted-text mt-1 text-[13px] font-semibold">
               {albumEvents.length > 0
-                ? `${albumEvents.length}/3 ${ruPlural(
-                    albumEvents.length,
-                    "событие",
-                    "события",
-                    "событий",
-                  )}`
-                : "Добавь событие и до 3 фото"}
+                ? "События, которые хочется сохранить"
+                : "Добавь первое событие"}
             </div>
-          </div>
-          <div className="theme-action-chip rounded-full border px-3 py-1.5 text-[11px] font-bold">
-            максимум 3 x 3
           </div>
         </div>
 
-        <div className="theme-dashed-card mt-5 rounded-[30px] border-2 border-dashed p-4">
-          <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
-            <label className="block">
-              <span className="theme-muted-text mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em]">
-                Название события
-              </span>
-              <input
-                value={albumDraftTitle}
-                onChange={(event) => setAlbumDraftTitle(event.target.value)}
-                placeholder="Например: первая поездка"
-                maxLength={32}
-                className="theme-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
-              />
-            </label>
-            <label className="block">
-              <span className="theme-muted-text mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em]">
-                Дата
-              </span>
-              <input
-                type="date"
-                value={albumDraftDateISO}
-                onChange={(event) => setAlbumDraftDateISO(event.target.value)}
-                className="theme-input theme-date-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
-              />
-            </label>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="theme-muted-text text-[12px] font-semibold">
-              {albumEvents.length >= MAX_ALBUM_EVENTS && !albumDraftMatchesExisting
-                ? "Лимит событий достигнут. Удали событие или добавь фото в существующее."
-                : "После выбора даты и названия можно добавить до 3 фото."}
+        {isAlbumComposerOpen ? (
+          <div className="theme-glass mt-5 rounded-[34px] border border-[var(--theme-card-border)] p-4 shadow-[0_20px_54px_var(--theme-shadow)]">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[18px] font-black">Новое событие</div>
+                <div className="theme-muted-text mt-1 text-[12px] font-semibold">
+                  До 3 событий в альбоме, до 3 фото в каждом.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onCloseAlbumComposer}
+                className="theme-icon-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-[18px] font-black"
+                aria-label="Закрыть создание события"
+              >
+                ×
+              </button>
             </div>
+
+            <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
+              <label className="block">
+                <span className="theme-muted-text mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em]">
+                  Название
+                </span>
+                <input
+                  value={albumDraftTitle}
+                  onChange={(event) => setAlbumDraftTitle(event.target.value)}
+                  placeholder="Первая поездка"
+                  maxLength={32}
+                  className="theme-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
+                />
+              </label>
+              <label className="block">
+                <span className="theme-muted-text mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em]">
+                  Дата
+                </span>
+                <input
+                  type="date"
+                  value={albumDraftDateISO}
+                  onChange={(event) => setAlbumDraftDateISO(event.target.value)}
+                  className="theme-input theme-date-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
+                />
+              </label>
+            </div>
+
             <button
               type="button"
               onClick={onPickDraftAlbumPhotos}
               disabled={!canCreateAlbumEvent || isUploadingAlbum}
-              className="theme-primary-button rounded-full px-5 py-2.5 text-[13px] font-extrabold shadow-[0_14px_28px_var(--theme-shadow)] disabled:cursor-not-allowed disabled:opacity-45"
+              className="theme-primary-button mt-4 w-full rounded-[24px] px-5 py-4 text-[15px] font-extrabold shadow-[0_14px_28px_var(--theme-shadow)] disabled:cursor-not-allowed disabled:opacity-45"
             >
-              {isUploadingAlbum ? "Загрузка..." : "+ фото к событию"}
+              {isUploadingAlbum ? "Загрузка..." : "Выбрать фото"}
             </button>
           </div>
-        </div>
+        ) : albumEvents.length < MAX_ALBUM_EVENTS ? (
+          <button
+            type="button"
+            onClick={() => setIsAlbumComposerOpen(true)}
+            className="theme-dashed-card-strong mt-5 block w-full rounded-[28px] border-2 border-dashed py-4 text-center text-[16px] font-semibold"
+          >
+            + добавить событие
+          </button>
+        ) : null}
 
         {albumEvents.length > 0 ? (
           <div className="mt-5 grid gap-4">
