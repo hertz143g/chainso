@@ -125,6 +125,10 @@ export async function PUT(request: Request, context: RouteContext) {
                 id: photo.id,
                 coupleId: updatedCouple.id,
                 mediaAssetId: asset.id,
+                caption: JSON.stringify({
+                  eventTitle: photo.eventTitle,
+                  eventDateISO: photo.eventDateISO,
+                }),
                 sortOrder: index,
               },
             }),

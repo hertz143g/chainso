@@ -61,6 +61,8 @@ export type AlbumPhoto = {
   id: string;
   imageDataUrl: string;
   createdAtISO: string;
+  eventTitle?: string;
+  eventDateISO?: string;
 };
 
 export type DrawingCanvas = {
@@ -251,6 +253,8 @@ function parseAlbumPhoto(photo: unknown): AlbumPhoto | null {
     imageDataUrl: raw.imageDataUrl,
     createdAtISO:
       typeof raw.createdAtISO === "string" ? raw.createdAtISO : new Date().toISOString(),
+    eventTitle: typeof raw.eventTitle === "string" ? raw.eventTitle : undefined,
+    eventDateISO: typeof raw.eventDateISO === "string" ? raw.eventDateISO : undefined,
   };
 }
 

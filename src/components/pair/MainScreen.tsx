@@ -16,6 +16,7 @@ import {
   formatTogether,
   getGoalProgress,
   ruPlural,
+  type AlbumPhoto,
   type AvatarDisplayStyle,
   type DrawingCanvas,
   type RelationshipWidget,
@@ -31,9 +32,20 @@ function cx(...classes: Array<string | false | undefined>) {
 const DRAWING_CANVAS_WIDTH = 840;
 const DRAWING_CANVAS_HEIGHT = 520;
 const DRAWING_CANVAS_BACKGROUND = "#fffaf4";
+const MAX_ALBUM_EVENTS = 3;
+const MAX_ALBUM_PHOTOS_PER_EVENT = 3;
 
 type DrawingTool = "brush" | "eraser";
 type WidgetDropPlacement = "before" | "after";
+type AlbumUploadTarget = {
+  eventKey: string;
+  eventTitle: string;
+  eventDateISO: string;
+};
+
+type AlbumEvent = AlbumUploadTarget & {
+  photos: AlbumPhoto[];
+};
 
 function fillDrawingCanvasBackground(context: CanvasRenderingContext2D) {
   context.fillStyle = DRAWING_CANVAS_BACKGROUND;
@@ -53,6 +65,46 @@ function isInteractiveTarget(target: EventTarget | null) {
   return target instanceof HTMLElement
     ? Boolean(target.closest("a, button, input, label, select, textarea"))
     : false;
+}
+
+function getAlbumEventDate(photo: AlbumPhoto) {
+  return photo.eventDateISO || photo.createdAtISO.slice(0, 10);
+}
+
+function getAlbumEventTitle(photo: AlbumPhoto) {
+  return photo.eventTitle?.trim() || "Воспоминание";
+}
+
+function getAlbumEventKey(eventTitle: string, eventDateISO: string) {
+  return `${eventDateISO}::${eventTitle.trim().toLocaleLowerCase("ru-RU")}`;
+}
+
+function getAlbumEvents(photos: AlbumPhoto[]): AlbumEvent[] {
+  const events = new Map<string, AlbumEvent>();
+
+  photos.forEach((photo) => {
+    const eventTitle = getAlbumEventTitle(photo);
+    const eventDateISO = getAlbumEventDate(photo);
+    const eventKey = getAlbumEventKey(eventTitle, eventDateISO);
+    const event = events.get(eventKey);
+
+    if (event) {
+      event.photos.push(photo);
+      return;
+    }
+
+    events.set(eventKey, {
+      eventKey,
+      eventTitle,
+      eventDateISO,
+      photos: [photo],
+    });
+  });
+
+  return Array.from(events.values()).sort((a, b) => {
+    const byDate = b.eventDateISO.localeCompare(a.eventDateISO);
+    return byDate || a.eventTitle.localeCompare(b.eventTitle, "ru-RU");
+  });
 }
 
 function getWidgetDropPlacement(
@@ -609,13 +661,93 @@ function DrawingCanvasCard({
         <button
           type="button"
           onClick={() => onDelete(canvas.id)}
-          className="theme-icon-button absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border text-[18px] font-bold"
+          className="absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 bg-slate-950/90 text-[18px] font-black leading-none text-white shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
           aria-label="Удалить холст"
         >
           ×
         </button>
       ) : null}
     </div>
+  );
+}
+
+function AlbumEventCard({
+  event,
+  isEditing,
+  isUploading,
+  onAddPhotos,
+  onDeletePhoto,
+}: {
+  event: AlbumEvent;
+  isEditing: boolean;
+  isUploading: boolean;
+  onAddPhotos: (target: AlbumUploadTarget) => void;
+  onDeletePhoto: (photoId: string) => void;
+}) {
+  const freeSlots = MAX_ALBUM_PHOTOS_PER_EVENT - event.photos.length;
+
+  return (
+    <section className="theme-glass rounded-[30px] border border-[var(--theme-card-border)] p-3 shadow-[0_18px_44px_var(--theme-shadow)]">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="truncate text-[16px] font-extrabold">{event.eventTitle}</div>
+          <div className="theme-muted-text mt-0.5 text-[12px] font-semibold">
+            {formatDateLong(event.eventDateISO)}
+          </div>
+        </div>
+        {freeSlots > 0 ? (
+          <button
+            type="button"
+            onClick={() => onAddPhotos(event)}
+            disabled={isUploading}
+            className="theme-action-chip shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold disabled:opacity-55"
+          >
+            + фото
+          </button>
+        ) : (
+          <div className="theme-action-chip shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold">
+            3/3
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2.5">
+        {event.photos.slice(0, MAX_ALBUM_PHOTOS_PER_EVENT).map((photo) => (
+          <div
+            key={photo.id}
+            className="group relative aspect-square overflow-hidden rounded-[22px] bg-[var(--theme-dashed-bg)] shadow-[0_12px_28px_var(--theme-shadow)]"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo.imageDataUrl}
+              alt={event.eventTitle}
+              className="h-full w-full object-cover"
+            />
+            {isEditing ? (
+              <button
+                type="button"
+                onClick={() => onDeletePhoto(photo.id)}
+                className="absolute right-1.5 top-1.5 z-20 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-slate-950/90 text-[16px] font-black leading-none text-white shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
+                aria-label="Удалить фото из альбома"
+              >
+                ×
+              </button>
+            ) : null}
+          </div>
+        ))}
+        {Array.from({ length: freeSlots }).map((_, index) => (
+          <button
+            key={`${event.eventKey}-slot-${index}`}
+            type="button"
+            onClick={() => onAddPhotos(event)}
+            disabled={isUploading}
+            className="theme-dashed-card flex aspect-square items-center justify-center rounded-[22px] border-2 border-dashed text-[12px] font-bold disabled:opacity-55"
+          >
+            + фото
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -635,6 +767,9 @@ export default function MainScreen() {
   const [isUploadingAlbum, setIsUploadingAlbum] = useState(false);
   const [editingCanvasId, setEditingCanvasId] = useState<string | null>(null);
   const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
+  const [albumDraftTitle, setAlbumDraftTitle] = useState("");
+  const [albumDraftDateISO, setAlbumDraftDateISO] = useState("");
+  const [albumUploadTarget, setAlbumUploadTarget] = useState<AlbumUploadTarget | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -653,6 +788,21 @@ export default function MainScreen() {
     if (!editingCanvasId || editingCanvasId === "new") return undefined;
     return settings.drawingCanvases.find((canvas) => canvas.id === editingCanvasId);
   }, [editingCanvasId, settings.drawingCanvases]);
+  const albumEvents = useMemo(() => getAlbumEvents(settings.albumPhotos), [settings.albumPhotos]);
+  const albumDraftEventKey =
+    albumDraftTitle.trim() && albumDraftDateISO
+      ? getAlbumEventKey(albumDraftTitle, albumDraftDateISO)
+      : "";
+  const albumDraftExistingEvent = albumEvents.find(
+    (event) => event.eventKey === albumDraftEventKey,
+  );
+  const albumDraftMatchesExisting = Boolean(albumDraftExistingEvent);
+  const canCreateAlbumEvent =
+    Boolean(albumDraftTitle.trim() && albumDraftDateISO) &&
+    (albumDraftMatchesExisting
+      ? (albumDraftExistingEvent?.photos.length ?? MAX_ALBUM_PHOTOS_PER_EVENT) <
+        MAX_ALBUM_PHOTOS_PER_EVENT
+      : albumEvents.length < MAX_ALBUM_EVENTS);
 
   const onDeleteWidget = (widgetId: string) => {
     if (typeof window !== "undefined") {
@@ -762,21 +912,62 @@ export default function MainScreen() {
     setDraggingWidgetId(null);
   };
 
-  const onPickAlbumPhotos = () => {
+  const onPickAlbumPhotos = (target: AlbumUploadTarget) => {
+    const existingEvent = albumEvents.find((event) => event.eventKey === target.eventKey);
+    if (!existingEvent && albumEvents.length >= MAX_ALBUM_EVENTS) {
+      window.alert("В альбоме можно добавить максимум 3 события.");
+      return;
+    }
+    if (existingEvent && existingEvent.photos.length >= MAX_ALBUM_PHOTOS_PER_EVENT) {
+      window.alert("В одно событие можно добавить максимум 3 фото.");
+      return;
+    }
+
+    setAlbumUploadTarget(target);
     albumInputRef.current?.click();
+  };
+
+  const onPickDraftAlbumPhotos = () => {
+    const eventTitle = albumDraftTitle.trim();
+    if (!eventTitle || !albumDraftDateISO) {
+      window.alert("Сначала укажи название события и дату.");
+      return;
+    }
+
+    onPickAlbumPhotos({
+      eventKey: getAlbumEventKey(eventTitle, albumDraftDateISO),
+      eventTitle,
+      eventDateISO: albumDraftDateISO,
+    });
   };
 
   const onAlbumPhotosChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.currentTarget.files ?? []);
     event.currentTarget.value = "";
 
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      setAlbumUploadTarget(null);
+      return;
+    }
+    if (!albumUploadTarget) return;
+
+    const existingEvent = albumEvents.find(
+      (albumEvent) => albumEvent.eventKey === albumUploadTarget.eventKey,
+    );
+    const remainingSlots =
+      MAX_ALBUM_PHOTOS_PER_EVENT - (existingEvent?.photos.length ?? 0);
+    const acceptedFiles = files.slice(0, Math.max(0, remainingSlots));
+
+    if (acceptedFiles.length === 0) {
+      window.alert("В одно событие можно добавить максимум 3 фото.");
+      return;
+    }
 
     setIsUploadingAlbum(true);
 
     try {
       const photos = await Promise.all(
-        files.map(async (file) => ({
+        acceptedFiles.map(async (file) => ({
           id: createWidgetId(),
           imageDataUrl: await prepareImageForStorage(file, {
             maxDimension: 980,
@@ -784,6 +975,8 @@ export default function MainScreen() {
             targetLength: 520_000,
           }),
           createdAtISO: new Date().toISOString(),
+          eventTitle: albumUploadTarget.eventTitle,
+          eventDateISO: albumUploadTarget.eventDateISO,
         })),
       );
 
@@ -791,10 +984,20 @@ export default function MainScreen() {
         ...prev,
         albumPhotos: [...photos, ...prev.albumPhotos],
       }));
+
+      if (!existingEvent) {
+        setAlbumDraftTitle("");
+        setAlbumDraftDateISO("");
+      }
+
+      if (files.length > acceptedFiles.length) {
+        window.alert("Добавил только 3 фото: это максимум для одного события.");
+      }
     } catch {
       window.alert("Не удалось добавить фото в альбом. Попробуй выбрать другое изображение.");
     } finally {
       setIsUploadingAlbum(false);
+      setAlbumUploadTarget(null);
     }
   };
 
@@ -854,10 +1057,6 @@ export default function MainScreen() {
     }));
   };
 
-  const albumDateLabel =
-    settings.albumPhotos.length > 0
-      ? formatDateLong(settings.albumPhotos[0]?.createdAtISO.slice(0, 10) ?? settings.startDateISO)
-      : "Добавь первые фото";
   const canvasCountLabel =
     settings.drawingCanvases.length > 0
       ? `${settings.drawingCanvases.length} ${ruPlural(
@@ -1060,59 +1259,85 @@ export default function MainScreen() {
         </div>
       ) : null}
 
-      <div className="mt-10 flex items-center justify-between">
-        <div className="text-[28px] font-extrabold">Альбом</div>
-        <button
-          type="button"
-          onClick={onPickAlbumPhotos}
-          disabled={isUploadingAlbum}
-          className="theme-action-chip rounded-full border px-3 py-1.5 text-[12px] font-bold disabled:opacity-55"
-        >
-          {isUploadingAlbum ? "Загрузка..." : "+ фото"}
-        </button>
-      </div>
-
-      <div className="theme-dashed-card mt-5 rounded-[28px] border-2 border-dashed px-4 py-3 text-center text-[15px] font-semibold">
-        {albumDateLabel}
-      </div>
-
-      {settings.albumPhotos.length > 0 ? (
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          {settings.albumPhotos.map((photo) => (
-            <div key={photo.id} className="group relative aspect-square overflow-hidden rounded-[24px] shadow-[0_14px_34px_var(--theme-shadow)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.imageDataUrl}
-                alt="Фото из альбома"
-                className="h-full w-full object-cover"
-              />
-              {isEditingWidgets ? (
-                <button
-                  type="button"
-                  onClick={() => onDeleteAlbumPhoto(photo.id)}
-                  className="theme-icon-button absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border text-[16px] font-bold"
-                  aria-label="Удалить фото из альбома"
-                >
-                  ×
-                </button>
-              ) : null}
+      <div className="mt-10">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <div className="text-[28px] font-extrabold">Альбом</div>
+            <div className="theme-muted-text mt-1 text-[13px] font-semibold">
+              {albumEvents.length > 0
+                ? `${albumEvents.length}/3 ${ruPlural(
+                    albumEvents.length,
+                    "событие",
+                    "события",
+                    "событий",
+                  )}`
+                : "Добавь событие и до 3 фото"}
             </div>
-          ))}
+          </div>
+          <div className="theme-action-chip rounded-full border px-3 py-1.5 text-[11px] font-bold">
+            максимум 3 x 3
+          </div>
         </div>
-      ) : (
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          {["фото", "фото", "фото"].map((item, index) => (
+
+        <div className="theme-dashed-card mt-5 rounded-[30px] border-2 border-dashed p-4">
+          <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
+            <label className="block">
+              <span className="theme-muted-text mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em]">
+                Название события
+              </span>
+              <input
+                value={albumDraftTitle}
+                onChange={(event) => setAlbumDraftTitle(event.target.value)}
+                placeholder="Например: первая поездка"
+                maxLength={32}
+                className="theme-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
+              />
+            </label>
+            <label className="block">
+              <span className="theme-muted-text mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.16em]">
+                Дата
+              </span>
+              <input
+                type="date"
+                value={albumDraftDateISO}
+                onChange={(event) => setAlbumDraftDateISO(event.target.value)}
+                className="theme-input theme-date-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="theme-muted-text text-[12px] font-semibold">
+              {albumEvents.length >= MAX_ALBUM_EVENTS && !albumDraftMatchesExisting
+                ? "Лимит событий достигнут. Удали событие или добавь фото в существующее."
+                : "После выбора даты и названия можно добавить до 3 фото."}
+            </div>
             <button
-              key={index}
               type="button"
-              onClick={onPickAlbumPhotos}
-              className="theme-dashed-card flex aspect-square items-center justify-center rounded-[24px] border-2 border-dashed text-[14px] font-normal"
+              onClick={onPickDraftAlbumPhotos}
+              disabled={!canCreateAlbumEvent || isUploadingAlbum}
+              className="theme-primary-button rounded-full px-5 py-2.5 text-[13px] font-extrabold shadow-[0_14px_28px_var(--theme-shadow)] disabled:cursor-not-allowed disabled:opacity-45"
             >
-              {item}
+              {isUploadingAlbum ? "Загрузка..." : "+ фото к событию"}
             </button>
-          ))}
+          </div>
         </div>
-      )}
+
+        {albumEvents.length > 0 ? (
+          <div className="mt-5 grid gap-4">
+            {albumEvents.map((event) => (
+              <AlbumEventCard
+                key={event.eventKey}
+                event={event}
+                isEditing={isEditingWidgets}
+                isUploading={isUploadingAlbum}
+                onAddPhotos={onPickAlbumPhotos}
+                onDeletePhoto={onDeleteAlbumPhoto}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
 
       <input
         ref={albumInputRef}

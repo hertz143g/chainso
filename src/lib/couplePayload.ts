@@ -30,6 +30,16 @@ function jsonObject(value: unknown): Record<string, unknown> {
     : {};
 }
 
+function parseJsonObject(value: string | null | undefined): Record<string, unknown> {
+  if (!value) return {};
+
+  try {
+    return jsonObject(JSON.parse(value));
+  } catch {
+    return {};
+  }
+}
+
 export function settingsFromCouple(couple: CoupleWithBlocks): CouplePayload {
   const settings = getDefaultSettings();
 
@@ -38,13 +48,18 @@ export function settingsFromCouple(couple: CoupleWithBlocks): CouplePayload {
     .map((widget) => jsonObject(widget.settings)) as Partial<RelationshipSettings>["widgets"];
   const albumPhotos = couple.albumPhotos
     .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((photo) =>
-      jsonObject({
+    .map((photo) => {
+      const metadata = parseJsonObject(photo.caption);
+
+      return jsonObject({
         id: photo.id,
         imageDataUrl: photo.mediaAsset.publicUrl,
         createdAtISO: photo.createdAt.toISOString(),
-      }),
-    ) as Partial<RelationshipSettings>["albumPhotos"];
+        eventTitle: typeof metadata.eventTitle === "string" ? metadata.eventTitle : undefined,
+        eventDateISO:
+          typeof metadata.eventDateISO === "string" ? metadata.eventDateISO : undefined,
+      });
+    }) as Partial<RelationshipSettings>["albumPhotos"];
   const drawingCanvases = couple.drawingCanvases
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((canvas) => jsonObject(canvas.snapshotData)) as Partial<
