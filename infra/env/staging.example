@@ -1,0 +1,6 @@
+# App-stack settings for staging.
+# Domains are configured in infra/env/proxy.env.
+
+COMPOSE_PROJECT_NAME=chainso-staging
+APP_NETWORK_ALIAS=chainso-staging-app
+EDGE_NETWORK=chainso_edge
