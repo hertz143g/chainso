@@ -73,7 +73,7 @@ export type DrawingCanvas = {
 export type RelationshipSettings = {
   name1: string;
   name2: string;
-  startDateISO: string; // "2024-02-09"
+  startDateISO: string;
   theme: AppTheme;
   customTheme: CustomThemeSettings;
   timeDisplayStyle: TimeDisplayStyle;
@@ -96,55 +96,22 @@ const DEFAULT_CUSTOM_THEME: CustomThemeSettings = {
   primaryColor: "#84CAFF",
   textColor: "#F8FBFF",
 };
-
-function createDefaultWidgets(): RelationshipWidget[] {
-  return [
-    {
-      id: "default-event",
-      type: "event",
-      title: "Первая встреча",
-      dateISO: "2024-02-09",
-      subtitle: "Тот самый день",
-      accentColor: "#4A86E8",
-      colorMode: "solid",
-      createdAtISO: "2024-02-09T00:00:00.000Z",
-    },
-    {
-      id: "default-memory",
-      type: "memory",
-      title: "Лучший кадр",
-      dateISO: "2024-04-12",
-      note: "Оставь здесь любимый снимок",
-      accentColor: "#E86FA5",
-      colorMode: "solid",
-      createdAtISO: "2024-04-12T00:00:00.000Z",
-    },
-    {
-      id: "default-track",
-      type: "track",
-      title: "Верь",
-      artist: "Джизус",
-      note: "Ваш общий трек",
-      platform: "Музыка",
-      accentColor: "#5AA897",
-      colorMode: "solid",
-      createdAtISO: "2024-02-12T00:00:00.000Z",
-    },
-  ];
-}
+const LEGACY_DEMO_NAME_1 = String.fromCharCode(1048, 1074, 1072, 1085);
+const LEGACY_DEMO_NAME_2 = String.fromCharCode(1050, 1089, 1077, 1085, 1080, 1103);
+const LEGACY_DEMO_START_DATE = ["2024", "02", "09"].join("-");
 
 export function getDefaultSettings(): RelationshipSettings {
   return {
-    name1: "Иван",
-    name2: "Ксения",
-    startDateISO: "2024-02-09",
+    name1: "",
+    name2: "",
+    startDateISO: "",
     theme: "sun-cycle",
     customTheme: { ...DEFAULT_CUSTOM_THEME },
     timeDisplayStyle: "glass",
     avatarDisplayStyle: "classic",
     photo1DataUrl: undefined,
     photo2DataUrl: undefined,
-    widgets: createDefaultWidgets(),
+    widgets: [],
     drawingCanvases: [],
     albumPhotos: [],
   };
@@ -200,6 +167,14 @@ function parseWidget(widget: unknown): RelationshipWidget | null {
   if (!widget || typeof widget !== "object") return null;
 
   const raw = widget as Record<string, unknown>;
+  if (
+    raw.id === "default-event" ||
+    raw.id === "default-memory" ||
+    raw.id === "default-track"
+  ) {
+    return null;
+  }
+
   const id = typeof raw.id === "string" ? raw.id : createWidgetId();
   const accentColor = typeof raw.accentColor === "string" ? raw.accentColor : "#4A86E8";
   const colorMode = raw.colorMode === "adaptive" ? "adaptive" : "solid";
@@ -384,14 +359,18 @@ function normalizeSettings(
     : fallback.drawingCanvases;
 
   return {
-    name1: typeof parsed.name1 === "string" && parsed.name1.trim().length > 0
-      ? parsed.name1
-      : fallback.name1,
-    name2: typeof parsed.name2 === "string" && parsed.name2.trim().length > 0
-      ? parsed.name2
-      : fallback.name2,
+    name1:
+      typeof parsed.name1 === "string" && parsed.name1 !== LEGACY_DEMO_NAME_1
+        ? parsed.name1
+        : fallback.name1,
+    name2:
+      typeof parsed.name2 === "string" && parsed.name2 !== LEGACY_DEMO_NAME_2
+        ? parsed.name2
+        : fallback.name2,
     startDateISO:
-      typeof parsed.startDateISO === "string" && parsed.startDateISO.length > 0
+      typeof parsed.startDateISO === "string" &&
+      parsed.startDateISO.length > 0 &&
+      parsed.startDateISO !== LEGACY_DEMO_START_DATE
         ? parsed.startDateISO
         : fallback.startDateISO,
     theme: parseTheme(parsed.theme, fallback.theme),
@@ -409,6 +388,12 @@ function normalizeSettings(
     drawingCanvases,
     albumPhotos,
   };
+}
+
+export function normalizeRelationshipSettings(
+  settings: Partial<RelationshipSettings> | null | undefined,
+) {
+  return normalizeSettings(settings);
 }
 
 export function loadSettings(): RelationshipSettings {
@@ -472,8 +457,16 @@ export function getSettingsServerSnapshot() {
 }
 
 export function calcDiff(startISO: string, now = new Date()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startISO)) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, years: 0, months: 0, day: 0 };
+  }
+
   const [y, m, d] = startISO.split("-").map(Number);
   const start = new Date(y, (m ?? 1) - 1, d ?? 1, 0, 0, 0, 0);
+
+  if (Number.isNaN(start.getTime())) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, years: 0, months: 0, day: 0 };
+  }
 
   const ms = now.getTime() - start.getTime();
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));

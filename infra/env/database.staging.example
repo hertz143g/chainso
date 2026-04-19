@@ -1,0 +1,7 @@
+# Copy this file on the server to infra/env/database.staging.env
+# and set a strong unique password before starting the staging stack.
+
+POSTGRES_DB=chainso_staging
+POSTGRES_USER=chainso_staging
+POSTGRES_PASSWORD=replace-with-a-strong-staging-password
+DATABASE_URL=postgresql://chainso_staging:replace-with-a-strong-staging-password@postgres:5432/chainso_staging?schema=public

@@ -1,0 +1,10 @@
+# Shared Caddy proxy settings.
+
+PROXY_PROJECT_NAME=chainso-proxy
+EDGE_NETWORK=chainso_edge
+
+PROD_DOMAINS='chainso.ru golover.chainso.ru lover.chainso.ru'
+PROD_UPSTREAM=chainso-prod-app:3000
+
+STAGING_DOMAINS='staging.chainso.ru'
+STAGING_UPSTREAM=chainso-staging-app:3000

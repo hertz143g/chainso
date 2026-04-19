@@ -1,0 +1,7 @@
+# Copy this file on the server to infra/env/database.env
+# and set a strong unique password before starting the stack.
+
+POSTGRES_DB=chainso
+POSTGRES_USER=chainso
+POSTGRES_PASSWORD=replace-with-a-strong-password
+DATABASE_URL=postgresql://chainso:replace-with-a-strong-password@postgres:5432/chainso?schema=public
