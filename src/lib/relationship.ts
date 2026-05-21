@@ -99,10 +99,6 @@ const DEFAULT_CUSTOM_THEME: CustomThemeSettings = {
   primaryColor: "#84CAFF",
   textColor: "#F8FBFF",
 };
-const LEGACY_DEMO_NAME_1 = String.fromCharCode(1048, 1074, 1072, 1085);
-const LEGACY_DEMO_NAME_2 = String.fromCharCode(1050, 1089, 1077, 1085, 1080, 1103);
-const LEGACY_DEMO_START_DATE = ["2024", "02", "09"].join("-");
-
 export function getDefaultSettings(): RelationshipSettings {
   return {
     name1: "",
@@ -368,18 +364,10 @@ function normalizeSettings(
     : fallback.drawingCanvases;
 
   return {
-    name1:
-      typeof parsed.name1 === "string" && parsed.name1 !== LEGACY_DEMO_NAME_1
-        ? parsed.name1
-        : fallback.name1,
-    name2:
-      typeof parsed.name2 === "string" && parsed.name2 !== LEGACY_DEMO_NAME_2
-        ? parsed.name2
-        : fallback.name2,
+    name1: typeof parsed.name1 === "string" ? parsed.name1 : fallback.name1,
+    name2: typeof parsed.name2 === "string" ? parsed.name2 : fallback.name2,
     startDateISO:
-      typeof parsed.startDateISO === "string" &&
-      parsed.startDateISO.length > 0 &&
-      parsed.startDateISO !== LEGACY_DEMO_START_DATE
+      typeof parsed.startDateISO === "string" && parsed.startDateISO.length > 0
         ? parsed.startDateISO
         : fallback.startDateISO,
     theme: parseTheme(parsed.theme, fallback.theme),
