@@ -190,7 +190,7 @@ function WidgetCard({
     <div
       data-widget-id={widget.id}
       className={cx(
-        "relative col-span-2 transition duration-200",
+        "relative col-span-2 overflow-hidden rounded-[34px] transition duration-200",
         isEditing && "cursor-grab select-none touch-none active:cursor-grabbing",
         isDragging && "z-40 scale-[0.985] opacity-55 shadow-[0_22px_54px_var(--theme-shadow)]",
       )}
@@ -222,9 +222,10 @@ function CoupleAvatar({
   photoDataUrl?: string;
   style: AvatarDisplayStyle;
 }) {
+  const displayName = name.trim() || "Имя";
   const image = photoDataUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={photoDataUrl} alt={name} className="h-full w-full object-cover" />
+    <img src={photoDataUrl} alt={displayName} className="h-full w-full object-cover" />
   ) : null;
 
   if (style === "duo-card") {
@@ -234,8 +235,8 @@ function CoupleAvatar({
           <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
             {image}
           </div>
-          <div className="mt-2 truncate text-center text-[16px] font-extrabold leading-tight">
-            {name}
+          <div className="theme-glass mt-2 truncate rounded-full px-3 py-2 text-center text-[16px] font-extrabold leading-tight shadow-[0_10px_24px_var(--theme-shadow)]">
+            {displayName}
           </div>
         </div>
       </div>
@@ -249,8 +250,8 @@ function CoupleAvatar({
           <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
             {image}
           </div>
-          <div className="mt-2 truncate text-center text-[16px] font-extrabold leading-tight">
-            {name}
+          <div className="theme-glass mt-2 truncate rounded-full px-3 py-2 text-center text-[16px] font-extrabold leading-tight shadow-[0_10px_24px_var(--theme-shadow)]">
+            {displayName}
           </div>
         </div>
       </div>
@@ -262,7 +263,9 @@ function CoupleAvatar({
       <div className="theme-avatar-ring theme-avatar-surface h-[156px] w-[156px] overflow-hidden rounded-full ring-[3px]">
         {image}
       </div>
-      <div className="mt-3 text-[18px] font-semibold">{name}</div>
+      <div className="theme-glass mt-3 rounded-full px-4 py-2 text-[18px] font-semibold shadow-[0_10px_24px_var(--theme-shadow)]">
+        {displayName}
+      </div>
     </div>
   );
 }
@@ -278,25 +281,27 @@ function CoupleCameo({
   photo1DataUrl?: string;
   photo2DataUrl?: string;
 }) {
+  const displayName1 = name1.trim() || "Имя 1";
+  const displayName2 = name2.trim() || "Имя 2";
   return (
     <div className="relative w-full pb-2 pt-3">
       <div className="relative mx-auto flex w-[316px] items-center justify-center">
         <div className="theme-avatar-ring theme-avatar-surface relative z-20 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo1DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo1DataUrl} alt={name1} className="h-full w-full object-cover" />
+            <img src={photo1DataUrl} alt={displayName1} className="h-full w-full object-cover" />
           ) : null}
         </div>
         <div className="theme-avatar-ring theme-avatar-surface relative z-10 -ml-8 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo2DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo2DataUrl} alt={name2} className="h-full w-full object-cover" />
+            <img src={photo2DataUrl} alt={displayName2} className="h-full w-full object-cover" />
           ) : null}
         </div>
       </div>
       <div className="mt-3 flex justify-center">
         <div className="theme-glass rounded-full px-5 py-2 text-[17px] font-extrabold shadow-[0_12px_30px_var(--theme-shadow)] backdrop-blur-md">
-          {name1} · {name2}
+          {displayName1} · {displayName2}
         </div>
       </div>
     </div>
