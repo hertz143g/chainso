@@ -66,7 +66,12 @@ function ColorBackdrop({
   imageOverlay?: boolean;
 }) {
   return (
-    <div className={cx("absolute inset-0", imageOverlay && "opacity-45 mix-blend-screen")}>
+    <div
+      className={cx(
+        "absolute inset-0 overflow-hidden rounded-[inherit]",
+        imageOverlay && "opacity-45 mix-blend-screen",
+      )}
+    >
       <AtmosphericBackdrop
         accentColor={widget.accentColor}
         colorMode={widget.colorMode}
@@ -89,7 +94,7 @@ function FullImageLayer({
   if (!imageDataUrl) return null;
 
   return (
-    <>
+    <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imageDataUrl}
@@ -104,7 +109,7 @@ function FullImageLayer({
             : "bg-[linear-gradient(180deg,var(--theme-image-overlay-soft)_0%,var(--theme-image-overlay-mid)_40%,var(--theme-image-overlay-strong)_100%)]",
         )}
       />
-    </>
+    </div>
   );
 }
 
@@ -169,7 +174,7 @@ export default function WidgetVisual({
     return (
       <article
         className={cx(
-          "theme-widget-card relative col-span-2 min-h-[188px] overflow-hidden rounded-[32px] border p-3.5",
+          "theme-widget-card relative isolate col-span-2 min-h-[188px] overflow-hidden rounded-[32px] border p-3.5",
           className,
         )}
       >
@@ -237,7 +242,7 @@ export default function WidgetVisual({
     return (
       <article
         className={cx(
-          "theme-widget-card relative col-span-2 min-h-[152px] overflow-hidden rounded-[30px] border p-4",
+          "theme-widget-card relative isolate col-span-2 min-h-[152px] overflow-hidden rounded-[30px] border p-4",
           className,
         )}
       >
@@ -299,7 +304,7 @@ export default function WidgetVisual({
   return (
     <article
       className={cx(
-        "theme-widget-card relative col-span-2 min-h-[222px] overflow-hidden rounded-[32px] border p-4",
+        "theme-widget-card relative isolate col-span-2 min-h-[222px] overflow-hidden rounded-[32px] border p-4",
         className,
       )}
     >
