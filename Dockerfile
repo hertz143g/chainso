@@ -11,14 +11,7 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run db:generate && npm run build
-
-FROM deps AS migrate
-WORKDIR /app
-COPY prisma ./prisma
-COPY scripts ./scripts
-RUN npm run db:generate
-CMD ["npm", "run", "db:deploy"]
+RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
