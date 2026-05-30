@@ -41,6 +41,11 @@ const THEME_OPTIONS: Array<{
     description: "Свежая светлая тема: голубой, лавандовый и чистые стеклянные поверхности.",
   },
   {
+    id: "liquid-glass",
+    title: "Liquid Glass",
+    description: "Стеклянная тема с мягким blur, бликами и более премиальной глубиной слоев.",
+  },
+  {
     id: "noir",
     title: "Графитовый шелк",
     description: "Темная спокойная тема: графит, холодный свет и дорогие матовые панели.",
@@ -88,6 +93,15 @@ const AVATAR_STYLE_OPTIONS: Array<{
   { id: "classic", title: "Круги" },
   { id: "halo", title: "Портреты" },
   { id: "duo-card", title: "Камео" },
+];
+
+const ACCENT_OPTIONS = [
+  "#7B7CFF",
+  "#4A86E8",
+  "#E86FA5",
+  "#5AA897",
+  "#F59E0B",
+  "#FF7A5C",
 ];
 
 function ThemePreviewDots({
@@ -151,6 +165,15 @@ function ThemePreviewDots({
       <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#dfeeff,#f2f1ff,#d4f0ea)]">
         <span className="absolute left-2 top-2 h-5 w-8 rounded-full bg-white/70 blur-[5px]" />
         <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#86d9e2]/80 blur-[2px]" />
+      </div>
+    );
+  }
+
+  if (theme === "liquid-glass") {
+    return (
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#d9ecff,#eef7ff,#f4f9ff)]">
+        <span className="absolute left-2 top-2 h-5 w-9 rounded-full bg-white/80 blur-[4px]" />
+        <span className="absolute bottom-1 right-2 h-5 w-5 rounded-full border border-white/70 bg-[#86d9ff]/40 shadow-[inset_0_1px_4px_rgba(255,255,255,0.65)]" />
       </div>
     );
   }
@@ -407,6 +430,31 @@ export default function SettingsScreen() {
           className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
         />
 
+        <div className="theme-panel-section mt-6 rounded-[24px] p-4">
+          <div className="text-[14px] font-extrabold">Accent color</div>
+          <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
+            Влияет на главные кнопки, активные состояния, focus ring и декоративное свечение.
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {ACCENT_OPTIONS.map((color) => {
+              const selected = current.accentColor === color;
+
+              return (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => patchDraft({ accentColor: color })}
+                  className={`theme-swatch h-11 w-11 rounded-full border-2 transition ${
+                    selected ? "theme-swatch-selected" : ""
+                  }`}
+                  style={{ backgroundColor: color }}
+                  aria-label={`Выбрать акцент ${color}`}
+                />
+              );
+            })}
+          </div>
+        </div>
+
         <div className="mt-6">
           <div className="theme-form-label mb-3 text-[13px] font-semibold">Тема приложения:</div>
           <div className="space-y-3">
@@ -446,7 +494,7 @@ export default function SettingsScreen() {
           <div className="theme-option-card mt-4 rounded-[24px] border px-3.5 py-4">
             <div className="text-[14px] font-extrabold">Настройка своей темы</div>
             <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
-              Эти цвета применяются ко всему интерфейсу: фону, карточкам, кнопкам и тексту.
+              Эти цвета применяются ко всему интерфейсу. Акцент отдельно задается выше.
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {CUSTOM_THEME_FIELDS.map((field) => (
@@ -527,7 +575,7 @@ export default function SettingsScreen() {
           disabled={isSaving || isUploadingPhoto1 || isUploadingPhoto2}
           className="theme-primary-button mt-6 w-full rounded-[18px] py-3 text-[16px] font-semibold disabled:opacity-60"
         >
-          Сохранить
+          {isSaving ? "Сохраняю..." : "Сохранить"}
         </button>
 
         <input

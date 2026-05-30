@@ -36,6 +36,27 @@ function FloatingDots() {
   );
 }
 
+function LiquidGlassFloaters() {
+  return (
+    <div className="theme-floating-dots theme-floating-dots-liquid">
+      {Array.from({ length: 11 }).map((_, index) => (
+        <span
+          key={index}
+          style={
+            {
+              "--bubble-index": index,
+              "--bubble-left": `${6 + index * 8.4}%`,
+              "--bubble-size": `${11 + (index % 4) * 6}px`,
+              "--bubble-duration": `${11 + index * 0.7}s`,
+              "--bubble-delay": `${index * -0.8}s`,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
 function MatrixRain() {
   const columns = [
     "0101",
@@ -105,6 +126,18 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
         <span className="theme-blob aurora-blob-c" />
         <span className="theme-sheen aurora-sheen" />
         <FloatingDots />
+      </div>
+    );
+  }
+
+  if (theme === "liquid-glass") {
+    return (
+      <div className="theme-ornaments theme-ornaments-liquid" aria-hidden="true">
+        <span className="theme-blob liquid-blob-a" />
+        <span className="theme-blob liquid-blob-b" />
+        <span className="theme-blob liquid-blob-c" />
+        <span className="theme-sheen liquid-sheen" />
+        <LiquidGlassFloaters />
       </div>
     );
   }
@@ -182,6 +215,39 @@ function buildCustomThemeStyle(theme: CustomThemeSettings): CSSProperties {
   } as CSSProperties;
 }
 
+function hexToRgb(hex: string) {
+  const normalized = hex.replace("#", "");
+  const value = normalized.length === 3
+    ? normalized
+        .split("")
+        .map((char) => `${char}${char}`)
+        .join("")
+    : normalized;
+
+  const int = Number.parseInt(value, 16);
+  return {
+    r: (int >> 16) & 255,
+    g: (int >> 8) & 255,
+    b: int & 255,
+  };
+}
+
+function getContrastText(hex: string) {
+  const { r, g, b } = hexToRgb(hex);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.64 ? "#0B1020" : "#F8FBFF";
+}
+
+function buildAccentStyle(accentColor: string): CSSProperties {
+  return {
+    "--theme-primary": accentColor,
+    "--theme-on-primary": getContrastText(accentColor),
+    "--theme-ring": `color-mix(in srgb, ${accentColor} 72%, white)`,
+    "--theme-control-active-bg": `color-mix(in srgb, ${accentColor} 18%, transparent)`,
+    "--theme-control-active-border": `color-mix(in srgb, ${accentColor} 62%, white 12%)`,
+  } as CSSProperties;
+}
+
 export default function AppFrame({ children }: { children: ReactNode }) {
   const settings = useRelationshipSettings();
   const [phase, setPhase] = useState<SunPhase>("day");
@@ -196,10 +262,21 @@ export default function AppFrame({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const themeStyle =
+    settings.theme === "custom"
+      ? {
+          ...buildAccentStyle(settings.accentColor),
+          ...buildCustomThemeStyle({
+            ...settings.customTheme,
+            primaryColor: settings.accentColor,
+          }),
+        }
+      : buildAccentStyle(settings.accentColor);
+
   return (
     <main
       className={`app-frame app-theme-${settings.theme} app-phase-${phase}`}
-      style={settings.theme === "custom" ? buildCustomThemeStyle(settings.customTheme) : undefined}
+      style={themeStyle}
     >
       <ThemeAtmosphere theme={settings.theme} />
       <div className="relative z-10 mx-auto min-h-screen w-full max-w-[360px] overflow-x-hidden px-4 py-6">

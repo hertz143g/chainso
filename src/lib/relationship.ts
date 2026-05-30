@@ -6,6 +6,7 @@ export type AppTheme =
   | "linen"
   | "sage"
   | "aurora"
+  | "liquid-glass"
   | "noir"
   | "ember"
   | "neo"
@@ -78,6 +79,7 @@ export type RelationshipSettings = {
   name2: string;
   startDateISO: string;
   theme: AppTheme;
+  accentColor: string;
   customTheme: CustomThemeSettings;
   timeDisplayStyle: TimeDisplayStyle;
   avatarDisplayStyle: AvatarDisplayStyle;
@@ -99,12 +101,16 @@ const DEFAULT_CUSTOM_THEME: CustomThemeSettings = {
   primaryColor: "#84CAFF",
   textColor: "#F8FBFF",
 };
+
+const DEFAULT_ACCENT_COLOR = "#7B7CFF";
+
 export function getDefaultSettings(): RelationshipSettings {
   return {
     name1: "",
     name2: "",
     startDateISO: "",
     theme: "sun-cycle",
+    accentColor: DEFAULT_ACCENT_COLOR,
     customTheme: { ...DEFAULT_CUSTOM_THEME },
     timeDisplayStyle: "glass",
     avatarDisplayStyle: "classic",
@@ -282,6 +288,7 @@ function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
     theme === "linen" ||
     theme === "sage" ||
     theme === "aurora" ||
+    theme === "liquid-glass" ||
     theme === "noir" ||
     theme === "ember" ||
     theme === "neo" ||
@@ -371,6 +378,7 @@ function normalizeSettings(
         ? parsed.startDateISO
         : fallback.startDateISO,
     theme: parseTheme(parsed.theme, fallback.theme),
+    accentColor: parseHexColor(parsed.accentColor, fallback.accentColor),
     customTheme: parseCustomTheme(parsed.customTheme, fallback.customTheme),
     timeDisplayStyle: parseTimeDisplayStyle(parsed.timeDisplayStyle, fallback.timeDisplayStyle),
     avatarDisplayStyle: parseAvatarDisplayStyle(

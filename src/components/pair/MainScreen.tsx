@@ -1353,8 +1353,11 @@ export default function MainScreen() {
           ))}
         </div>
       ) : (
-        <div className="theme-dashed-card mt-6 rounded-[28px] border-2 border-dashed px-5 py-8 text-center text-[15px]">
-          Пока нет виджетов. Добавь первый, и здесь появится ваша история.
+        <div className="theme-empty-state mt-6 rounded-[30px] px-5 py-8 text-center">
+          <div className="text-[17px] font-extrabold">Пока пусто</div>
+          <div className="theme-subtle-text mt-2 text-[14px] leading-relaxed">
+            Добавь первый виджет, чтобы собрать вашу историю в живую ленту, а не в сырой список.
+          </div>
         </div>
       )}
 
@@ -1393,7 +1396,14 @@ export default function MainScreen() {
             />
           ))}
         </div>
-      ) : null}
+      ) : (
+        <div className="theme-empty-state mt-5 rounded-[30px] px-5 py-7 text-center">
+          <div className="text-[16px] font-extrabold">Здесь будут ваши холсты</div>
+          <div className="theme-subtle-text mt-2 text-[14px] leading-relaxed">
+            Открой чистый холст, набросай что-нибудь и сохрани это прямо в карусель.
+          </div>
+        </div>
+      )}
 
       <div className="mt-10">
         <div className="flex items-end justify-between gap-3">
@@ -1532,7 +1542,16 @@ export default function MainScreen() {
               />
             ))}
           </div>
-        ) : null}
+        ) : (
+          !isAlbumComposerOpen && (
+            <div className="theme-empty-state mt-5 rounded-[30px] px-5 py-8 text-center">
+              <div className="text-[16px] font-extrabold">Альбом пока пустой</div>
+              <div className="theme-subtle-text mt-2 text-[14px] leading-relaxed">
+                Добавь событие с датой и собери до трех кадров в аккуратную историю.
+              </div>
+            </div>
+          )
+        )}
       </div>
 
       <input
