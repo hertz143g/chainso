@@ -3,13 +3,8 @@ export type WidgetType = "event" | "memory" | "track";
 export type WidgetColorMode = "solid" | "adaptive";
 export type AppTheme =
   | "sun-cycle"
-  | "linen"
-  | "sage"
-  | "aurora"
-  | "liquid-glass"
-  | "noir"
-  | "ember"
-  | "neo"
+  | "light"
+  | "dark"
   | "custom";
 export type TimeDisplayStyle = "hourglass" | "glass" | "orbits";
 export type AvatarDisplayStyle = "classic" | "halo" | "duo-card";
@@ -285,20 +280,29 @@ function parseDrawingCanvas(canvas: unknown): DrawingCanvas | null {
 function parseTheme(theme: unknown, fallback: AppTheme): AppTheme {
   if (
     theme === "sun-cycle" ||
-    theme === "linen" ||
-    theme === "sage" ||
-    theme === "aurora" ||
-    theme === "liquid-glass" ||
-    theme === "noir" ||
-    theme === "ember" ||
-    theme === "neo" ||
+    theme === "light" ||
+    theme === "dark" ||
     theme === "custom"
   ) {
     return theme;
   }
-  if (theme === "kitty") return "linen";
-  if (theme === "aquarium") return "sage";
-  if (theme === "pearl") return "aurora";
+
+  if (
+    theme === "linen" ||
+    theme === "sage" ||
+    theme === "aurora" ||
+    theme === "liquid-glass" ||
+    theme === "kitty" ||
+    theme === "aquarium" ||
+    theme === "pearl"
+  ) {
+    return "light";
+  }
+
+  if (theme === "noir" || theme === "ember" || theme === "neo") {
+    return "dark";
+  }
+
   return fallback;
 }
 

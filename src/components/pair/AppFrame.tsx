@@ -36,91 +36,10 @@ function FloatingDots() {
   );
 }
 
-function LiquidGlassFloaters() {
-  return (
-    <div className="theme-floating-dots theme-floating-dots-liquid">
-      {Array.from({ length: 11 }).map((_, index) => (
-        <span
-          key={index}
-          style={
-            {
-              "--bubble-index": index,
-              "--bubble-left": `${6 + index * 8.4}%`,
-              "--bubble-size": `${11 + (index % 4) * 6}px`,
-              "--bubble-duration": `${11 + index * 0.7}s`,
-              "--bubble-delay": `${index * -0.8}s`,
-            } as CSSProperties
-          }
-        />
-      ))}
-    </div>
-  );
-}
-
-function MatrixRain() {
-  const columns = [
-    "0101",
-    "CHAIN",
-    "1010",
-    "<>{}",
-    "SO",
-    "0110",
-    "LOVE",
-    "1001",
-    "[]()",
-    "0011",
-    "SYNC",
-    "1110",
-    "{}",
-    "0100",
-    "HEART",
-    "1011",
-  ];
-
-  return (
-    <div className="theme-matrix-rain">
-      {columns.map((text, index) => (
-        <span
-          key={`${text}-${index}`}
-          style={
-            {
-              "--matrix-left": `${index * 6.6}%`,
-              "--matrix-duration": `${6.5 + (index % 5) * 1.1}s`,
-              "--matrix-delay": `${index * -0.55}s`,
-            } as CSSProperties
-          }
-        >
-          {text}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function ThemeAtmosphere({ theme }: { theme: string }) {
-  if (theme === "linen") {
+  if (theme === "light") {
     return (
-      <div className="theme-ornaments theme-ornaments-linen" aria-hidden="true">
-        <span className="theme-blob linen-blob-a" />
-        <span className="theme-blob linen-blob-b" />
-        <span className="theme-sheen linen-sheen" />
-      </div>
-    );
-  }
-
-  if (theme === "sage") {
-    return (
-      <div className="theme-ornaments theme-ornaments-sage" aria-hidden="true">
-        <span className="theme-blob sage-blob-a" />
-        <span className="theme-blob sage-blob-b" />
-        <span className="theme-sheen sage-sheen" />
-      </div>
-    );
-  }
-
-  if (theme === "aurora") {
-    return (
-      <div className="theme-ornaments theme-ornaments-aurora" aria-hidden="true">
+      <div className="theme-ornaments theme-ornaments-light" aria-hidden="true">
         <span className="theme-blob aurora-blob-a" />
         <span className="theme-blob aurora-blob-b" />
         <span className="theme-blob aurora-blob-c" />
@@ -130,29 +49,7 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
     );
   }
 
-  if (theme === "liquid-glass") {
-    return (
-      <div className="theme-ornaments theme-ornaments-liquid" aria-hidden="true">
-        <span className="theme-blob liquid-blob-a" />
-        <span className="theme-blob liquid-blob-b" />
-        <span className="theme-blob liquid-blob-c" />
-        <span className="theme-sheen liquid-sheen" />
-        <LiquidGlassFloaters />
-      </div>
-    );
-  }
-
-  if (theme === "neo") {
-    return (
-      <div className="theme-ornaments theme-ornaments-neo" aria-hidden="true">
-        <MatrixRain />
-        <span className="theme-blob neo-blob-a" />
-        <span className="theme-blob neo-blob-b" />
-      </div>
-    );
-  }
-
-  if (theme === "noir" || theme === "ember" || theme === "custom") {
+  if (theme === "dark" || theme === "custom") {
     return (
       <div className="theme-ornaments theme-ornaments-dark" aria-hidden="true">
         <span className={`theme-blob ${theme}-blob-a`} />
@@ -265,13 +162,15 @@ export default function AppFrame({ children }: { children: ReactNode }) {
   const themeStyle =
     settings.theme === "custom"
       ? {
-          ...buildAccentStyle(settings.accentColor),
           ...buildCustomThemeStyle({
             ...settings.customTheme,
             primaryColor: settings.accentColor,
           }),
+          ...buildAccentStyle(settings.accentColor),
         }
-      : buildAccentStyle(settings.accentColor);
+      : settings.theme === "light" || settings.theme === "dark"
+        ? buildAccentStyle(settings.accentColor)
+        : undefined;
 
   return (
     <main

@@ -26,39 +26,14 @@ const THEME_OPTIONS: Array<{
     description: "Живая версия текущей темы: фон меняется утром, днем, на закате и ночью.",
   },
   {
-    id: "linen",
-    title: "Теплый лен",
-    description: "Светлая спокойная тема: кремовый фон, мягкие карточки и теплые акценты.",
+    id: "light",
+    title: "Чистый свет",
+    description: "Светлая базовая тема: воздух, стеклянные панели и акцентный цвет без визуального шума.",
   },
   {
-    id: "sage",
-    title: "Тихий сад",
-    description: "Природная тема с шалфеем, молочными панелями и очень мягким контрастом.",
-  },
-  {
-    id: "aurora",
-    title: "Воздушная аврора",
-    description: "Свежая светлая тема: голубой, лавандовый и чистые стеклянные поверхности.",
-  },
-  {
-    id: "liquid-glass",
-    title: "Liquid Glass",
-    description: "Стеклянная тема с мягким blur, бликами и более премиальной глубиной слоев.",
-  },
-  {
-    id: "noir",
-    title: "Графитовый шелк",
-    description: "Темная спокойная тема: графит, холодный свет и дорогие матовые панели.",
-  },
-  {
-    id: "ember",
-    title: "Ночной янтарь",
-    description: "Темная теплая тема с огненными акцентами, но без кислотного перегруза.",
-  },
-  {
-    id: "neo",
-    title: "Neo Matrix",
-    description: "Черно-зеленая тема для хакерского вайба: код, свечение и цифровой дождь.",
+    id: "dark",
+    title: "Полночный экран",
+    description: "Темная чистая тема: глубокий фон, мягкий контраст и красивый акцент без кислотности.",
   },
   {
     id: "custom",
@@ -73,7 +48,6 @@ const CUSTOM_THEME_FIELDS: Array<{
 }> = [
   { key: "backgroundColor", label: "Фон" },
   { key: "surfaceColor", label: "Панели" },
-  { key: "primaryColor", label: "Акцент" },
   { key: "textColor", label: "Текст" },
 ];
 
@@ -131,67 +105,20 @@ function ThemePreviewDots({
     );
   }
 
-  if (theme === "neo") {
+  if (theme === "dark") {
     return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#000501,#021208,#31ff91)]">
-        <span className="absolute left-2 top-1 text-[9px] font-black tracking-[0.2em] text-[#31ff91]">
-          0101
-        </span>
-        <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#31ff91]/80 blur-[2px]" />
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#09111d,#111d31,#1a2744)]">
+        <span className="absolute left-3 top-2 h-4 w-8 rounded-full bg-white/26 blur-[5px]" />
+        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full bg-[var(--theme-primary)]/80" />
       </div>
     );
   }
 
-  if (theme === "ember") {
+  if (theme === "light") {
     return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#120806,#281611,#ff9f5f)]">
-        <span className="absolute left-2 top-2 h-5 w-6 rounded-full bg-[#ff9f5f]/75 blur-[4px]" />
-        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full bg-[#ffc48e]" />
-      </div>
-    );
-  }
-
-  if (theme === "noir") {
-    return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#070b13,#121826,#b8ccf1)]">
-        <span className="absolute left-3 top-2 h-4 w-7 rounded-full bg-white/35 blur-[5px]" />
-        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full bg-[#d7e4ff]/80" />
-      </div>
-    );
-  }
-
-  if (theme === "aurora") {
-    return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#dfeeff,#f2f1ff,#d4f0ea)]">
-        <span className="absolute left-2 top-2 h-5 w-8 rounded-full bg-white/70 blur-[5px]" />
-        <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[#86d9e2]/80 blur-[2px]" />
-      </div>
-    );
-  }
-
-  if (theme === "liquid-glass") {
-    return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#d9ecff,#eef7ff,#f4f9ff)]">
+      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#eef3fb,#f8fbff,#e8eef8)]">
         <span className="absolute left-2 top-2 h-5 w-9 rounded-full bg-white/80 blur-[4px]" />
-        <span className="absolute bottom-1 right-2 h-5 w-5 rounded-full border border-white/70 bg-[#86d9ff]/40 shadow-[inset_0_1px_4px_rgba(255,255,255,0.65)]" />
-      </div>
-    );
-  }
-
-  if (theme === "linen") {
-    return (
-      <div className="flex h-10 w-16 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,#f5dfc5,#f8ead8,#d9e5cf)]">
-        <span className="h-5 w-5 rounded-full bg-white/75" />
-        <span className="-ml-1 h-4 w-4 rounded-full bg-[#c97945]/65" />
-      </div>
-    );
-  }
-
-  if (theme === "sage") {
-    return (
-      <div className="relative h-10 w-16 overflow-hidden rounded-[16px] bg-[linear-gradient(135deg,#dbe8ce,#f3edd6,#bed7c0)]">
-        <span className="absolute left-3 top-2 h-4 w-4 rounded-full bg-white/65" />
-        <span className="absolute bottom-2 right-3 h-3 w-3 rounded-full bg-[#638f66]/70" />
+        <span className="absolute bottom-1 right-2 h-4 w-4 rounded-full bg-[var(--theme-primary)]/75 blur-[1px]" />
       </div>
     );
   }
@@ -430,31 +357,6 @@ export default function SettingsScreen() {
           className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
         />
 
-        <div className="theme-panel-section mt-6 rounded-[24px] p-4">
-          <div className="text-[14px] font-extrabold">Accent color</div>
-          <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
-            Влияет на главные кнопки, активные состояния, focus ring и декоративное свечение.
-          </div>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {ACCENT_OPTIONS.map((color) => {
-              const selected = current.accentColor === color;
-
-              return (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => patchDraft({ accentColor: color })}
-                  className={`theme-swatch h-11 w-11 rounded-full border-2 transition ${
-                    selected ? "theme-swatch-selected" : ""
-                  }`}
-                  style={{ backgroundColor: color }}
-                  aria-label={`Выбрать акцент ${color}`}
-                />
-              );
-            })}
-          </div>
-        </div>
-
         <div className="mt-6">
           <div className="theme-form-label mb-3 text-[13px] font-semibold">Тема приложения:</div>
           <div className="space-y-3">
@@ -490,11 +392,38 @@ export default function SettingsScreen() {
           </div>
         </div>
 
+        {current.theme !== "sun-cycle" ? (
+          <div className="theme-panel-section mt-6 rounded-[24px] p-4">
+            <div className="text-[14px] font-extrabold">Акцентный цвет</div>
+            <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
+              Работает для светлой, темной и своей темы. Меняет главные кнопки, активные состояния и свечение.
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {ACCENT_OPTIONS.map((color) => {
+                const selected = current.accentColor === color;
+
+                return (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => patchDraft({ accentColor: color })}
+                    className={`theme-swatch h-11 w-11 rounded-full border-2 transition ${
+                      selected ? "theme-swatch-selected" : ""
+                    }`}
+                    style={{ backgroundColor: color }}
+                    aria-label={`Выбрать акцент ${color}`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
         {current.theme === "custom" ? (
           <div className="theme-option-card mt-4 rounded-[24px] border px-3.5 py-4">
             <div className="text-[14px] font-extrabold">Настройка своей темы</div>
             <div className="theme-subtle-text mt-1 text-[12px] leading-relaxed">
-              Эти цвета применяются ко всему интерфейсу. Акцент отдельно задается выше.
+              Эти цвета применяются ко всему интерфейсу. Акцент задается отдельно, чтобы тема оставалась чище.
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {CUSTOM_THEME_FIELDS.map((field) => (

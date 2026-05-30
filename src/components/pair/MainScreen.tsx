@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import WidgetVisual, {
   relationshipWidgetToVisualData,
 } from "@/components/pair/WidgetVisual";
@@ -27,6 +27,13 @@ import { prepareImageForStorage } from "@/lib/widgetAppearance";
 
 function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
+}
+
+function scrollToSection(sectionRef: RefObject<HTMLDivElement | null>) {
+  sectionRef.current?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 
 const DRAWING_CANVAS_WIDTH = 840;
@@ -882,6 +889,9 @@ function AlbumEventCard({
 export default function MainScreen() {
   const settings = useRelationshipSettings();
   const albumInputRef = useRef<HTMLInputElement>(null);
+  const widgetsSectionRef = useRef<HTMLDivElement>(null);
+  const canvasesSectionRef = useRef<HTMLDivElement>(null);
+  const albumSectionRef = useRef<HTMLDivElement>(null);
   const widgetDragRef = useRef<{
     id: string;
     pointerId: number;
@@ -1328,7 +1338,7 @@ export default function MainScreen() {
         />
       </div>
 
-      <div className="mt-7 flex items-center justify-between">
+      <div ref={widgetsSectionRef} className="mt-7 flex items-center justify-between scroll-mt-24">
         <div className="text-[30px] font-extrabold">Виджеты</div>
         {isEditingWidgets ? (
           <div className="theme-action-chip rounded-full border px-3 py-1 text-[12px] font-semibold">
@@ -1368,7 +1378,10 @@ export default function MainScreen() {
         + добавить виджет
       </Link>
 
-      <div className="mt-10 flex items-center justify-between gap-3">
+      <div
+        ref={canvasesSectionRef}
+        className="mt-10 flex items-center justify-between gap-3 scroll-mt-24"
+      >
         <div>
           <div className="text-[28px] font-extrabold">Холсты</div>
           <div className="theme-muted-text mt-1 text-[13px] font-semibold">
@@ -1405,7 +1418,7 @@ export default function MainScreen() {
         </div>
       )}
 
-      <div className="mt-10">
+      <div ref={albumSectionRef} className="mt-10 scroll-mt-24">
         <div className="flex items-end justify-between gap-3">
           <div>
             <div className="text-[28px] font-extrabold">Альбом</div>
@@ -1563,7 +1576,81 @@ export default function MainScreen() {
         onChange={onAlbumPhotosChange}
       />
 
-      <div className="h-10" />
+      {isEditingWidgets ? (
+        <div className="fixed inset-x-0 bottom-4 z-40 px-4">
+          <div className="mx-auto w-full max-w-[360px]">
+            <div className="theme-edit-dock relative rounded-[30px] px-3 py-3">
+              <div className="relative z-10">
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <div className="text-[12px] font-extrabold uppercase tracking-[0.18em] text-[var(--theme-text-muted)]">
+                    Режим редактирования
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingWidgets(false)}
+                    className="theme-icon-button rounded-full border px-3 py-1 text-[12px] font-bold"
+                  >
+                    Готово
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection(widgetsSectionRef)}
+                    className="theme-option-card rounded-full border px-3 py-2 text-[12px] font-bold"
+                  >
+                    Виджеты
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection(canvasesSectionRef)}
+                    className="theme-option-card rounded-full border px-3 py-2 text-[12px] font-bold"
+                  >
+                    Холсты
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollToSection(albumSectionRef)}
+                    className="theme-option-card rounded-full border px-3 py-2 text-[12px] font-bold"
+                  >
+                    Альбом
+                  </button>
+                </div>
+
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  <Link
+                    href="/widget/new"
+                    className="theme-primary-button rounded-[18px] px-3 py-2 text-center text-[12px] font-extrabold"
+                  >
+                    + Виджет
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setEditingCanvasId("new")}
+                    className="theme-option-card rounded-[18px] border px-3 py-2 text-[12px] font-extrabold"
+                  >
+                    + Холст
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAlbumDraftDateISO(todayISO());
+                      setIsAlbumComposerOpen(true);
+                      window.setTimeout(() => scrollToSection(albumSectionRef), 40);
+                    }}
+                    className="theme-option-card rounded-[18px] border px-3 py-2 text-[12px] font-extrabold"
+                  >
+                    + Событие
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className={cx("h-10", isEditingWidgets && "h-44")} />
     </div>
   );
 }
