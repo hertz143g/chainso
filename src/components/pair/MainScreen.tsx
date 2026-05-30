@@ -727,7 +727,7 @@ function AlbumEventCard({
   const photos = event.photos.slice(0, MAX_ALBUM_PHOTOS_PER_EVENT);
 
   const titleOverlay = (
-    <div className="absolute inset-x-3 bottom-3 rounded-[22px] border border-white/20 bg-black/38 px-4 py-3 text-white shadow-[0_16px_34px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+    <div className="theme-media-caption absolute inset-x-3 bottom-3 rounded-[22px] px-4 py-3 text-white">
       <div className="truncate text-[18px] font-black leading-tight">{event.eventTitle}</div>
       <div className="mt-1 text-[12px] font-bold opacity-85">
         {formatDateLong(event.eventDateISO)}

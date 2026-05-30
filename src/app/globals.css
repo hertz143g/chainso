@@ -559,9 +559,13 @@ body {
 }
 
 .theme-panel-section {
-  background: color-mix(in srgb, var(--theme-surface-soft) 76%, transparent);
-  border: 1px solid var(--theme-card-border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-surface-soft) 92%, white 8%), color-mix(in srgb, var(--theme-surface) 82%, transparent)),
+    color-mix(in srgb, var(--theme-surface) 74%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-card-border) 88%, white 12%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 10px 28px color-mix(in srgb, var(--theme-shadow) 42%, transparent);
   backdrop-filter: blur(calc(var(--glass-blur) * 0.72));
 }
 
@@ -648,9 +652,13 @@ body {
 }
 
 .theme-time-tray {
-  background: var(--theme-glass-bg);
-  border: 1px solid var(--theme-card-border);
-  box-shadow: var(--shadow-soft);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 96%, white 6%), color-mix(in srgb, var(--theme-surface) 78%, transparent)),
+    color-mix(in srgb, var(--theme-glass-bg) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-card-border) 86%, white 14%);
+  box-shadow:
+    0 18px 40px color-mix(in srgb, var(--theme-shadow) 58%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(22px);
 }
 
@@ -661,20 +669,35 @@ body {
 }
 
 .theme-dashed-card-strong {
-  background: color-mix(in srgb, var(--theme-dashed-bg) 72%, var(--theme-primary) 28%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-dashed-bg) 80%, white 10%), color-mix(in srgb, var(--theme-primary) 16%, var(--theme-dashed-bg))),
+    color-mix(in srgb, var(--theme-dashed-bg) 74%, var(--theme-primary) 26%);
   border-color: var(--theme-ring);
   color: var(--theme-text);
+  box-shadow:
+    0 12px 26px color-mix(in srgb, var(--theme-shadow) 34%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .theme-option-card {
-  background: var(--theme-dashed-bg);
-  border-color: var(--theme-dashed-border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 82%, white 8%), color-mix(in srgb, var(--theme-surface) 78%, transparent)),
+    color-mix(in srgb, var(--theme-dashed-bg) 88%, transparent);
+  border-color: color-mix(in srgb, var(--theme-dashed-border) 84%, white 12%);
   color: var(--theme-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 8px 22px color-mix(in srgb, var(--theme-shadow) 18%, transparent);
 }
 
 .theme-option-card-selected {
-  background: var(--theme-control-active-bg);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-control-active-bg) 72%, white 10%), color-mix(in srgb, var(--theme-glass-bg) 82%, transparent)),
+    var(--theme-control-active-bg);
   border-color: var(--theme-control-active-border);
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--theme-shadow) 30%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .theme-form-label {
@@ -682,9 +705,14 @@ body {
 }
 
 .theme-upload-button {
-  background: var(--theme-dashed-bg);
-  border-color: var(--theme-dashed-border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 80%, white 8%), color-mix(in srgb, var(--theme-surface) 74%, transparent)),
+    color-mix(in srgb, var(--theme-dashed-bg) 84%, transparent);
+  border-color: color-mix(in srgb, var(--theme-dashed-border) 82%, white 12%);
   color: var(--theme-text-muted);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 8px 20px color-mix(in srgb, var(--theme-shadow) 18%, transparent);
 }
 
 .theme-upload-button:hover {
@@ -698,10 +726,15 @@ body {
 }
 
 .theme-widget-card {
-  background: var(--theme-widget-bg);
-  border-color: var(--theme-widget-border);
-  box-shadow: var(--shadow-card);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-widget-bg) 94%, white 8%), color-mix(in srgb, var(--theme-surface) 82%, transparent)),
+    color-mix(in srgb, var(--theme-widget-bg) 92%, transparent);
+  border-color: color-mix(in srgb, var(--theme-widget-border) 84%, white 10%);
+  box-shadow:
+    0 18px 42px color-mix(in srgb, var(--theme-shadow) 52%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
   color: var(--theme-text);
+  backdrop-filter: blur(calc(var(--glass-blur) * 0.86));
 }
 
 .theme-chip {
@@ -710,14 +743,25 @@ body {
 }
 
 .theme-glass {
-  background: var(--theme-glass-bg);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 94%, white 10%), color-mix(in srgb, var(--theme-surface) 78%, transparent)),
+    color-mix(in srgb, var(--theme-glass-bg) 88%, transparent);
   color: var(--theme-text);
+  border: 1px solid color-mix(in srgb, var(--theme-card-border) 74%, white 14%);
+  box-shadow:
+    0 14px 34px color-mix(in srgb, var(--theme-shadow) 30%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(calc(var(--glass-blur) * 0.74));
 }
 
 .theme-photo-frame {
-  background: var(--theme-photo-frame);
-  border-color: var(--theme-widget-border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-photo-frame) 92%, white 10%), color-mix(in srgb, var(--theme-photo-frame) 72%, transparent)),
+    var(--theme-photo-frame);
+  border-color: color-mix(in srgb, var(--theme-widget-border) 76%, white 12%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 26px color-mix(in srgb, var(--theme-shadow) 26%, transparent);
 }
 
 .theme-photo-inner {
@@ -737,21 +781,23 @@ body {
 .theme-empty-state {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--theme-dashed-bg) 82%, transparent),
-    color-mix(in srgb, var(--theme-dashed-bg) 55%, var(--theme-surface-soft))
+    color-mix(in srgb, var(--theme-glass-bg) 76%, white 8%),
+    color-mix(in srgb, var(--theme-dashed-bg) 56%, var(--theme-surface-soft))
   );
-  border: 1px dashed var(--theme-dashed-border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  border: 1px dashed color-mix(in srgb, var(--theme-dashed-border) 80%, white 10%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 12px 28px color-mix(in srgb, var(--theme-shadow) 16%, transparent);
 }
 
 .theme-edit-dock {
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--theme-surface) 94%, white 6%), color-mix(in srgb, var(--theme-glass-bg) 82%, transparent)),
-    color-mix(in srgb, var(--theme-glass-bg) 88%, transparent);
-  border: 1px solid color-mix(in srgb, var(--theme-card-border) 92%, white 8%);
+    linear-gradient(180deg, color-mix(in srgb, var(--theme-surface) 92%, white 10%), color-mix(in srgb, var(--theme-glass-bg) 80%, transparent)),
+    color-mix(in srgb, var(--theme-glass-bg) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-card-border) 82%, white 14%);
   box-shadow:
-    0 18px 44px var(--theme-shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 18px 44px color-mix(in srgb, var(--theme-shadow) 64%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(24px);
 }
 
@@ -762,6 +808,17 @@ body {
   border-radius: inherit;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 44%, rgba(255, 255, 255, 0.08));
   pointer-events: none;
+}
+
+.theme-media-caption {
+  background:
+    linear-gradient(180deg, rgba(12, 18, 30, 0.28), rgba(10, 14, 24, 0.52)),
+    rgba(12, 18, 30, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(18px);
 }
 
 .theme-swatch {
