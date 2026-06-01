@@ -1223,23 +1223,25 @@ export default function MainScreen() {
         />
       ) : null}
 
-      <div className="relative h-[52px]">
+      <div className="relative h-[56px]">
         <div className="absolute left-0 top-3">
           <button
             type="button"
             onClick={() => setIsEditingWidgets((value) => !value)}
-            className={`theme-icon-button flex h-[38px] w-[38px] items-center justify-center rounded-full border ${
-              isEditingWidgets ? "theme-icon-button-active" : ""
-            }`}
+            className={cx(
+              "theme-top-action px-3 text-left",
+              isEditingWidgets && "theme-top-action-active",
+            )}
             aria-label="Переключить режим редактирования виджетов"
           >
-            <Image
-              src="/icons/brush.png"
-              alt="brush"
-              width={18}
-              height={18}
-              className="opacity-90"
-            />
+            <span className="relative z-10 flex flex-col leading-none">
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--theme-text-muted)]">
+                Режим
+              </span>
+              <span className="mt-1 text-[12px] font-extrabold">
+                {isEditingWidgets ? "Готово" : "Редакт."}
+              </span>
+            </span>
           </button>
         </div>
 
@@ -1250,16 +1252,15 @@ export default function MainScreen() {
         <div className="absolute right-0 top-3">
           <Link
             href="/settings"
-            className="theme-icon-button flex h-[38px] w-[38px] items-center justify-center rounded-full border"
+            className="theme-top-action px-3 text-left"
             aria-label="Открыть настройки"
           >
-            <Image
-              src="/icons/gear.png"
-              alt="settings"
-              width={18}
-              height={18}
-              className="opacity-90"
-            />
+            <span className="relative z-10 flex flex-col leading-none">
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--theme-text-muted)]">
+                Экран
+              </span>
+              <span className="mt-1 text-[12px] font-extrabold">Настройки</span>
+            </span>
           </Link>
         </div>
       </div>
@@ -1576,30 +1577,6 @@ export default function MainScreen() {
         onChange={onAlbumPhotosChange}
       />
 
-      {!isEditingWidgets ? (
-        <div className="fixed inset-x-0 bottom-4 z-40 px-4">
-          <div className="mx-auto flex w-full max-w-[360px] justify-end">
-            <button
-              type="button"
-              onClick={() => setIsEditingWidgets(true)}
-              className="theme-edit-trigger rounded-full px-4 py-3"
-              aria-label="Включить режим редактирования"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <Image
-                  src="/icons/brush.png"
-                  alt="brush"
-                  width={16}
-                  height={16}
-                  className="opacity-90"
-                />
-                <span className="text-[13px] font-extrabold">Редактировать</span>
-              </span>
-            </button>
-          </div>
-        </div>
-      ) : null}
-
       {isEditingWidgets ? (
         <div className="fixed inset-x-0 bottom-4 z-40 px-4">
           <div className="mx-auto w-full max-w-[360px]">
@@ -1674,7 +1651,7 @@ export default function MainScreen() {
         </div>
       ) : null}
 
-      <div className={cx("h-24", isEditingWidgets && "h-44")} />
+      <div className={cx("h-10", isEditingWidgets && "h-44")} />
     </div>
   );
 }
