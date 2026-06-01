@@ -1223,13 +1223,13 @@ export default function MainScreen() {
         />
       ) : null}
 
-      <div className="relative min-h-[56px]">
-        <div className="absolute left-0 top-1/2 z-10 -translate-y-1/2">
+      <div className="grid min-h-[52px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 min-[390px]:gap-2">
+        <div className="min-w-0 justify-self-start">
           <button
             type="button"
             onClick={() => setIsEditingWidgets((value) => !value)}
             className={cx(
-              "theme-header-pill px-3 text-[11px] font-extrabold",
+              "theme-header-pill max-w-full px-2.5 text-[10px] font-extrabold min-[390px]:px-3 min-[390px]:text-[11px]",
               isEditingWidgets && "theme-header-pill-active",
             )}
             aria-label="Переключить режим редактирования виджетов"
@@ -1242,32 +1242,24 @@ export default function MainScreen() {
                     "bg-[var(--theme-primary)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--theme-primary)_22%,transparent)]",
                 )}
               />
-              <span className="min-[390px]:hidden">
-                {isEditingWidgets ? "Готово" : "Править"}
-              </span>
-              <span className="hidden min-[390px]:inline">
-                {isEditingWidgets ? "Готово" : "Редактировать"}
-              </span>
+              <span>{isEditingWidgets ? "Готово" : "Редактировать"}</span>
             </span>
           </button>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center">
-          <span className="text-[24px] font-extrabold leading-none tracking-[-0.04em] min-[390px]:text-[26px]">
+        <div className="min-w-0 justify-self-center px-1 text-center">
+          <span className="whitespace-nowrap text-[18px] font-extrabold leading-none tracking-[-0.04em] min-[360px]:text-[20px] min-[390px]:text-[22px] min-[430px]:text-[24px]">
             CHAINSO
           </span>
         </div>
 
-        <div className="absolute right-0 top-1/2 z-10 -translate-y-1/2">
+        <div className="min-w-0 justify-self-end">
           <Link
             href="/settings"
-            className="theme-header-pill px-3 text-[11px] font-extrabold"
+            className="theme-header-pill max-w-full px-2.5 text-[10px] font-extrabold min-[390px]:px-3 min-[390px]:text-[11px]"
             aria-label="Открыть настройки"
           >
-            <span className="relative z-10 whitespace-nowrap">
-              <span className="min-[390px]:hidden">Настр.</span>
-              <span className="hidden min-[390px]:inline">Настройки</span>
-            </span>
+            <span className="relative z-10 whitespace-nowrap">Настройки</span>
           </Link>
         </div>
       </div>

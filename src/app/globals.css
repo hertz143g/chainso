@@ -855,9 +855,10 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
+  min-height: 36px;
   overflow: hidden;
   border-radius: 999px;
+  white-space: nowrap;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 88%, white 6%), color-mix(in srgb, var(--theme-surface) 82%, transparent)),
     color-mix(in srgb, var(--theme-glass-bg) 84%, transparent);
