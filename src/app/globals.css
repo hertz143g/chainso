@@ -559,6 +559,10 @@ body {
 }
 
 .theme-panel-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-clip: padding-box;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-surface-soft) 92%, white 8%), color-mix(in srgb, var(--theme-surface) 82%, transparent)),
     color-mix(in srgb, var(--theme-surface) 74%, transparent);
@@ -652,6 +656,10 @@ body {
 }
 
 .theme-time-tray {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-clip: padding-box;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 96%, white 6%), color-mix(in srgb, var(--theme-surface) 78%, transparent)),
     color-mix(in srgb, var(--theme-glass-bg) 88%, transparent);
@@ -726,6 +734,10 @@ body {
 }
 
 .theme-widget-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-clip: padding-box;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-widget-bg) 94%, white 8%), color-mix(in srgb, var(--theme-surface) 82%, transparent)),
     color-mix(in srgb, var(--theme-widget-bg) 92%, transparent);
@@ -743,6 +755,10 @@ body {
 }
 
 .theme-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-clip: padding-box;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 94%, white 10%), color-mix(in srgb, var(--theme-surface) 78%, transparent)),
     color-mix(in srgb, var(--theme-glass-bg) 88%, transparent);

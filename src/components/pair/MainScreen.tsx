@@ -375,7 +375,7 @@ function TimeDisplay({
           </div>
 
           <div
-            className="flex h-[104px] w-[104px] items-center justify-center rounded-full p-2 shadow-[0_16px_42px_var(--theme-shadow)]"
+            className="flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-full p-2 shadow-[0_16px_42px_var(--theme-shadow)]"
             style={
               {
                 background: `conic-gradient(var(--theme-primary) ${secondsAngle}deg, var(--theme-control-bg) 0deg)`,
