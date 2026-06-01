@@ -137,7 +137,7 @@ function ThemePreviewDots({
 function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
   if (style === "glass") {
     return (
-      <div className="theme-time-tray mx-auto grid h-11 w-full grid-cols-3 rounded-full px-2.5 text-center">
+      <div className="theme-time-tray mx-auto grid h-12 w-full max-w-[172px] grid-cols-3 rounded-[18px] px-2 text-center">
         {[
           { value: "08", label: "ч" },
           { value: "24", label: "м" },
@@ -146,12 +146,14 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
           <div
             key={unit.label}
             className={cx(
-              "flex min-w-0 flex-col items-center justify-center",
+              "flex min-w-0 flex-col items-center justify-center rounded-[12px]",
               index > 0 && "border-l border-[var(--theme-card-border)]",
             )}
           >
-            <span className="text-[10px] font-black leading-none">{unit.value}</span>
-            <span className="theme-muted-text mt-0.5 text-[8px] font-bold uppercase leading-none">
+            <span className="text-[10px] font-black leading-none tracking-[-0.04em]">
+              {unit.value}
+            </span>
+            <span className="theme-muted-text mt-1 text-[7px] font-bold uppercase leading-none">
               {unit.label}
             </span>
           </div>
@@ -162,32 +164,34 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
 
   if (style === "orbits") {
     return (
-      <div className="theme-time-tray mx-auto h-12 w-full overflow-hidden rounded-[20px] px-2 py-1.5">
-        <div className="grid h-full grid-cols-[minmax(0,1fr)_34px] items-center gap-1.5">
-          <div className="grid min-w-0 grid-cols-2 gap-1.5">
-            <div className="theme-glass rounded-[12px] px-1.5 py-1 text-center">
-              <div className="text-[10px] font-black leading-none">08</div>
-              <div className="theme-muted-text mt-0.5 text-[7px] font-bold uppercase leading-none">
+      <div className="theme-time-tray mx-auto h-[58px] w-full max-w-[172px] overflow-hidden rounded-[22px] px-2.5 py-2">
+        <div className="grid h-full grid-cols-[minmax(0,1fr)_40px] items-center gap-2">
+          <div className="grid min-w-0 grid-cols-2 gap-2">
+            <div className="theme-glass rounded-[14px] px-2 py-1.5 text-center">
+              <div className="text-[11px] font-black leading-none tracking-[-0.05em]">08</div>
+              <div className="theme-muted-text mt-1 text-[7px] font-bold uppercase leading-none">
                 ч
               </div>
             </div>
-            <div className="theme-glass rounded-[12px] px-1.5 py-1 text-center">
-              <div className="text-[10px] font-black leading-none">24</div>
-              <div className="theme-muted-text mt-0.5 text-[7px] font-bold uppercase leading-none">
+            <div className="theme-glass rounded-[14px] px-2 py-1.5 text-center">
+              <div className="text-[11px] font-black leading-none tracking-[-0.05em]">24</div>
+              <div className="theme-muted-text mt-1 text-[7px] font-bold uppercase leading-none">
                 м
               </div>
             </div>
           </div>
 
           <div
-            className="theme-time-orbit-ring flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-full p-[3px]"
+            className="theme-time-orbit-ring flex h-[40px] w-[40px] items-center justify-center overflow-hidden rounded-full p-[3px]"
             style={{
-              background:
-                "conic-gradient(var(--theme-primary) 96deg, var(--theme-control-bg) 0deg)",
+              background: "conic-gradient(var(--theme-primary) 96deg, var(--theme-control-bg) 0deg)",
             }}
           >
-            <div className="theme-time-orbit-core theme-glass flex h-full w-full items-center justify-center rounded-full text-[8px] font-black">
-              16
+            <div className="theme-time-orbit-core theme-glass flex h-full w-full flex-col items-center justify-center rounded-full">
+              <span className="text-[9px] font-black leading-none">16</span>
+              <span className="theme-muted-text mt-0.5 text-[6px] font-bold uppercase leading-none">
+                с
+              </span>
             </div>
           </div>
         </div>
@@ -196,18 +200,18 @@ function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
   }
 
   return (
-    <div className="theme-time-tray mx-auto grid h-12 w-full grid-cols-3 gap-1.5 rounded-[18px] px-1.5 py-1.5">
+    <div className="theme-time-tray mx-auto grid h-[58px] w-full max-w-[172px] grid-cols-3 gap-2 rounded-[22px] px-2 py-2">
       {["08", "24", "16"].map((value, index) => (
         <span
           key={value}
-          className="theme-glass relative flex flex-col items-center justify-center overflow-hidden rounded-b-[12px] rounded-t-[8px] text-[10px] font-black"
+          className="theme-glass relative flex flex-col items-center justify-center overflow-hidden rounded-b-[16px] rounded-t-[10px] text-[10px] font-black"
         >
           <span
             className="theme-time-fill absolute inset-x-0 bottom-0 opacity-25"
-            style={{ height: `${38 + index * 18}%` }}
+            style={{ height: `${34 + index * 18}%` }}
           />
-          <span className="relative z-10 leading-none">{value}</span>
-          <span className="theme-muted-text relative z-10 mt-0.5 text-[7px] font-bold uppercase leading-none">
+          <span className="relative z-10 text-[11px] leading-none tracking-[-0.04em]">{value}</span>
+          <span className="theme-muted-text relative z-10 mt-1 text-[6px] font-bold uppercase leading-none">
             {index === 0 ? "ч" : index === 1 ? "м" : "с"}
           </span>
         </span>

@@ -18,7 +18,6 @@ import {
   type AlbumPhoto,
   type AvatarDisplayStyle,
   type DrawingCanvas,
-  type HeartEffectStyle,
   type RelationshipWidget,
   type TimeDisplayStyle,
   updateSettings,
@@ -61,11 +60,6 @@ const HEART_COLOR_OPTIONS = [
   "#FF9F45",
   "#FFD166",
   "#7B7CFF",
-];
-const HEART_EFFECT_OPTIONS: Array<{ id: HeartEffectStyle; title: string }> = [
-  { id: "pulse", title: "Пульс" },
-  { id: "glow", title: "Сияние" },
-  { id: "double", title: "Контур" },
 ];
 
 type DrawingTool = "brush" | "eraser";
@@ -1032,6 +1026,8 @@ export default function MainScreen() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const prefersMobileMotion =
+      window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches;
     let pointerX = 0;
     let pointerY = 0;
     let scrollValue = Math.min(1, window.scrollY / 220);
@@ -1071,30 +1067,23 @@ export default function MainScreen() {
       schedule();
     };
 
-    const onTouchMove = (event: TouchEvent) => {
-      const touch = event.touches[0];
-      if (!touch) return;
-
-      const centerX = window.innerWidth / 2;
-      const centerY = Math.min(window.innerHeight, 720) / 2;
-      pointerX = Math.max(-1, Math.min(1, (touch.clientX - centerX) / centerX));
-      pointerY = Math.max(-1, Math.min(1, (touch.clientY - centerY) / centerY));
-      schedule();
-    };
-
     applyMotion();
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerdown", onPointerMove, { passive: true });
-    window.addEventListener("pointerleave", onPointerLeave);
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
+
+    if (!prefersMobileMotion) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerdown", onPointerMove, { passive: true });
+      window.addEventListener("pointerleave", onPointerLeave);
+    }
+
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerdown", onPointerMove);
-      window.removeEventListener("pointerleave", onPointerLeave);
-      window.removeEventListener("touchmove", onTouchMove);
+      if (!prefersMobileMotion) {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerdown", onPointerMove);
+        window.removeEventListener("pointerleave", onPointerLeave);
+      }
       window.removeEventListener("scroll", onScroll);
     };
   }, []);
@@ -1477,12 +1466,7 @@ export default function MainScreen() {
 
         <div
           ref={heartPickerRef}
-          className={cx(
-            "theme-heart-orbit theme-parallax-heart relative z-40 mt-2 flex h-12 w-12 items-center justify-center",
-            settings.heartEffectStyle === "glow" && "theme-heart-mode-glow",
-            settings.heartEffectStyle === "double" && "theme-heart-mode-double",
-            settings.heartEffectStyle === "pulse" && "theme-heart-mode-pulse",
-          )}
+          className="theme-heart-orbit theme-parallax-heart relative z-40 mt-2 flex h-12 w-12 items-center justify-center"
         >
           <button
             type="button"
@@ -1520,26 +1504,6 @@ export default function MainScreen() {
                     />
                   );
                 })}
-              </div>
-              <div className="mt-2 flex items-center justify-center gap-1.5">
-                {HEART_EFFECT_OPTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() =>
-                      updateSettings((prev) => ({
-                        ...prev,
-                        heartEffectStyle: option.id,
-                      }))
-                    }
-                    className={cx(
-                      "theme-heart-mode-chip rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em]",
-                      settings.heartEffectStyle === option.id && "theme-heart-mode-chip-active",
-                    )}
-                  >
-                    {option.title}
-                  </button>
-                ))}
               </div>
             </div>
           ) : null}
