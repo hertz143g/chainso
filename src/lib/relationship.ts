@@ -75,6 +75,7 @@ export type RelationshipSettings = {
   startDateISO: string;
   theme: AppTheme;
   accentColor: string;
+  heartColor: string;
   customTheme: CustomThemeSettings;
   timeDisplayStyle: TimeDisplayStyle;
   avatarDisplayStyle: AvatarDisplayStyle;
@@ -98,6 +99,7 @@ const DEFAULT_CUSTOM_THEME: CustomThemeSettings = {
 };
 
 const DEFAULT_ACCENT_COLOR = "#7B7CFF";
+const DEFAULT_HEART_COLOR = "#FFF4F6";
 
 export function getDefaultSettings(): RelationshipSettings {
   return {
@@ -106,6 +108,7 @@ export function getDefaultSettings(): RelationshipSettings {
     startDateISO: "",
     theme: "sun-cycle",
     accentColor: DEFAULT_ACCENT_COLOR,
+    heartColor: DEFAULT_HEART_COLOR,
     customTheme: { ...DEFAULT_CUSTOM_THEME },
     timeDisplayStyle: "glass",
     avatarDisplayStyle: "classic",
@@ -383,6 +386,7 @@ function normalizeSettings(
         : fallback.startDateISO,
     theme: parseTheme(parsed.theme, fallback.theme),
     accentColor: parseHexColor(parsed.accentColor, fallback.accentColor),
+    heartColor: parseHexColor(parsed.heartColor, fallback.heartColor),
     customTheme: parseCustomTheme(parsed.customTheme, fallback.customTheme),
     timeDisplayStyle: parseTimeDisplayStyle(parsed.timeDisplayStyle, fallback.timeDisplayStyle),
     avatarDisplayStyle: parseAvatarDisplayStyle(

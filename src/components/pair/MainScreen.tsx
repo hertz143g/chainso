@@ -1,7 +1,6 @@
 // src/components/pair/MainScreen.tsx
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import WidgetVisual, {
@@ -36,11 +35,32 @@ function scrollToSection(sectionRef: RefObject<HTMLDivElement | null>) {
   });
 }
 
+function HeartIcon({ color, className }: { color: string; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill={color}
+    >
+      <path d="M12 21.35 10.55 20.03C5.4 15.36 2 12.27 2 8.5 2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.54L12 21.35Z" />
+    </svg>
+  );
+}
+
 const DRAWING_CANVAS_WIDTH = 840;
 const DRAWING_CANVAS_HEIGHT = 520;
 const DRAWING_CANVAS_BACKGROUND = "#fffaf4";
 const MAX_ALBUM_EVENTS = 3;
 const MAX_ALBUM_PHOTOS_PER_EVENT = 3;
+const HEART_COLOR_OPTIONS = [
+  "#FFF4F6",
+  "#FF8CAB",
+  "#FF6B6B",
+  "#FF9F45",
+  "#FFD166",
+  "#7B7CFF",
+];
 
 type DrawingTool = "brush" | "eraser";
 type WidgetDropPlacement = "before" | "after";
@@ -892,6 +912,7 @@ export default function MainScreen() {
   const widgetsSectionRef = useRef<HTMLDivElement>(null);
   const canvasesSectionRef = useRef<HTMLDivElement>(null);
   const albumSectionRef = useRef<HTMLDivElement>(null);
+  const heartPickerRef = useRef<HTMLDivElement>(null);
   const widgetDragRef = useRef<{
     id: string;
     pointerId: number;
@@ -910,11 +931,25 @@ export default function MainScreen() {
   const [albumDraftLayout, setAlbumDraftLayout] = useState<AlbumLayout>("feature");
   const [albumUploadTarget, setAlbumUploadTarget] = useState<AlbumUploadTarget | null>(null);
   const [isAlbumComposerOpen, setIsAlbumComposerOpen] = useState(false);
+  const [isHeartPickerOpen, setIsHeartPickerOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!isHeartPickerOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && heartPickerRef.current?.contains(target)) return;
+      setIsHeartPickerOpen(false);
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    return () => window.removeEventListener("pointerdown", handlePointerDown);
+  }, [isHeartPickerOpen]);
 
   const { diff, progress } = useMemo(() => {
     const currentDiff = calcDiff(settings.startDateISO, now);
@@ -1264,19 +1299,51 @@ export default function MainScreen() {
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col items-center">
+      <div className="mt-7 flex flex-col items-center">
         <div className="theme-subtle-text text-[17px] font-semibold leading-none">
           {diff.days} ДНЕЙ
         </div>
 
-        <div className="mt-1">
-          <Image
-            src="/icons/heart.png"
-            alt="heart"
-            width={30}
-            height={30}
-            className="opacity-80"
-          />
+        <div ref={heartPickerRef} className="relative mt-2">
+          <button
+            type="button"
+            onClick={() => setIsHeartPickerOpen((value) => !value)}
+            className="theme-heart-button"
+            aria-label="Выбрать цвет сердечка"
+            aria-expanded={isHeartPickerOpen}
+          >
+            <HeartIcon color={settings.heartColor} className="h-8 w-8 drop-shadow-[0_8px_18px_rgba(255,255,255,0.18)]" />
+          </button>
+
+          {isHeartPickerOpen ? (
+            <div className="theme-heart-palette absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 rounded-full px-2 py-2">
+              <div className="flex items-center gap-2">
+                {HEART_COLOR_OPTIONS.map((color) => {
+                  const selected = settings.heartColor === color;
+
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => {
+                        updateSettings((prev) => ({
+                          ...prev,
+                          heartColor: color,
+                        }));
+                        setIsHeartPickerOpen(false);
+                      }}
+                      className={cx(
+                        "theme-heart-swatch h-7 w-7 rounded-full",
+                        selected && "theme-heart-swatch-active",
+                      )}
+                      style={{ backgroundColor: color }}
+                      aria-label={`Выбрать цвет ${color}`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
