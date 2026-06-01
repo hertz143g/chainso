@@ -94,7 +94,7 @@ function FullImageLayer({
   if (!imageDataUrl) return null;
 
   return (
-    <div className="absolute inset-0 overflow-hidden rounded-[inherit]">
+    <div className="theme-photo-depth absolute inset-0 overflow-hidden rounded-[inherit]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imageDataUrl}
@@ -109,6 +109,24 @@ function FullImageLayer({
             : "bg-[linear-gradient(180deg,var(--theme-image-overlay-soft)_0%,var(--theme-image-overlay-mid)_40%,var(--theme-image-overlay-strong)_100%)]",
         )}
       />
+    </div>
+  );
+}
+
+function TrackWaveform() {
+  return (
+    <div className="theme-track-waveform mt-3" aria-hidden="true">
+      {Array.from({ length: 12 }).map((_, index) => (
+        <span
+          key={index}
+          style={
+            {
+              "--wave-delay": `${index * 0.12}s`,
+              "--wave-height": `${42 + ((index * 17) % 38)}%`,
+            } as CSSProperties
+          }
+        />
+      ))}
     </div>
   );
 }
@@ -185,7 +203,12 @@ export default function WidgetVisual({
           <div className="relative aspect-square w-full self-start">
             <div className="absolute inset-1 rotate-[-5deg] rounded-[30px] bg-[var(--theme-photo-frame)] shadow-[0_18px_42px_var(--theme-shadow)]" />
             <div className="theme-photo-frame relative h-full rotate-[-1.5deg] overflow-hidden rounded-[30px] border p-2 shadow-[0_18px_46px_rgba(3,7,18,0.32)] backdrop-blur-md">
-              <div className="theme-photo-inner h-full overflow-hidden rounded-[22px]">
+              <div
+                className={cx(
+                  "theme-photo-inner h-full overflow-hidden rounded-[22px]",
+                  widget.imageDataUrl && "theme-photo-depth",
+                )}
+              >
                 {widget.imageDataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -250,7 +273,12 @@ export default function WidgetVisual({
         {actions}
 
         <div className="relative z-10 grid grid-cols-[112px_minmax(0,1fr)] items-center gap-4">
-          <div className="theme-photo-frame flex aspect-square w-full items-center justify-center overflow-hidden rounded-[26px] border text-[32px] font-bold text-[var(--theme-text)] shadow-[0_18px_36px_var(--theme-shadow)]">
+          <div
+            className={cx(
+              "theme-track-cover theme-photo-frame flex aspect-square w-full items-center justify-center overflow-hidden rounded-[26px] border text-[32px] font-bold text-[var(--theme-text)] shadow-[0_18px_36px_var(--theme-shadow)]",
+              widget.imageDataUrl && "theme-photo-depth",
+            )}
+          >
             {widget.imageDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -293,6 +321,7 @@ export default function WidgetVisual({
                 {note}
               </p>
             ) : null}
+            <TrackWaveform />
           </div>
         </div>
       </article>

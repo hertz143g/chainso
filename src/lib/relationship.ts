@@ -8,6 +8,7 @@ export type AppTheme =
   | "custom";
 export type TimeDisplayStyle = "hourglass" | "glass" | "orbits";
 export type AvatarDisplayStyle = "classic" | "halo" | "duo-card";
+export type HeartEffectStyle = "pulse" | "glow" | "double";
 
 export type CustomThemeSettings = {
   backgroundColor: string;
@@ -76,6 +77,7 @@ export type RelationshipSettings = {
   theme: AppTheme;
   accentColor: string;
   heartColor: string;
+  heartEffectStyle: HeartEffectStyle;
   customTheme: CustomThemeSettings;
   timeDisplayStyle: TimeDisplayStyle;
   avatarDisplayStyle: AvatarDisplayStyle;
@@ -100,6 +102,7 @@ const DEFAULT_CUSTOM_THEME: CustomThemeSettings = {
 
 const DEFAULT_ACCENT_COLOR = "#7B7CFF";
 const DEFAULT_HEART_COLOR = "#FFF4F6";
+const DEFAULT_HEART_EFFECT_STYLE: HeartEffectStyle = "pulse";
 
 export function getDefaultSettings(): RelationshipSettings {
   return {
@@ -109,6 +112,7 @@ export function getDefaultSettings(): RelationshipSettings {
     theme: "sun-cycle",
     accentColor: DEFAULT_ACCENT_COLOR,
     heartColor: DEFAULT_HEART_COLOR,
+    heartEffectStyle: DEFAULT_HEART_EFFECT_STYLE,
     customTheme: { ...DEFAULT_CUSTOM_THEME },
     timeDisplayStyle: "glass",
     avatarDisplayStyle: "classic",
@@ -320,6 +324,11 @@ function parseAvatarDisplayStyle(style: unknown, fallback: AvatarDisplayStyle): 
   return fallback;
 }
 
+function parseHeartEffectStyle(style: unknown, fallback: HeartEffectStyle): HeartEffectStyle {
+  if (style === "pulse" || style === "glow" || style === "double") return style;
+  return fallback;
+}
+
 function parseHexColor(color: unknown, fallback: string) {
   if (typeof color !== "string") return fallback;
   const trimmed = color.trim();
@@ -387,6 +396,10 @@ function normalizeSettings(
     theme: parseTheme(parsed.theme, fallback.theme),
     accentColor: parseHexColor(parsed.accentColor, fallback.accentColor),
     heartColor: parseHexColor(parsed.heartColor, fallback.heartColor),
+    heartEffectStyle: parseHeartEffectStyle(
+      parsed.heartEffectStyle,
+      fallback.heartEffectStyle,
+    ),
     customTheme: parseCustomTheme(parsed.customTheme, fallback.customTheme),
     timeDisplayStyle: parseTimeDisplayStyle(parsed.timeDisplayStyle, fallback.timeDisplayStyle),
     avatarDisplayStyle: parseAvatarDisplayStyle(

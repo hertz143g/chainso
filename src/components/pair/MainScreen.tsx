@@ -18,6 +18,7 @@ import {
   type AlbumPhoto,
   type AvatarDisplayStyle,
   type DrawingCanvas,
+  type HeartEffectStyle,
   type RelationshipWidget,
   type TimeDisplayStyle,
   updateSettings,
@@ -60,6 +61,11 @@ const HEART_COLOR_OPTIONS = [
   "#FF9F45",
   "#FFD166",
   "#7B7CFF",
+];
+const HEART_EFFECT_OPTIONS: Array<{ id: HeartEffectStyle; title: string }> = [
+  { id: "pulse", title: "Пульс" },
+  { id: "glow", title: "Сияние" },
+  { id: "double", title: "Контур" },
 ];
 
 type DrawingTool = "brush" | "eraser";
@@ -168,6 +174,53 @@ function getWidgetDropPlacement(
   return event.clientY > rect.top + rect.height / 2 ? "after" : "before";
 }
 
+function hasValidDate(startISO: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(startISO);
+}
+
+function getHeroOccasion(
+  startISO: string,
+  now: Date,
+  diffDays: number,
+): { label: string; tone: "anniversary" | "milestone" | "evening" } | null {
+  if (!hasValidDate(startISO)) return null;
+
+  const [, startMonth, startDay] = startISO.split("-").map(Number);
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const hour = now.getHours();
+
+  if (month === startMonth && day === startDay) {
+    return { label: "сегодня ваш день", tone: "anniversary" };
+  }
+
+  if (diffDays > 0 && diffDays % 100 === 0) {
+    return { label: "красивая круглая дата", tone: "milestone" };
+  }
+
+  if (hour >= 18 && hour < 23) {
+    return { label: "уютный вечер вдвоем", tone: "evening" };
+  }
+
+  return null;
+}
+
+function AnimatedTimeValue({
+  value,
+  className,
+}: {
+  value: string;
+  className?: string;
+}) {
+  return (
+    <span className={cx("theme-time-value", className)}>
+      <span key={value} className="theme-time-digit theme-time-digit-in">
+        {value}
+      </span>
+    </span>
+  );
+}
+
 function WidgetActions({
   widgetId,
   onDelete,
@@ -245,27 +298,35 @@ function CoupleAvatar({
   photoDataUrl,
   style,
   className,
+  parallaxSide = "left",
 }: {
   name: string;
   photoDataUrl?: string;
   style: AvatarDisplayStyle;
   className?: string;
+  parallaxSide?: "left" | "right";
 }) {
   const displayName = name.trim() || "Имя";
   const image = photoDataUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={photoDataUrl} alt={displayName} className="h-full w-full object-cover" />
   ) : null;
+  const parallaxClass =
+    parallaxSide === "right" ? "theme-parallax-avatar-right" : "theme-parallax-avatar-left";
 
   if (style === "duo-card") {
     return (
-      <div className={cx("theme-portrait flex w-[158px] flex-col items-center", className)}>
-        <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
-          <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
-            {image}
-          </div>
-          <div className="theme-glass mt-2 truncate rounded-full px-3 py-2 text-center text-[16px] font-extrabold leading-tight shadow-[0_10px_24px_var(--theme-shadow)]">
-            {displayName}
+      <div className={parallaxClass}>
+        <div className={cx("theme-portrait flex w-[158px] flex-col items-center", className)}>
+          <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+            <div
+              className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2"
+            >
+              <div className={cx("h-full w-full", photoDataUrl && "theme-photo-depth")}>{image}</div>
+            </div>
+            <div className="theme-glass mt-2 truncate rounded-full px-3 py-2 text-center text-[16px] font-extrabold leading-tight shadow-[0_10px_24px_var(--theme-shadow)]">
+              {displayName}
+            </div>
           </div>
         </div>
       </div>
@@ -274,13 +335,17 @@ function CoupleAvatar({
 
   if (style === "halo") {
     return (
-      <div className={cx("theme-portrait flex w-[158px] flex-col items-center", className)}>
-        <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
-          <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
-            {image}
-          </div>
-          <div className="theme-glass mt-2 truncate rounded-full px-3 py-2 text-center text-[16px] font-extrabold leading-tight shadow-[0_10px_24px_var(--theme-shadow)]">
-            {displayName}
+      <div className={parallaxClass}>
+        <div className={cx("theme-portrait flex w-[158px] flex-col items-center", className)}>
+          <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
+            <div
+              className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2"
+            >
+              <div className={cx("h-full w-full", photoDataUrl && "theme-photo-depth")}>{image}</div>
+            </div>
+            <div className="theme-glass mt-2 truncate rounded-full px-3 py-2 text-center text-[16px] font-extrabold leading-tight shadow-[0_10px_24px_var(--theme-shadow)]">
+              {displayName}
+            </div>
           </div>
         </div>
       </div>
@@ -288,12 +353,16 @@ function CoupleAvatar({
   }
 
   return (
-    <div className={cx("theme-portrait flex w-[156px] flex-col items-center", className)}>
-      <div className="theme-avatar-ring theme-avatar-surface h-[156px] w-[156px] overflow-hidden rounded-full ring-[3px]">
-        {image}
-      </div>
-      <div className="theme-glass mt-3 rounded-full px-4 py-2 text-[18px] font-semibold shadow-[0_10px_24px_var(--theme-shadow)]">
-        {displayName}
+    <div className={parallaxClass}>
+      <div className={cx("theme-portrait flex w-[156px] flex-col items-center", className)}>
+        <div
+          className="theme-avatar-ring theme-avatar-surface h-[156px] w-[156px] overflow-hidden rounded-full ring-[3px]"
+        >
+          <div className={cx("h-full w-full", photoDataUrl && "theme-photo-depth")}>{image}</div>
+        </div>
+        <div className="theme-glass mt-3 rounded-full px-4 py-2 text-[18px] font-semibold shadow-[0_10px_24px_var(--theme-shadow)]">
+          {displayName}
+        </div>
       </div>
     </div>
   );
@@ -315,24 +384,34 @@ function CoupleCameo({
   const displayName1 = name1.trim() || "Имя 1";
   const displayName2 = name2.trim() || "Имя 2";
   return (
-    <div className={cx("theme-cameo-stage relative w-full pb-2 pt-3", className)}>
-      <div className="relative mx-auto flex w-[316px] items-center justify-center">
-        <div className="theme-cameo-portrait theme-cameo-portrait-a theme-avatar-ring theme-avatar-surface relative z-20 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
-          {photo1DataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo1DataUrl} alt={displayName1} className="h-full w-full object-cover" />
-          ) : null}
+    <div className="theme-parallax-avatars">
+      <div className={cx("theme-cameo-stage relative w-full pb-2 pt-3", className)}>
+        <div className="relative mx-auto flex w-[316px] items-center justify-center">
+          <div
+            className="theme-cameo-portrait theme-cameo-portrait-a theme-avatar-ring theme-avatar-surface relative z-20 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]"
+          >
+            <div className={cx("h-full w-full", photo1DataUrl && "theme-photo-depth")}>
+              {photo1DataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo1DataUrl} alt={displayName1} className="h-full w-full object-cover" />
+              ) : null}
+            </div>
+          </div>
+          <div
+            className="theme-cameo-portrait theme-cameo-portrait-b theme-avatar-ring theme-avatar-surface relative z-10 -ml-8 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]"
+          >
+            <div className={cx("h-full w-full", photo2DataUrl && "theme-photo-depth")}>
+              {photo2DataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo2DataUrl} alt={displayName2} className="h-full w-full object-cover" />
+              ) : null}
+            </div>
+          </div>
         </div>
-        <div className="theme-cameo-portrait theme-cameo-portrait-b theme-avatar-ring theme-avatar-surface relative z-10 -ml-8 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
-          {photo2DataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo2DataUrl} alt={displayName2} className="h-full w-full object-cover" />
-          ) : null}
-        </div>
-      </div>
-      <div className="mt-3 flex justify-center">
-        <div className="theme-glass rounded-full px-5 py-2 text-[17px] font-extrabold shadow-[0_12px_30px_var(--theme-shadow)] backdrop-blur-md">
-          {displayName1} · {displayName2}
+        <div className="mt-3 flex justify-center">
+          <div className="theme-glass rounded-full px-5 py-2 text-[17px] font-extrabold shadow-[0_12px_30px_var(--theme-shadow)] backdrop-blur-md">
+            {displayName1} · {displayName2}
+          </div>
         </div>
       </div>
     </div>
@@ -367,7 +446,10 @@ function TimeDisplay({
               index > 0 && "border-l border-[var(--theme-card-border)]",
             )}
           >
-            <div className="text-[30px] font-extrabold leading-none">{unit.value}</div>
+            <AnimatedTimeValue
+              value={unit.value}
+              className="text-[30px] font-extrabold leading-none"
+            />
             <div className="theme-muted-text mt-1 text-[12px] font-semibold">{unit.label}</div>
           </div>
         ))}
@@ -384,17 +466,19 @@ function TimeDisplay({
         <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_104px] items-center gap-4">
           <div className="grid min-w-0 grid-cols-2 gap-3">
             <div className="theme-glass rounded-[24px] px-3 py-4 text-center">
-              <div className="text-[42px] font-black leading-none tracking-[-0.07em]">
-                {hours}
-              </div>
+              <AnimatedTimeValue
+                value={hours}
+                className="text-[42px] font-black leading-none tracking-[-0.07em]"
+              />
               <div className="theme-muted-text mt-2 text-[11px] font-bold uppercase tracking-[0.12em]">
                 часы
               </div>
             </div>
             <div className="theme-glass rounded-[24px] px-3 py-4 text-center">
-              <div className="text-[42px] font-black leading-none tracking-[-0.07em]">
-                {minutes}
-              </div>
+              <AnimatedTimeValue
+                value={minutes}
+                className="text-[42px] font-black leading-none tracking-[-0.07em]"
+              />
               <div className="theme-muted-text mt-2 text-[11px] font-bold uppercase tracking-[0.12em]">
                 минуты
               </div>
@@ -412,7 +496,10 @@ function TimeDisplay({
             <div className="theme-time-orbit-core theme-glass relative flex h-full w-full flex-col items-center justify-center rounded-full">
               <span className="absolute h-5 w-5 rounded-full bg-[var(--theme-primary)] opacity-25 blur-md" />
               <span className="absolute h-3 w-3 animate-ping rounded-full bg-[var(--theme-primary)] opacity-30" />
-              <div className="text-[30px] font-black leading-none">{seconds}</div>
+              <AnimatedTimeValue
+                value={seconds}
+                className="text-[30px] font-black leading-none"
+              />
               <div className="theme-muted-text mt-1 text-[10px] font-bold uppercase tracking-[0.14em]">
                 сек
               </div>
@@ -441,9 +528,10 @@ function TimeDisplay({
                 className="theme-time-fill absolute inset-x-0 bottom-0 opacity-25"
                 style={{ height: `${fill}%` }}
               />
-              <div className="relative z-10 text-[31px] font-black leading-none tracking-[-0.04em]">
-                {unit.value}
-              </div>
+              <AnimatedTimeValue
+                value={unit.value}
+                className="relative z-10 text-[31px] font-black leading-none tracking-[-0.04em]"
+              />
               <div className="theme-muted-text relative z-10 mt-2 text-[10px] font-bold uppercase tracking-[0.12em]">
                 {unit.label}
               </div>
@@ -915,6 +1003,7 @@ function AlbumEventCard({
 
 export default function MainScreen() {
   const settings = useRelationshipSettings();
+  const screenRef = useRef<HTMLDivElement>(null);
   const albumInputRef = useRef<HTMLInputElement>(null);
   const widgetsSectionRef = useRef<HTMLDivElement>(null);
   const canvasesSectionRef = useRef<HTMLDivElement>(null);
@@ -943,6 +1032,63 @@ export default function MainScreen() {
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let pointerX = 0;
+    let pointerY = 0;
+    let scrollValue = Math.min(1, window.scrollY / 320);
+    let frame = 0;
+
+    const applyMotion = () => {
+      frame = 0;
+      const node = screenRef.current;
+      if (!node) return;
+
+      node.style.setProperty("--hero-pointer-x", pointerX.toFixed(4));
+      node.style.setProperty("--hero-pointer-y", pointerY.toFixed(4));
+      node.style.setProperty("--hero-scroll", scrollValue.toFixed(4));
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(applyMotion);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      const centerX = window.innerWidth / 2;
+      const centerY = Math.min(window.innerHeight, 720) / 2;
+      pointerX = Math.max(-1, Math.min(1, (event.clientX - centerX) / centerX));
+      pointerY = Math.max(-1, Math.min(1, (event.clientY - centerY) / centerY));
+      schedule();
+    };
+
+    const onPointerLeave = () => {
+      pointerX *= 0.45;
+      pointerY *= 0.45;
+      schedule();
+    };
+
+    const onScroll = () => {
+      scrollValue = Math.min(1, window.scrollY / 320);
+      schedule();
+    };
+
+    applyMotion();
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerdown", onPointerMove, { passive: true });
+    window.addEventListener("mouseout", onPointerLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerdown", onPointerMove);
+      window.removeEventListener("mouseout", onPointerLeave);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -982,6 +1128,10 @@ export default function MainScreen() {
     Boolean(albumDraftTitle.trim() && albumDraftDateISO) &&
     !albumDraftMatchesExisting &&
     albumEvents.length < MAX_ALBUM_EVENTS;
+  const heroOccasion = useMemo(
+    () => getHeroOccasion(settings.startDateISO, now, diff.days),
+    [diff.days, now, settings.startDateISO],
+  );
 
   const onDeleteWidget = (widgetId: string) => {
     if (typeof window !== "undefined") {
@@ -1256,7 +1406,13 @@ export default function MainScreen() {
       : "Нажми плюс и нарисуй первый";
 
   return (
-    <div className="theme-screen">
+    <div
+      ref={screenRef}
+      className={cx(
+        "theme-screen theme-hero-scene",
+        heroOccasion?.tone && `theme-hero-${heroOccasion.tone}`,
+      )}
+    >
       {editingCanvasId ? (
         <DrawingCanvasEditor
           canvas={activeDrawingCanvas}
@@ -1306,14 +1462,19 @@ export default function MainScreen() {
         </div>
       </div>
 
-      <div className="theme-reveal theme-reveal-delay-1 theme-kpi-stack mt-7 flex flex-col items-center">
-        <div className="theme-day-counter theme-subtle-text text-[17px] font-semibold leading-none">
+      <div className="theme-reveal theme-reveal-delay-1 theme-kpi-stack theme-parallax-kpi mt-7 flex flex-col items-center">
+        <div className="theme-parallax-days theme-day-counter theme-subtle-text text-[17px] font-semibold leading-none">
           {diff.days} ДНЕЙ
         </div>
 
         <div
           ref={heartPickerRef}
-          className="theme-heart-orbit relative z-40 mt-2 flex h-12 w-12 items-center justify-center"
+          className={cx(
+            "theme-heart-orbit theme-parallax-heart relative z-40 mt-2 flex h-12 w-12 items-center justify-center",
+            settings.heartEffectStyle === "glow" && "theme-heart-mode-glow",
+            settings.heartEffectStyle === "double" && "theme-heart-mode-double",
+            settings.heartEffectStyle === "pulse" && "theme-heart-mode-pulse",
+          )}
         >
           <button
             type="button"
@@ -1326,7 +1487,7 @@ export default function MainScreen() {
           </button>
 
           {isHeartPickerOpen ? (
-            <div className="theme-heart-palette absolute left-1/2 top-[calc(100%+10px)] z-50 -translate-x-1/2 rounded-full px-2 py-2">
+            <div className="theme-heart-palette absolute left-1/2 top-[calc(100%+10px)] z-50 -translate-x-1/2 rounded-[22px] px-2 py-2">
               <div className="flex items-center gap-2">
                 {HEART_COLOR_OPTIONS.map((color) => {
                   const selected = settings.heartColor === color;
@@ -1352,9 +1513,42 @@ export default function MainScreen() {
                   );
                 })}
               </div>
+              <div className="mt-2 flex items-center justify-center gap-1.5">
+                {HEART_EFFECT_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() =>
+                      updateSettings((prev) => ({
+                        ...prev,
+                        heartEffectStyle: option.id,
+                      }))
+                    }
+                    className={cx(
+                      "theme-heart-mode-chip rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em]",
+                      settings.heartEffectStyle === option.id && "theme-heart-mode-chip-active",
+                    )}
+                  >
+                    {option.title}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
+
+        {heroOccasion ? (
+          <div
+            className={cx(
+              "theme-occasion-badge mt-3 rounded-full px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em]",
+              heroOccasion.tone === "anniversary" && "theme-occasion-badge-anniversary",
+              heroOccasion.tone === "milestone" && "theme-occasion-badge-milestone",
+              heroOccasion.tone === "evening" && "theme-occasion-badge-evening",
+            )}
+          >
+            {heroOccasion.label}
+          </div>
+        ) : null}
       </div>
 
       <div className="theme-reveal theme-reveal-delay-2 theme-avatars-stage mt-0 flex justify-center gap-4">
@@ -1371,12 +1565,14 @@ export default function MainScreen() {
               name={settings.name1}
               photoDataUrl={settings.photo1DataUrl}
               style={settings.avatarDisplayStyle}
+              parallaxSide="left"
             />
             <CoupleAvatar
               name={settings.name2}
               photoDataUrl={settings.photo2DataUrl}
               style={settings.avatarDisplayStyle}
               className="theme-portrait-alt"
+              parallaxSide="right"
             />
           </>
         )}
@@ -1400,14 +1596,14 @@ export default function MainScreen() {
         </div>
       </div>
 
-      <div className="theme-reveal theme-reveal-delay-4 mt-8 text-center">
+      <div className="theme-reveal theme-reveal-delay-4 theme-parallax-together mt-8 text-center">
         <div className="theme-subtle-text text-[22px] font-semibold">Вместе уже:</div>
         <div className="mt-1 text-[28px] font-semibold leading-tight">
           {formatTogether(diff.years, diff.months, diff.day)}
         </div>
       </div>
 
-      <div className="theme-reveal theme-reveal-delay-5 theme-time-stage mt-4 flex justify-center">
+      <div className="theme-reveal theme-reveal-delay-5 theme-time-stage theme-parallax-time mt-4 flex justify-center">
         <TimeDisplay
           style={settings.timeDisplayStyle}
           hours={format2(diff.hours)}
