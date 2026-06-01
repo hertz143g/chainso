@@ -182,24 +182,19 @@ function getHeroOccasion(
   startISO: string,
   now: Date,
   diffDays: number,
-): { label: string; tone: "anniversary" | "milestone" | "evening" } | null {
+): { tone: "anniversary" | "milestone" } | null {
   if (!hasValidDate(startISO)) return null;
 
   const [, startMonth, startDay] = startISO.split("-").map(Number);
   const month = now.getMonth() + 1;
   const day = now.getDate();
-  const hour = now.getHours();
 
   if (month === startMonth && day === startDay) {
-    return { label: "сегодня ваш день", tone: "anniversary" };
+    return { tone: "anniversary" };
   }
 
   if (diffDays > 0 && diffDays % 100 === 0) {
-    return { label: "красивая круглая дата", tone: "milestone" };
-  }
-
-  if (hour >= 18 && hour < 23) {
-    return { label: "уютный вечер вдвоем", tone: "evening" };
+    return { tone: "milestone" };
   }
 
   return null;
@@ -1039,7 +1034,7 @@ export default function MainScreen() {
 
     let pointerX = 0;
     let pointerY = 0;
-    let scrollValue = Math.min(1, window.scrollY / 320);
+    let scrollValue = Math.min(1, window.scrollY / 220);
     let frame = 0;
 
     const applyMotion = () => {
@@ -1072,21 +1067,34 @@ export default function MainScreen() {
     };
 
     const onScroll = () => {
-      scrollValue = Math.min(1, window.scrollY / 320);
+      scrollValue = Math.min(1, window.scrollY / 220);
+      schedule();
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+
+      const centerX = window.innerWidth / 2;
+      const centerY = Math.min(window.innerHeight, 720) / 2;
+      pointerX = Math.max(-1, Math.min(1, (touch.clientX - centerX) / centerX));
+      pointerY = Math.max(-1, Math.min(1, (touch.clientY - centerY) / centerY));
       schedule();
     };
 
     applyMotion();
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerMove, { passive: true });
-    window.addEventListener("mouseout", onPointerLeave);
+    window.addEventListener("pointerleave", onPointerLeave);
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerMove);
-      window.removeEventListener("mouseout", onPointerLeave);
+      window.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("scroll", onScroll);
     };
   }, []);
@@ -1537,18 +1545,6 @@ export default function MainScreen() {
           ) : null}
         </div>
 
-        {heroOccasion ? (
-          <div
-            className={cx(
-              "theme-occasion-badge mt-3 rounded-full px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em]",
-              heroOccasion.tone === "anniversary" && "theme-occasion-badge-anniversary",
-              heroOccasion.tone === "milestone" && "theme-occasion-badge-milestone",
-              heroOccasion.tone === "evening" && "theme-occasion-badge-evening",
-            )}
-          >
-            {heroOccasion.label}
-          </div>
-        ) : null}
       </div>
 
       <div className="theme-reveal theme-reveal-delay-2 theme-avatars-stage mt-0 flex justify-center gap-4">

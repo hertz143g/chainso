@@ -797,60 +797,60 @@ body {
 
 .theme-parallax-kpi {
   transform: translate3d(
-    calc(var(--hero-pointer-x) * 8px),
-    calc(var(--hero-pointer-y) * 4px + var(--hero-scroll) * -12px),
+    calc(var(--hero-pointer-x) * 14px),
+    calc(var(--hero-pointer-y) * 8px + var(--hero-scroll) * -20px),
     0
   );
 }
 
 .theme-parallax-days {
-  transform: translate3d(calc(var(--hero-pointer-x) * -2px), calc(var(--hero-pointer-y) * -1px), 0);
+  transform: translate3d(calc(var(--hero-pointer-x) * -5px), calc(var(--hero-pointer-y) * -2px), 0);
 }
 
 .theme-parallax-heart {
   transform: translate3d(
-    calc(var(--hero-pointer-x) * -6px),
-    calc(var(--hero-pointer-y) * 3px + var(--hero-scroll) * -4px),
+    calc(var(--hero-pointer-x) * -12px),
+    calc(var(--hero-pointer-y) * 7px + var(--hero-scroll) * -8px),
     0
   );
 }
 
 .theme-parallax-avatars {
   transform: translate3d(
-    calc(var(--hero-pointer-x) * -7px),
-    calc(var(--hero-pointer-y) * 3px + var(--hero-scroll) * -7px),
+    calc(var(--hero-pointer-x) * -14px),
+    calc(var(--hero-pointer-y) * 6px + var(--hero-scroll) * -14px),
     0
   );
 }
 
 .theme-parallax-avatar-left {
   transform: translate3d(
-    calc(var(--hero-pointer-x) * -8px),
-    calc(var(--hero-pointer-y) * 2px + var(--hero-scroll) * -3px),
+    calc(var(--hero-pointer-x) * -18px),
+    calc(var(--hero-pointer-y) * 5px + var(--hero-scroll) * -6px),
     0
   );
 }
 
 .theme-parallax-avatar-right {
   transform: translate3d(
-    calc(var(--hero-pointer-x) * 8px),
-    calc(var(--hero-pointer-y) * -2px + var(--hero-scroll) * -3px),
+    calc(var(--hero-pointer-x) * 18px),
+    calc(var(--hero-pointer-y) * -5px + var(--hero-scroll) * -6px),
     0
   );
 }
 
 .theme-parallax-together {
   transform: translate3d(
-    calc(var(--hero-pointer-x) * 4px),
-    calc(var(--hero-pointer-y) * 2px + var(--hero-scroll) * -8px),
+    calc(var(--hero-pointer-x) * 9px),
+    calc(var(--hero-pointer-y) * 4px + var(--hero-scroll) * -14px),
     0
   );
 }
 
 .theme-parallax-time {
   transform: translate3d(
-    calc(var(--hero-pointer-x) * -4px),
-    calc(var(--hero-pointer-y) * 4px + var(--hero-scroll) * -10px),
+    calc(var(--hero-pointer-x) * -10px),
+    calc(var(--hero-pointer-y) * 8px + var(--hero-scroll) * -18px),
     0
   );
 }
@@ -883,33 +883,6 @@ body {
   animation: counter-glow 4.4s ease-in-out infinite;
 }
 
-.theme-occasion-badge {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 92%, white 10%), color-mix(in srgb, var(--theme-surface) 80%, transparent)),
-    color-mix(in srgb, var(--theme-glass-bg) 86%, transparent);
-  border: 1px solid color-mix(in srgb, var(--theme-card-border) 78%, white 12%);
-  box-shadow:
-    0 10px 24px color-mix(in srgb, var(--theme-shadow) 26%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  color: var(--theme-text);
-  backdrop-filter: blur(14px);
-}
-
-.theme-occasion-badge-anniversary {
-  border-color: color-mix(in srgb, var(--theme-primary) 56%, white 14%);
-  box-shadow:
-    0 12px 28px color-mix(in srgb, var(--theme-primary) 18%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
-.theme-occasion-badge-milestone {
-  border-color: color-mix(in srgb, #ffd166 56%, white 10%);
-}
-
-.theme-occasion-badge-evening {
-  border-color: color-mix(in srgb, #ff9f6b 52%, white 10%);
-}
-
 .theme-hero-anniversary .theme-kpi-stack::after {
   background: radial-gradient(circle, color-mix(in srgb, #ff8cab 26%, transparent), transparent 72%);
   opacity: 0.62;
@@ -917,13 +890,6 @@ body {
 
 .theme-hero-milestone .theme-day-counter {
   text-shadow: 0 0 20px color-mix(in srgb, #ffd166 38%, transparent);
-}
-
-.theme-hero-evening .theme-time-tray {
-  box-shadow:
-    0 18px 40px color-mix(in srgb, var(--theme-shadow) 58%, transparent),
-    0 0 22px color-mix(in srgb, #ff9f6b 12%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .theme-icon-button {

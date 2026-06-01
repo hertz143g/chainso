@@ -15,6 +15,10 @@ import {
 } from "@/lib/relationship";
 import { prepareImageForStorage } from "@/lib/widgetAppearance";
 
+function cx(...classes: Array<string | false | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
 const THEME_OPTIONS: Array<{
   id: AppTheme;
   title: string;
@@ -133,39 +137,79 @@ function ThemePreviewDots({
 function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
   if (style === "glass") {
     return (
-      <div className="theme-glass mx-auto grid h-10 w-full grid-cols-3 items-center rounded-full px-2 text-center text-[10px] font-bold">
-        <span>08</span>
-        <span>24</span>
-        <span>16</span>
+      <div className="theme-time-tray mx-auto grid h-11 w-full grid-cols-3 rounded-full px-2.5 text-center">
+        {[
+          { value: "08", label: "ч" },
+          { value: "24", label: "м" },
+          { value: "16", label: "с" },
+        ].map((unit, index) => (
+          <div
+            key={unit.label}
+            className={cx(
+              "flex min-w-0 flex-col items-center justify-center",
+              index > 0 && "border-l border-[var(--theme-card-border)]",
+            )}
+          >
+            <span className="text-[10px] font-black leading-none">{unit.value}</span>
+            <span className="theme-muted-text mt-0.5 text-[8px] font-bold uppercase leading-none">
+              {unit.label}
+            </span>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (style === "orbits") {
     return (
-      <div className="theme-glass relative mx-auto h-10 w-full overflow-hidden rounded-[18px] px-2 py-1.5">
-        <div className="absolute left-2 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border border-[var(--theme-ring)]" />
-        <div className="relative ml-3 flex h-full items-center justify-end gap-1 text-[10px] font-black">
-          <span className="theme-primary-button rounded-full px-2 py-1">08</span>
-          <span>24</span>
-          <span className="theme-muted-text">16</span>
+      <div className="theme-time-tray mx-auto h-12 w-full overflow-hidden rounded-[20px] px-2 py-1.5">
+        <div className="grid h-full grid-cols-[minmax(0,1fr)_34px] items-center gap-1.5">
+          <div className="grid min-w-0 grid-cols-2 gap-1.5">
+            <div className="theme-glass rounded-[12px] px-1.5 py-1 text-center">
+              <div className="text-[10px] font-black leading-none">08</div>
+              <div className="theme-muted-text mt-0.5 text-[7px] font-bold uppercase leading-none">
+                ч
+              </div>
+            </div>
+            <div className="theme-glass rounded-[12px] px-1.5 py-1 text-center">
+              <div className="text-[10px] font-black leading-none">24</div>
+              <div className="theme-muted-text mt-0.5 text-[7px] font-bold uppercase leading-none">
+                м
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="theme-time-orbit-ring flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-full p-[3px]"
+            style={{
+              background:
+                "conic-gradient(var(--theme-primary) 96deg, var(--theme-control-bg) 0deg)",
+            }}
+          >
+            <div className="theme-time-orbit-core theme-glass flex h-full w-full items-center justify-center rounded-full text-[8px] font-black">
+              16
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto grid h-10 w-full grid-cols-3 gap-1.5">
+    <div className="theme-time-tray mx-auto grid h-12 w-full grid-cols-3 gap-1.5 rounded-[18px] px-1.5 py-1.5">
       {["08", "24", "16"].map((value, index) => (
         <span
           key={value}
-          className="theme-glass relative flex items-center justify-center overflow-hidden rounded-b-[16px] rounded-t-[8px] text-[10px] font-black"
+          className="theme-glass relative flex flex-col items-center justify-center overflow-hidden rounded-b-[12px] rounded-t-[8px] text-[10px] font-black"
         >
           <span
-            className="absolute inset-x-0 bottom-0 bg-[var(--theme-primary)] opacity-45"
+            className="theme-time-fill absolute inset-x-0 bottom-0 opacity-25"
             style={{ height: `${38 + index * 18}%` }}
           />
-          <span className="relative z-10">{value}</span>
+          <span className="relative z-10 leading-none">{value}</span>
+          <span className="theme-muted-text relative z-10 mt-0.5 text-[7px] font-bold uppercase leading-none">
+            {index === 0 ? "ч" : index === 1 ? "м" : "с"}
+          </span>
         </span>
       ))}
     </div>
