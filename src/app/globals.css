@@ -741,6 +741,36 @@ body {
 
 .theme-avatar-ring {
   --tw-ring-color: var(--theme-ring);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-avatar-ring::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 38deg,
+    color-mix(in srgb, var(--theme-primary) 54%, white 18%) 64deg,
+    rgba(255, 255, 255, 0.88) 84deg,
+    transparent 108deg,
+    transparent 360deg
+  );
+  opacity: 0.66;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: avatar-ring-sheen 7.2s linear infinite;
 }
 
 .theme-screen {
@@ -851,6 +881,25 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
   -webkit-backdrop-filter: blur(22px);
   backdrop-filter: blur(22px);
+}
+
+.theme-time-tray::after {
+  content: "";
+  position: absolute;
+  inset: -24% auto -24% -18%;
+  width: 42%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 26%,
+    rgba(255, 255, 255, 0.24) 50%,
+    rgba(255, 255, 255, 0.04) 72%,
+    transparent 100%
+  );
+  opacity: 0.32;
+  transform: translate3d(-160%, 0, 0) rotate(12deg);
+  animation: time-tray-sheen 5.8s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .theme-time-cell {
@@ -1363,6 +1412,20 @@ body {
   }
 }
 
+@keyframes avatar-ring-sheen {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.54;
+  }
+  50% {
+    opacity: 0.82;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.54;
+  }
+}
+
 @keyframes surface-pop {
   0% {
     opacity: 0;
@@ -1398,6 +1461,25 @@ body {
   82% {
     transform: translate3d(250%, 0, 0) rotate(14deg);
     opacity: 0.12;
+  }
+}
+
+@keyframes time-tray-sheen {
+  0%,
+  16% {
+    transform: translate3d(-160%, 0, 0) rotate(12deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.28;
+  }
+  54% {
+    transform: translate3d(240%, 0, 0) rotate(12deg);
+    opacity: 0.24;
+  }
+  100% {
+    transform: translate3d(240%, 0, 0) rotate(12deg);
+    opacity: 0;
   }
 }
 
@@ -1595,8 +1677,10 @@ body {
   .theme-progress-track::after,
   .theme-progress-value,
   .theme-progress-value::after,
+  .theme-avatar-ring::after,
   .theme-time-orbit-ring::after,
   .theme-time-orbit-core,
+  .theme-time-tray::after,
   .theme-widget-card::after,
   .theme-wordmark,
   .theme-day-counter,
