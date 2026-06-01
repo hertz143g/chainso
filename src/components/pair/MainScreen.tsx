@@ -1223,13 +1223,13 @@ export default function MainScreen() {
         />
       ) : null}
 
-      <div className="grid min-h-[56px] grid-cols-[auto_1fr_auto] items-center gap-2">
+      <div className="grid min-h-[56px] grid-cols-[auto_1fr_auto] items-center gap-1.5">
         <div className="justify-self-start">
           <button
             type="button"
             onClick={() => setIsEditingWidgets((value) => !value)}
             className={cx(
-              "theme-header-pill px-3.5 text-[12px] font-bold",
+              "theme-header-pill px-3 text-[11px] font-extrabold",
               isEditingWidgets && "theme-header-pill-active",
             )}
             aria-label="Переключить режим редактирования виджетов"
@@ -1242,22 +1242,32 @@ export default function MainScreen() {
                     "bg-[var(--theme-primary)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--theme-primary)_22%,transparent)]",
                 )}
               />
-              <span>{isEditingWidgets ? "Готово" : "Редактировать"}</span>
+              <span className="min-[390px]:hidden">
+                {isEditingWidgets ? "Готово" : "Править"}
+              </span>
+              <span className="hidden min-[390px]:inline">
+                {isEditingWidgets ? "Готово" : "Редактировать"}
+              </span>
             </span>
           </button>
         </div>
 
         <div className="justify-self-center text-center">
-          <span className="text-[28px] font-extrabold leading-none">CHAINSO</span>
+          <span className="text-[24px] font-extrabold leading-none tracking-[-0.04em] min-[390px]:text-[26px]">
+            CHAINSO
+          </span>
         </div>
 
         <div className="justify-self-end">
           <Link
             href="/settings"
-            className="theme-header-pill px-3.5 text-[12px] font-bold"
+            className="theme-header-pill px-3 text-[11px] font-extrabold"
             aria-label="Открыть настройки"
           >
-            <span className="relative z-10 whitespace-nowrap">Настройки</span>
+            <span className="relative z-10 whitespace-nowrap">
+              <span className="min-[390px]:hidden">Настр.</span>
+              <span className="hidden min-[390px]:inline">Настройки</span>
+            </span>
           </Link>
         </div>
       </div>
