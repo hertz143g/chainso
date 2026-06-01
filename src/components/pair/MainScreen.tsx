@@ -1223,44 +1223,41 @@ export default function MainScreen() {
         />
       ) : null}
 
-      <div className="relative h-[56px]">
-        <div className="absolute left-0 top-3">
+      <div className="grid min-h-[56px] grid-cols-[auto_1fr_auto] items-center gap-2">
+        <div className="justify-self-start">
           <button
             type="button"
             onClick={() => setIsEditingWidgets((value) => !value)}
             className={cx(
-              "theme-top-action px-3 text-left",
-              isEditingWidgets && "theme-top-action-active",
+              "theme-header-pill px-3.5 text-[12px] font-bold",
+              isEditingWidgets && "theme-header-pill-active",
             )}
             aria-label="Переключить режим редактирования виджетов"
           >
-            <span className="relative z-10 flex flex-col leading-none">
-              <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--theme-text-muted)]">
-                Режим
-              </span>
-              <span className="mt-1 text-[12px] font-extrabold">
-                {isEditingWidgets ? "Готово" : "Редакт."}
-              </span>
+            <span className="relative z-10 flex items-center gap-2 whitespace-nowrap">
+              <span
+                className={cx(
+                  "h-1.5 w-1.5 rounded-full bg-[var(--theme-text-muted)] transition",
+                  isEditingWidgets &&
+                    "bg-[var(--theme-primary)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--theme-primary)_22%,transparent)]",
+                )}
+              />
+              <span>{isEditingWidgets ? "Готово" : "Редактировать"}</span>
             </span>
           </button>
         </div>
 
-        <div className="absolute left-1/2 top-4 -translate-x-1/2">
+        <div className="justify-self-center text-center">
           <span className="text-[28px] font-extrabold leading-none">CHAINSO</span>
         </div>
 
-        <div className="absolute right-0 top-3">
+        <div className="justify-self-end">
           <Link
             href="/settings"
-            className="theme-top-action px-3 text-left"
+            className="theme-header-pill px-3.5 text-[12px] font-bold"
             aria-label="Открыть настройки"
           >
-            <span className="relative z-10 flex flex-col leading-none">
-              <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--theme-text-muted)]">
-                Экран
-              </span>
-              <span className="mt-1 text-[12px] font-extrabold">Настройки</span>
-            </span>
+            <span className="relative z-10 whitespace-nowrap">Настройки</span>
           </Link>
         </div>
       </div>
