@@ -1576,6 +1576,30 @@ export default function MainScreen() {
         onChange={onAlbumPhotosChange}
       />
 
+      {!isEditingWidgets ? (
+        <div className="fixed inset-x-0 bottom-4 z-40 px-4">
+          <div className="mx-auto flex w-full max-w-[360px] justify-end">
+            <button
+              type="button"
+              onClick={() => setIsEditingWidgets(true)}
+              className="theme-edit-trigger rounded-full px-4 py-3"
+              aria-label="Включить режим редактирования"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <Image
+                  src="/icons/brush.png"
+                  alt="brush"
+                  width={16}
+                  height={16}
+                  className="opacity-90"
+                />
+                <span className="text-[13px] font-extrabold">Редактировать</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {isEditingWidgets ? (
         <div className="fixed inset-x-0 bottom-4 z-40 px-4">
           <div className="mx-auto w-full max-w-[360px]">
@@ -1650,7 +1674,7 @@ export default function MainScreen() {
         </div>
       ) : null}
 
-      <div className={cx("h-10", isEditingWidgets && "h-44")} />
+      <div className={cx("h-24", isEditingWidgets && "h-44")} />
     </div>
   );
 }
