@@ -36,6 +36,36 @@ function FloatingDots() {
   );
 }
 
+function HeroSparkles() {
+  return (
+    <div className="theme-sparkles" aria-hidden="true">
+      {Array.from({ length: 10 }).map((_, index) => (
+        <span
+          key={index}
+          style={
+            {
+              "--sparkle-left": `${8 + index * 9}%`,
+              "--sparkle-top": `${8 + (index % 5) * 11}%`,
+              "--sparkle-size": `${4 + (index % 3) * 2}px`,
+              "--sparkle-duration": `${4.8 + index * 0.45}s`,
+              "--sparkle-delay": `${index * -0.55}s`,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+function HeroRibbon() {
+  return (
+    <div className="theme-hero-ribbon" aria-hidden="true">
+      <span className="theme-hero-ribbon-beam" />
+      <span className="theme-hero-ribbon-haze" />
+    </div>
+  );
+}
+
 function ThemeAtmosphere({ theme }: { theme: string }) {
   if (theme === "light") {
     return (
@@ -44,6 +74,8 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
         <span className="theme-blob aurora-blob-b" />
         <span className="theme-blob aurora-blob-c" />
         <span className="theme-sheen aurora-sheen" />
+        <HeroRibbon />
+        <HeroSparkles />
         <FloatingDots />
       </div>
     );
@@ -55,6 +87,8 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
         <span className={`theme-blob ${theme}-blob-a`} />
         <span className={`theme-blob ${theme}-blob-b`} />
         <span className={`theme-sheen ${theme}-sheen`} />
+        <HeroRibbon />
+        <HeroSparkles />
       </div>
     );
   }
@@ -64,6 +98,8 @@ function ThemeAtmosphere({ theme }: { theme: string }) {
       <span className="theme-blob sun-cycle-orb" />
       <span className="theme-blob sun-cycle-haze sun-cycle-haze-a" />
       <span className="theme-blob sun-cycle-haze sun-cycle-haze-b" />
+      <HeroRibbon />
+      <HeroSparkles />
     </div>
   );
 }

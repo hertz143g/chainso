@@ -27,18 +27,22 @@ export default function AtmosphericBackdrop({
       {BLOB_LAYOUTS.map((style, index) => (
         <div
           key={`${colors[index % colors.length]}-${index}`}
-          className="absolute rounded-full blur-3xl"
+          className="theme-widget-atmosphere-blob absolute rounded-full blur-3xl"
           style={{
             ...style,
             backgroundColor: colors[index % colors.length],
             opacity: colorMode === "adaptive" ? 0.72 : 0.4,
+            ["--blob-duration" as string]: `${7.5 + index * 1.2}s`,
+            ["--blob-delay" as string]: `${index * -1.1}s`,
+            ["--blob-shift-x" as string]: `${16 + index * 5}px`,
+            ["--blob-shift-y" as string]: `${10 + (index % 2) * 8}px`,
           }}
         />
       ))}
 
       {colorMode === "adaptive" && imageDataUrl ? (
         <div
-          className="absolute inset-0 scale-110 bg-cover bg-center blur-2xl"
+          className="theme-widget-atmosphere-image absolute inset-0 scale-110 bg-cover bg-center blur-2xl"
           style={{ backgroundImage: `url(${imageDataUrl})`, opacity: 0.18 }}
         />
       ) : null}

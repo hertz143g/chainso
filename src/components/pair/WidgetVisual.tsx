@@ -174,7 +174,7 @@ export default function WidgetVisual({
     return (
       <article
         className={cx(
-          "theme-widget-card relative isolate col-span-2 min-h-[188px] overflow-hidden rounded-[32px] border p-3.5",
+          "theme-widget-card theme-surface-lift relative isolate col-span-2 min-h-[188px] overflow-hidden rounded-[32px] border p-3.5",
           className,
         )}
       >
@@ -242,7 +242,7 @@ export default function WidgetVisual({
     return (
       <article
         className={cx(
-          "theme-widget-card relative isolate col-span-2 min-h-[152px] overflow-hidden rounded-[30px] border p-4",
+          "theme-widget-card theme-surface-lift relative isolate col-span-2 min-h-[152px] overflow-hidden rounded-[30px] border p-4",
           className,
         )}
       >
@@ -304,7 +304,7 @@ export default function WidgetVisual({
   return (
     <article
       className={cx(
-        "theme-widget-card relative isolate col-span-2 min-h-[222px] overflow-hidden rounded-[32px] border p-4",
+        "theme-widget-card theme-surface-lift relative isolate col-span-2 min-h-[222px] overflow-hidden rounded-[32px] border p-4",
         className,
       )}
     >

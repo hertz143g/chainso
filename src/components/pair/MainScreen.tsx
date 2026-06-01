@@ -244,10 +244,12 @@ function CoupleAvatar({
   name,
   photoDataUrl,
   style,
+  className,
 }: {
   name: string;
   photoDataUrl?: string;
   style: AvatarDisplayStyle;
+  className?: string;
 }) {
   const displayName = name.trim() || "Имя";
   const image = photoDataUrl ? (
@@ -257,7 +259,7 @@ function CoupleAvatar({
 
   if (style === "duo-card") {
     return (
-      <div className="flex w-[158px] flex-col items-center">
+      <div className={cx("theme-portrait flex w-[158px] flex-col items-center", className)}>
         <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
           <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
             {image}
@@ -272,7 +274,7 @@ function CoupleAvatar({
 
   if (style === "halo") {
     return (
-      <div className="flex w-[158px] flex-col items-center">
+      <div className={cx("theme-portrait flex w-[158px] flex-col items-center", className)}>
         <div className="theme-glass w-[154px] rounded-[34px] p-2.5 shadow-[0_18px_48px_var(--theme-shadow)] backdrop-blur-md">
           <div className="theme-avatar-ring theme-avatar-surface aspect-[5/6] w-full overflow-hidden rounded-[26px] ring-2">
             {image}
@@ -286,7 +288,7 @@ function CoupleAvatar({
   }
 
   return (
-    <div className="flex w-[156px] flex-col items-center">
+    <div className={cx("theme-portrait flex w-[156px] flex-col items-center", className)}>
       <div className="theme-avatar-ring theme-avatar-surface h-[156px] w-[156px] overflow-hidden rounded-full ring-[3px]">
         {image}
       </div>
@@ -302,24 +304,26 @@ function CoupleCameo({
   name2,
   photo1DataUrl,
   photo2DataUrl,
+  className,
 }: {
   name1: string;
   name2: string;
   photo1DataUrl?: string;
   photo2DataUrl?: string;
+  className?: string;
 }) {
   const displayName1 = name1.trim() || "Имя 1";
   const displayName2 = name2.trim() || "Имя 2";
   return (
-    <div className="relative w-full pb-2 pt-3">
+    <div className={cx("theme-cameo-stage relative w-full pb-2 pt-3", className)}>
       <div className="relative mx-auto flex w-[316px] items-center justify-center">
-        <div className="theme-avatar-ring theme-avatar-surface relative z-20 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
+        <div className="theme-cameo-portrait theme-cameo-portrait-a theme-avatar-ring theme-avatar-surface relative z-20 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo1DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photo1DataUrl} alt={displayName1} className="h-full w-full object-cover" />
           ) : null}
         </div>
-        <div className="theme-avatar-ring theme-avatar-surface relative z-10 -ml-8 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
+        <div className="theme-cameo-portrait theme-cameo-portrait-b theme-avatar-ring theme-avatar-surface relative z-10 -ml-8 h-[176px] w-[176px] overflow-hidden rounded-full ring-[4px] shadow-[0_18px_46px_var(--theme-shadow)]">
           {photo2DataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photo2DataUrl} alt={displayName2} className="h-full w-full object-cover" />
@@ -358,7 +362,10 @@ function TimeDisplay({
         {units.map((unit, index) => (
           <div
             key={unit.label}
-            className={cx(index > 0 && "border-l border-[var(--theme-card-border)]")}
+            className={cx(
+              "theme-time-cell",
+              index > 0 && "border-l border-[var(--theme-card-border)]",
+            )}
           >
             <div className="text-[30px] font-extrabold leading-none">{unit.value}</div>
             <div className="theme-muted-text mt-1 text-[12px] font-semibold">{unit.label}</div>
@@ -395,14 +402,14 @@ function TimeDisplay({
           </div>
 
           <div
-            className="flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-full p-2 shadow-[0_16px_42px_var(--theme-shadow)]"
+            className="theme-time-orbit-ring flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-full p-2 shadow-[0_16px_42px_var(--theme-shadow)]"
             style={
               {
                 background: `conic-gradient(var(--theme-primary) ${secondsAngle}deg, var(--theme-control-bg) 0deg)`,
               } as CSSProperties
             }
           >
-            <div className="theme-glass relative flex h-full w-full flex-col items-center justify-center rounded-full">
+            <div className="theme-time-orbit-core theme-glass relative flex h-full w-full flex-col items-center justify-center rounded-full">
               <span className="absolute h-5 w-5 rounded-full bg-[var(--theme-primary)] opacity-25 blur-md" />
               <span className="absolute h-3 w-3 animate-ping rounded-full bg-[var(--theme-primary)] opacity-30" />
               <div className="text-[30px] font-black leading-none">{seconds}</div>
@@ -431,7 +438,7 @@ function TimeDisplay({
               className="theme-glass relative min-w-0 overflow-hidden rounded-b-[30px] rounded-t-[18px] px-2 py-4"
             >
               <div
-                className="absolute inset-x-0 bottom-0 bg-[var(--theme-primary)] opacity-25"
+                className="theme-time-fill absolute inset-x-0 bottom-0 opacity-25"
                 style={{ height: `${fill}%` }}
               />
               <div className="relative z-10 text-[31px] font-black leading-none tracking-[-0.04em]">
@@ -570,7 +577,7 @@ function DrawingCanvasEditor({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(5,8,18,0.74)] px-4 py-4 backdrop-blur-2xl">
       <div className="mx-auto flex min-h-full w-full max-w-[920px] flex-col justify-center">
-        <div className="theme-panel rounded-[34px] p-3">
+        <div className="theme-panel theme-panel-pop rounded-[34px] p-3">
           <div className="flex items-center justify-between gap-3 px-1 pb-3">
             <div>
               <div className="text-[24px] font-extrabold leading-tight">
@@ -699,7 +706,7 @@ function DrawingCanvasCard({
       <button
         type="button"
         onClick={() => onOpen(canvas.id)}
-        className="theme-glass h-full w-full overflow-hidden rounded-[30px] border border-[var(--theme-card-border)] text-left shadow-[0_18px_44px_var(--theme-shadow)] transition duration-200 hover:-translate-y-0.5"
+        className="theme-glass theme-surface-lift h-full w-full overflow-hidden rounded-[30px] border border-[var(--theme-card-border)] text-left shadow-[0_18px_44px_var(--theme-shadow)] transition duration-200 hover:-translate-y-0.5"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -757,7 +764,7 @@ function AlbumEventCard({
 
   if (event.eventLayout === "strip") {
     return (
-      <section className="theme-glass overflow-hidden rounded-[34px] border border-[var(--theme-card-border)] p-3 shadow-[0_20px_52px_var(--theme-shadow)]">
+      <section className="theme-glass theme-surface-lift overflow-hidden rounded-[34px] border border-[var(--theme-card-border)] p-3 shadow-[0_20px_52px_var(--theme-shadow)]">
         <div className="relative grid min-h-[190px] grid-cols-3 gap-2.5">
           {photos.map((photo) => (
             <div key={photo.id} className="relative overflow-hidden rounded-[24px] bg-[var(--theme-dashed-bg)]">
@@ -793,7 +800,7 @@ function AlbumEventCard({
 
   if (event.eventLayout === "stack") {
     return (
-      <section className="theme-glass overflow-hidden rounded-[34px] border border-[var(--theme-card-border)] p-4 shadow-[0_20px_52px_var(--theme-shadow)]">
+      <section className="theme-glass theme-surface-lift overflow-hidden rounded-[34px] border border-[var(--theme-card-border)] p-4 shadow-[0_20px_52px_var(--theme-shadow)]">
         <div className="relative min-h-[230px]">
           {photos.map((photo, index) => (
             <div
@@ -836,7 +843,7 @@ function AlbumEventCard({
   }
 
   return (
-    <section className="theme-glass overflow-hidden rounded-[34px] border border-[var(--theme-card-border)] p-3 shadow-[0_20px_52px_var(--theme-shadow)]">
+    <section className="theme-glass theme-surface-lift overflow-hidden rounded-[34px] border border-[var(--theme-card-border)] p-3 shadow-[0_20px_52px_var(--theme-shadow)]">
       <div className="grid min-h-[210px] grid-cols-[1.4fr_0.72fr] gap-3">
         <div className="relative overflow-hidden rounded-[26px] bg-[var(--theme-dashed-bg)]">
           {coverPhoto ? (
@@ -1258,7 +1265,7 @@ export default function MainScreen() {
         />
       ) : null}
 
-      <div className="grid min-h-[52px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 min-[390px]:gap-2">
+      <div className="theme-reveal theme-topbar grid min-h-[52px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 min-[390px]:gap-2">
         <div className="min-w-0 justify-self-start">
           <button
             type="button"
@@ -1283,7 +1290,7 @@ export default function MainScreen() {
         </div>
 
         <div className="min-w-0 justify-self-center px-1 text-center">
-          <span className="whitespace-nowrap text-[18px] font-extrabold leading-none tracking-[-0.04em] min-[360px]:text-[20px] min-[390px]:text-[22px] min-[430px]:text-[24px]">
+          <span className="theme-wordmark whitespace-nowrap text-[18px] font-extrabold leading-none tracking-[-0.04em] min-[360px]:text-[20px] min-[390px]:text-[22px] min-[430px]:text-[24px]">
             CHAINSO
           </span>
         </div>
@@ -1299,12 +1306,12 @@ export default function MainScreen() {
         </div>
       </div>
 
-      <div className="mt-7 flex flex-col items-center">
-        <div className="theme-subtle-text text-[17px] font-semibold leading-none">
+      <div className="theme-reveal theme-reveal-delay-1 theme-kpi-stack mt-7 flex flex-col items-center">
+        <div className="theme-day-counter theme-subtle-text text-[17px] font-semibold leading-none">
           {diff.days} ДНЕЙ
         </div>
 
-        <div ref={heartPickerRef} className="relative mt-2">
+        <div ref={heartPickerRef} className="theme-heart-orbit relative mt-2">
           <button
             type="button"
             onClick={() => setIsHeartPickerOpen((value) => !value)}
@@ -1347,7 +1354,7 @@ export default function MainScreen() {
         </div>
       </div>
 
-      <div className="mt-0 flex justify-center gap-4">
+      <div className="theme-reveal theme-reveal-delay-2 theme-avatars-stage mt-0 flex justify-center gap-4">
         {settings.avatarDisplayStyle === "duo-card" ? (
           <CoupleCameo
             name1={settings.name1}
@@ -1366,19 +1373,20 @@ export default function MainScreen() {
               name={settings.name2}
               photoDataUrl={settings.photo2DataUrl}
               style={settings.avatarDisplayStyle}
+              className="theme-portrait-alt"
             />
           </>
         )}
       </div>
 
-      <div className="mt-7">
+      <div className="theme-reveal theme-reveal-delay-3 mt-7">
         <div className="theme-subtle-text flex justify-end pr-1 text-[13px] font-semibold">
           {progress.percent}%
         </div>
 
         <div className="theme-progress-track mt-2 h-[10px] overflow-hidden rounded-full">
           <div
-            className="theme-primary-button h-full rounded-full"
+            className="theme-primary-button theme-progress-value h-full rounded-full"
             style={{ width: `${progress.bar}%` }}
           />
         </div>
@@ -1389,14 +1397,14 @@ export default function MainScreen() {
         </div>
       </div>
 
-      <div className="mt-8 text-center">
+      <div className="theme-reveal theme-reveal-delay-4 mt-8 text-center">
         <div className="theme-subtle-text text-[22px] font-semibold">Вместе уже:</div>
         <div className="mt-1 text-[28px] font-semibold leading-tight">
           {formatTogether(diff.years, diff.months, diff.day)}
         </div>
       </div>
 
-      <div className="mt-4 flex justify-center">
+      <div className="theme-reveal theme-reveal-delay-5 theme-time-stage mt-4 flex justify-center">
         <TimeDisplay
           style={settings.timeDisplayStyle}
           hours={format2(diff.hours)}
@@ -1405,7 +1413,10 @@ export default function MainScreen() {
         />
       </div>
 
-      <div ref={widgetsSectionRef} className="mt-7 flex items-center justify-between scroll-mt-24">
+      <div
+        ref={widgetsSectionRef}
+        className="theme-reveal theme-reveal-delay-6 mt-7 flex items-center justify-between scroll-mt-24"
+      >
         <div className="text-[30px] font-extrabold">Виджеты</div>
         {isEditingWidgets ? (
           <div className="theme-action-chip rounded-full border px-3 py-1 text-[12px] font-semibold">
@@ -1415,7 +1426,7 @@ export default function MainScreen() {
       </div>
 
       {settings.widgets.length > 0 ? (
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="theme-reveal theme-reveal-delay-6 mt-6 grid grid-cols-2 gap-4">
           {settings.widgets.map((widget) => (
             <WidgetCard
               key={widget.id}
@@ -1430,7 +1441,7 @@ export default function MainScreen() {
           ))}
         </div>
       ) : (
-        <div className="theme-empty-state mt-6 rounded-[30px] px-5 py-8 text-center">
+        <div className="theme-empty-state theme-reveal theme-reveal-delay-6 mt-6 rounded-[30px] px-5 py-8 text-center">
           <div className="text-[17px] font-extrabold">Пока пусто</div>
           <div className="theme-subtle-text mt-2 text-[14px] leading-relaxed">
             Добавь первый виджет, чтобы собрать вашу историю в живую ленту, а не в сырой список.
@@ -1447,7 +1458,7 @@ export default function MainScreen() {
 
       <div
         ref={canvasesSectionRef}
-        className="mt-10 flex items-center justify-between gap-3 scroll-mt-24"
+        className="theme-reveal mt-10 flex items-center justify-between gap-3 scroll-mt-24"
       >
         <div>
           <div className="text-[28px] font-extrabold">Холсты</div>
@@ -1465,7 +1476,7 @@ export default function MainScreen() {
       </div>
 
       {settings.drawingCanvases.length > 0 ? (
-        <div className="-mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="theme-reveal -mx-1 mt-5 flex gap-4 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {settings.drawingCanvases.map((canvas) => (
             <DrawingCanvasCard
               key={canvas.id}
@@ -1477,7 +1488,7 @@ export default function MainScreen() {
           ))}
         </div>
       ) : (
-        <div className="theme-empty-state mt-5 rounded-[30px] px-5 py-7 text-center">
+        <div className="theme-empty-state theme-reveal mt-5 rounded-[30px] px-5 py-7 text-center">
           <div className="text-[16px] font-extrabold">Здесь будут ваши холсты</div>
           <div className="theme-subtle-text mt-2 text-[14px] leading-relaxed">
             Открой чистый холст, набросай что-нибудь и сохрани это прямо в карусель.
@@ -1485,7 +1496,7 @@ export default function MainScreen() {
         </div>
       )}
 
-      <div ref={albumSectionRef} className="mt-10 scroll-mt-24">
+      <div ref={albumSectionRef} className="theme-reveal mt-10 scroll-mt-24">
         <div className="flex items-end justify-between gap-3">
           <div>
             <div className="text-[28px] font-extrabold">Альбом</div>
@@ -1498,7 +1509,7 @@ export default function MainScreen() {
         </div>
 
         {isAlbumComposerOpen ? (
-          <div className="theme-glass mt-5 rounded-[34px] border border-[var(--theme-card-border)] p-4 shadow-[0_20px_54px_var(--theme-shadow)]">
+          <div className="theme-glass theme-panel-pop mt-5 rounded-[34px] border border-[var(--theme-card-border)] p-4 shadow-[0_20px_54px_var(--theme-shadow)]">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <div className="text-[18px] font-black">Новое событие</div>
