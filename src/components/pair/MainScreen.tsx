@@ -1242,7 +1242,7 @@ export default function MainScreen() {
                     "bg-[var(--theme-primary)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--theme-primary)_22%,transparent)]",
                 )}
               />
-              <span>{isEditingWidgets ? "Готово" : "Редактировать"}</span>
+              <span>{isEditingWidgets ? "Готово" : "Править"}</span>
             </span>
           </button>
         </div>
