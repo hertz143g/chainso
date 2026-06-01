@@ -563,6 +563,9 @@ body {
   isolation: isolate;
   overflow: hidden;
   background-clip: padding-box;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-surface-soft) 92%, white 8%), color-mix(in srgb, var(--theme-surface) 82%, transparent)),
     color-mix(in srgb, var(--theme-surface) 74%, transparent);
@@ -570,6 +573,7 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.26),
     0 10px 28px color-mix(in srgb, var(--theme-shadow) 42%, transparent);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.72));
   backdrop-filter: blur(calc(var(--glass-blur) * 0.72));
 }
 
@@ -660,6 +664,9 @@ body {
   isolation: isolate;
   overflow: hidden;
   background-clip: padding-box;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 96%, white 6%), color-mix(in srgb, var(--theme-surface) 78%, transparent)),
     color-mix(in srgb, var(--theme-glass-bg) 88%, transparent);
@@ -667,6 +674,7 @@ body {
   box-shadow:
     0 18px 40px color-mix(in srgb, var(--theme-shadow) 58%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  -webkit-backdrop-filter: blur(22px);
   backdrop-filter: blur(22px);
 }
 
@@ -738,6 +746,9 @@ body {
   isolation: isolate;
   overflow: hidden;
   background-clip: padding-box;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-widget-bg) 94%, white 8%), color-mix(in srgb, var(--theme-surface) 82%, transparent)),
     color-mix(in srgb, var(--theme-widget-bg) 92%, transparent);
@@ -746,6 +757,7 @@ body {
     0 18px 42px color-mix(in srgb, var(--theme-shadow) 52%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   color: var(--theme-text);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.86));
   backdrop-filter: blur(calc(var(--glass-blur) * 0.86));
 }
 
@@ -759,6 +771,9 @@ body {
   isolation: isolate;
   overflow: hidden;
   background-clip: padding-box;
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--theme-glass-bg) 94%, white 10%), color-mix(in srgb, var(--theme-surface) 78%, transparent)),
     color-mix(in srgb, var(--theme-glass-bg) 88%, transparent);
@@ -767,6 +782,7 @@ body {
   box-shadow:
     0 14px 34px color-mix(in srgb, var(--theme-shadow) 30%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 0.74));
   backdrop-filter: blur(calc(var(--glass-blur) * 0.74));
 }
 
@@ -778,6 +794,9 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
     0 10px 26px color-mix(in srgb, var(--theme-shadow) 26%, transparent);
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
 }
 
 .theme-photo-inner {
@@ -814,6 +833,10 @@ body {
   box-shadow:
     0 18px 44px color-mix(in srgb, var(--theme-shadow) 64%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
 }
 
@@ -834,6 +857,10 @@ body {
   box-shadow:
     0 16px 34px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transform: translateZ(0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
 }
 
