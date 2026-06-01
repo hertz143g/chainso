@@ -1311,7 +1311,10 @@ export default function MainScreen() {
           {diff.days} ДНЕЙ
         </div>
 
-        <div ref={heartPickerRef} className="theme-heart-orbit relative mt-2">
+        <div
+          ref={heartPickerRef}
+          className="theme-heart-orbit relative z-40 mt-2 flex h-12 w-12 items-center justify-center"
+        >
           <button
             type="button"
             onClick={() => setIsHeartPickerOpen((value) => !value)}
@@ -1323,7 +1326,7 @@ export default function MainScreen() {
           </button>
 
           {isHeartPickerOpen ? (
-            <div className="theme-heart-palette absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 rounded-full px-2 py-2">
+            <div className="theme-heart-palette absolute left-1/2 top-[calc(100%+10px)] z-50 -translate-x-1/2 rounded-full px-2 py-2">
               <div className="flex items-center gap-2">
                 {HEART_COLOR_OPTIONS.map((color) => {
                   const selected = settings.heartColor === color;

@@ -213,59 +213,6 @@ body {
   overflow: hidden;
 }
 
-.theme-hero-ribbon,
-.theme-sparkles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.theme-hero-ribbon-beam,
-.theme-hero-ribbon-haze {
-  position: absolute;
-  left: 50%;
-  top: 10%;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  will-change: transform, opacity;
-}
-
-.theme-hero-ribbon-beam {
-  height: 260px;
-  width: min(92vw, 460px);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0));
-  filter: blur(16px);
-  opacity: 0.22;
-  animation: hero-beam-drift 9s ease-in-out infinite alternate;
-}
-
-.theme-hero-ribbon-haze {
-  height: 360px;
-  width: min(110vw, 540px);
-  background: radial-gradient(circle, color-mix(in srgb, var(--theme-primary) 26%, transparent), transparent 66%);
-  filter: blur(26px);
-  opacity: 0.3;
-  animation: hero-haze-breathe 6.2s ease-in-out infinite;
-}
-
-.theme-sparkles span {
-  position: absolute;
-  left: var(--sparkle-left);
-  top: var(--sparkle-top);
-  width: var(--sparkle-size);
-  height: var(--sparkle-size);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.28),
-    0 0 12px rgba(255, 255, 255, 0.72),
-    0 0 28px color-mix(in srgb, var(--theme-primary) 34%, transparent);
-  opacity: 0;
-  animation: sparkle-twinkle var(--sparkle-duration) ease-in-out infinite;
-  animation-delay: var(--sparkle-delay);
-  will-change: transform, opacity;
-}
-
 .theme-blob,
 .theme-sheen {
   position: absolute;
@@ -645,48 +592,6 @@ body {
   }
 }
 
-@keyframes sparkle-twinkle {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(0.55) rotate(0deg);
-    opacity: 0;
-  }
-  18% {
-    opacity: 0.9;
-  }
-  45% {
-    transform: translate3d(0, -8px, 0) scale(1.1) rotate(10deg);
-    opacity: 0.78;
-  }
-  70% {
-    transform: translate3d(0, -3px, 0) scale(0.72) rotate(-6deg);
-    opacity: 0.22;
-  }
-}
-
-@keyframes hero-beam-drift {
-  from {
-    transform: translateX(-50%) translateY(0) scaleX(0.96);
-    opacity: 0.18;
-  }
-  to {
-    transform: translateX(-50%) translateY(10px) scaleX(1.04);
-    opacity: 0.28;
-  }
-}
-
-@keyframes hero-haze-breathe {
-  0%,
-  100% {
-    transform: translateX(-50%) scale(0.96);
-    opacity: 0.24;
-  }
-  50% {
-    transform: translateX(-50%) scale(1.08);
-    opacity: 0.38;
-  }
-}
-
 @keyframes ornament-drift {
   from {
     transform: translate3d(
@@ -948,32 +853,8 @@ body {
   backdrop-filter: blur(22px);
 }
 
-.theme-time-tray::before {
-  content: "";
-  position: absolute;
-  inset: auto -12% -42% auto;
-  height: 120px;
-  width: 120px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--theme-primary) 28%, transparent);
-  filter: blur(26px);
-  opacity: 0.34;
-  animation: ambient-pulse 4.4s ease-in-out infinite;
-  pointer-events: none;
-}
-
 .theme-time-cell {
   position: relative;
-}
-
-.theme-time-cell::after {
-  content: "";
-  position: absolute;
-  inset: 12px 12px auto;
-  height: 1px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.24), transparent);
-  opacity: 0.5;
 }
 
 .theme-time-orbit-ring {
@@ -1006,19 +887,6 @@ body {
 
 .theme-time-stage {
   position: relative;
-}
-
-.theme-time-stage::before {
-  content: "";
-  position: absolute;
-  inset: -12px 12% auto;
-  height: 140px;
-  border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--theme-primary) 20%, transparent), transparent 68%);
-  filter: blur(22px);
-  opacity: 0.42;
-  animation: hero-haze-breathe 5.2s ease-in-out infinite;
-  pointer-events: none;
 }
 
 .theme-dashed-card {
@@ -1268,9 +1136,13 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  height: 40px;
+  width: 40px;
   min-height: 40px;
   min-width: 40px;
   border-radius: 999px;
+  position: relative;
+  z-index: 1;
   transition:
     transform var(--duration-fast) var(--ease-standard),
     opacity var(--duration-fast) var(--ease-standard);
@@ -1285,15 +1157,15 @@ body {
 .theme-heart-orbit::after {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 50%;
   border-radius: 999px;
   pointer-events: none;
 }
 
 .theme-heart-orbit::before {
-  width: 58px;
-  height: 58px;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
   transform: translate(-50%, -50%);
   background: radial-gradient(circle, color-mix(in srgb, var(--theme-primary) 24%, transparent), transparent 70%);
   filter: blur(14px);
@@ -1302,8 +1174,10 @@ body {
 }
 
 .theme-heart-orbit::after {
-  width: 44px;
-  height: 44px;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
   transform: translate(-50%, -50%);
   border: 1px solid color-mix(in srgb, var(--theme-primary) 34%, white 22%);
   opacity: 0.44;
@@ -1396,6 +1270,8 @@ body {
 
 .theme-kpi-stack {
   position: relative;
+  isolation: isolate;
+  z-index: 20;
 }
 
 .theme-kpi-stack::after {
@@ -1427,18 +1303,7 @@ body {
 
 .theme-avatars-stage {
   position: relative;
-}
-
-.theme-avatars-stage::before {
-  content: "";
-  position: absolute;
-  inset: 10% 8% -8%;
-  border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--theme-primary) 18%, transparent), transparent 64%);
-  filter: blur(26px);
-  opacity: 0.34;
-  animation: hero-haze-breathe 6.4s ease-in-out infinite;
-  pointer-events: none;
+  z-index: 10;
 }
 
 .theme-cameo-portrait {
@@ -1725,26 +1590,20 @@ body {
   .theme-sheen,
   .theme-matrix-rain span,
   .theme-floating-dots span,
-  .theme-sparkles span,
-  .theme-hero-ribbon-beam,
-  .theme-hero-ribbon-haze,
   .theme-widget-atmosphere-blob,
   .theme-widget-atmosphere-image,
   .theme-progress-track::after,
   .theme-progress-value,
   .theme-progress-value::after,
-  .theme-time-tray::before,
   .theme-time-orbit-ring::after,
   .theme-time-orbit-core,
   .theme-widget-card::after,
   .theme-wordmark,
   .theme-day-counter,
-  .theme-time-stage::before,
   .theme-heart-orbit::before,
   .theme-heart-orbit::after,
   .theme-heart-button svg,
   .theme-portrait,
-  .theme-avatars-stage::before,
   .theme-cameo-stage,
   .theme-cameo-portrait,
   .theme-panel-pop,
