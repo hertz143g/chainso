@@ -1223,8 +1223,8 @@ export default function MainScreen() {
         />
       ) : null}
 
-      <div className="grid min-h-[56px] grid-cols-[auto_1fr_auto] items-center gap-1.5">
-        <div className="justify-self-start">
+      <div className="relative min-h-[56px]">
+        <div className="absolute left-0 top-1/2 z-10 -translate-y-1/2">
           <button
             type="button"
             onClick={() => setIsEditingWidgets((value) => !value)}
@@ -1252,13 +1252,13 @@ export default function MainScreen() {
           </button>
         </div>
 
-        <div className="justify-self-center text-center">
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center">
           <span className="text-[24px] font-extrabold leading-none tracking-[-0.04em] min-[390px]:text-[26px]">
             CHAINSO
           </span>
         </div>
 
-        <div className="justify-self-end">
+        <div className="absolute right-0 top-1/2 z-10 -translate-y-1/2">
           <Link
             href="/settings"
             className="theme-header-pill px-3 text-[11px] font-extrabold"
