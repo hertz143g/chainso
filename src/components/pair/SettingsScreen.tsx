@@ -3,7 +3,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import TimeDisplay, { RelationshipTimer } from "@/components/pair/TimeDisplay";
+import { useAppearancePreview } from "@/components/pair/AppearancePreviewContext";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   type AppTheme,
@@ -14,10 +16,6 @@ import {
   updateSettings,
 } from "@/lib/relationship";
 import { prepareImageForStorage } from "@/lib/widgetAppearance";
-
-function cx(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
 
 const THEME_OPTIONS: Array<{
   id: AppTheme;
@@ -135,89 +133,7 @@ function ThemePreviewDots({
 }
 
 function TimeStylePreview({ style }: { style: TimeDisplayStyle }) {
-  if (style === "glass") {
-    return (
-      <div className="theme-time-tray mx-auto grid h-12 w-full max-w-[172px] grid-cols-3 rounded-[18px] px-2 text-center">
-        {[
-          { value: "08", label: "ч" },
-          { value: "24", label: "м" },
-          { value: "16", label: "с" },
-        ].map((unit, index) => (
-          <div
-            key={unit.label}
-            className={cx(
-              "flex min-w-0 flex-col items-center justify-center rounded-[12px]",
-              index > 0 && "border-l border-[var(--theme-card-border)]",
-            )}
-          >
-            <span className="text-[10px] font-black leading-none tracking-[-0.04em]">
-              {unit.value}
-            </span>
-            <span className="theme-muted-text mt-1 text-[7px] font-bold uppercase leading-none">
-              {unit.label}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (style === "orbits") {
-    return (
-      <div className="theme-time-tray mx-auto h-[58px] w-full max-w-[172px] overflow-hidden rounded-[22px] px-2.5 py-2">
-        <div className="grid h-full grid-cols-[minmax(0,1fr)_40px] items-center gap-2">
-          <div className="grid min-w-0 grid-cols-2 gap-2">
-            <div className="theme-glass rounded-[14px] px-2 py-1.5 text-center">
-              <div className="text-[11px] font-black leading-none tracking-[-0.05em]">08</div>
-              <div className="theme-muted-text mt-1 text-[7px] font-bold uppercase leading-none">
-                ч
-              </div>
-            </div>
-            <div className="theme-glass rounded-[14px] px-2 py-1.5 text-center">
-              <div className="text-[11px] font-black leading-none tracking-[-0.05em]">24</div>
-              <div className="theme-muted-text mt-1 text-[7px] font-bold uppercase leading-none">
-                м
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="theme-time-orbit-ring flex h-[40px] w-[40px] items-center justify-center overflow-hidden rounded-full p-[3px]"
-            style={{
-              background: "conic-gradient(var(--theme-primary) 96deg, var(--theme-control-bg) 0deg)",
-            }}
-          >
-            <div className="theme-time-orbit-core theme-glass flex h-full w-full flex-col items-center justify-center rounded-full">
-              <span className="text-[9px] font-black leading-none">16</span>
-              <span className="theme-muted-text mt-0.5 text-[6px] font-bold uppercase leading-none">
-                с
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="theme-time-tray mx-auto grid h-[58px] w-full max-w-[172px] grid-cols-3 gap-2 rounded-[22px] px-2 py-2">
-      {["08", "24", "16"].map((value, index) => (
-        <span
-          key={value}
-          className="theme-glass relative flex flex-col items-center justify-center overflow-hidden rounded-b-[16px] rounded-t-[10px] text-[10px] font-black"
-        >
-          <span
-            className="theme-time-fill absolute inset-x-0 bottom-0 opacity-25"
-            style={{ height: `${34 + index * 18}%` }}
-          />
-          <span className="relative z-10 text-[11px] leading-none tracking-[-0.04em]">{value}</span>
-          <span className="theme-muted-text relative z-10 mt-1 text-[6px] font-bold uppercase leading-none">
-            {index === 0 ? "ч" : index === 1 ? "м" : "с"}
-          </span>
-        </span>
-      ))}
-    </div>
-  );
+  return <TimeDisplay style={style} hours={8} minutes={24} seconds={16} compact />;
 }
 
 function AvatarStylePreview({ style }: { style: AvatarDisplayStyle }) {
@@ -258,6 +174,12 @@ export default function SettingsScreen() {
   const [isUploadingPhoto2, setIsUploadingPhoto2] = useState(false);
 
   const current = draft ?? settings;
+  const setPreview = useAppearancePreview();
+
+  useEffect(() => {
+    setPreview?.(current);
+    return () => setPreview?.(null);
+  }, [current, setPreview]);
 
   const patchDraft = (patch: Partial<RelationshipSettings>) => {
     setDraft((prev) => ({
@@ -307,6 +229,7 @@ export default function SettingsScreen() {
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSaving || isUploadingPhoto1 || isUploadingPhoto2) return;
     setIsSaving(true);
 
     try {
@@ -326,7 +249,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <div className="theme-screen">
+    <div className="theme-screen pb-24">
       <div className="relative flex items-center">
         <Link href="/" className="w-8 text-left select-none">
           ←
@@ -337,11 +260,13 @@ export default function SettingsScreen() {
         <div className="w-8" />
       </div>
 
-      <form onSubmit={onSubmit} className="theme-panel mt-6 rounded-[22px] p-4">
+      <form id="relationship-settings" onSubmit={onSubmit} className="theme-panel mt-6 rounded-[22px] p-4">
         <div className="mb-4 flex items-center gap-3">
           <button
             type="button"
             onClick={() => onPickPhoto(1)}
+            disabled={isUploadingPhoto1}
+            aria-label="Выбрать фото первого человека"
             className="theme-avatar-ring theme-avatar-surface relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full ring-2"
           >
             {current.photo1DataUrl ? (
@@ -365,7 +290,10 @@ export default function SettingsScreen() {
             value={current.name1}
             onChange={(event) => patchDraft({ name1: event.target.value })}
             placeholder="Имя"
-            className="theme-input flex-1 rounded-full px-4 py-3 text-[14px] outline-none"
+            aria-label="Имя первого человека"
+            autoComplete="off"
+            maxLength={40}
+            className="theme-input min-w-0 w-full flex-1 rounded-full px-4 py-3 text-[16px] outline-none"
           />
         </div>
 
@@ -373,6 +301,8 @@ export default function SettingsScreen() {
           <button
             type="button"
             onClick={() => onPickPhoto(2)}
+            disabled={isUploadingPhoto2}
+            aria-label="Выбрать фото второго человека"
             className="theme-avatar-ring theme-avatar-surface relative flex h-[74px] w-[74px] shrink-0 items-center justify-center overflow-hidden rounded-full ring-2"
           >
             {current.photo2DataUrl ? (
@@ -396,7 +326,10 @@ export default function SettingsScreen() {
             value={current.name2}
             onChange={(event) => patchDraft({ name2: event.target.value })}
             placeholder="Имя"
-            className="theme-input flex-1 rounded-full px-4 py-3 text-[14px] outline-none"
+            aria-label="Имя второго человека"
+            autoComplete="off"
+            maxLength={40}
+            className="theme-input min-w-0 w-full flex-1 rounded-full px-4 py-3 text-[16px] outline-none"
           />
         </div>
 
@@ -405,6 +338,7 @@ export default function SettingsScreen() {
           type="date"
           value={current.startDateISO}
           onChange={(event) => patchDraft({ startDateISO: event.target.value })}
+          onInput={(event) => patchDraft({ startDateISO: event.currentTarget.value })}
           className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
         />
 
@@ -419,6 +353,7 @@ export default function SettingsScreen() {
                   key={theme.id}
                   type="button"
                   onClick={() => patchDraft({ theme: theme.id })}
+                  aria-pressed={selected}
                   className={`theme-option-card w-full rounded-[24px] border px-3.5 py-3 text-left transition ${
                     selected ? "theme-option-card-selected" : ""
                   }`}
@@ -506,6 +441,12 @@ export default function SettingsScreen() {
 
         <div className="mt-6">
           <div className="theme-form-label mb-3 text-[13px] font-semibold">Блок времени:</div>
+          <div className="mb-3">
+            <RelationshipTimer startDateISO={current.startDateISO} style={current.timeDisplayStyle} demo={!current.startDateISO} />
+            <p className="theme-muted-text mt-2 text-center text-[11px]">
+              {current.startDateISO ? "Так таймер будет выглядеть на главной" : "Предпросмотр · для вашего отсчёта выбери дату"}
+            </p>
+          </div>
           <div className="grid grid-cols-3 gap-2">
             {TIME_STYLE_OPTIONS.map((option) => {
               const selected = current.timeDisplayStyle === option.id;
@@ -515,6 +456,7 @@ export default function SettingsScreen() {
                   key={option.id}
                   type="button"
                   onClick={() => patchDraft({ timeDisplayStyle: option.id })}
+                  aria-pressed={selected}
                   className={`theme-option-card rounded-[20px] border px-2 py-3 text-center transition ${
                     selected ? "theme-option-card-selected" : ""
                   }`}
@@ -550,13 +492,6 @@ export default function SettingsScreen() {
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={isSaving || isUploadingPhoto1 || isUploadingPhoto2}
-          className="theme-primary-button mt-6 w-full rounded-[18px] py-3 text-[16px] font-semibold disabled:opacity-60"
-        >
-          {isSaving ? "Сохраняю..." : "Сохранить"}
-        </button>
 
         <input
           ref={file1Ref}
@@ -573,6 +508,18 @@ export default function SettingsScreen() {
           onChange={onFileChange("photo2DataUrl")}
         />
       </form>
+      <div className="theme-settings-save fixed inset-x-0 bottom-0 z-40 px-4 pt-3">
+        <div className="theme-panel mx-auto w-full max-w-[328px] rounded-[24px] p-3">
+          <button
+            type="submit"
+            form="relationship-settings"
+            disabled={isSaving || isUploadingPhoto1 || isUploadingPhoto2}
+            className="theme-primary-button w-full rounded-[18px] py-3 text-[16px] font-semibold disabled:opacity-60"
+          >
+            {isSaving ? "Сохраняю..." : "Сохранить изменения"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

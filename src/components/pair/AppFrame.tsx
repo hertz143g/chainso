@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
+import { AppearancePreviewContext } from "@/components/pair/AppearancePreviewContext";
+import type { RelationshipSettings } from "@/lib/relationship";
 import type { CustomThemeSettings } from "@/lib/relationship";
 
 type SunPhase = "dawn" | "day" | "sunset" | "night";
@@ -146,7 +148,9 @@ function buildAccentStyle(accentColor: string): CSSProperties {
 }
 
 export default function AppFrame({ children }: { children: ReactNode }) {
-  const settings = useRelationshipSettings();
+  const savedSettings = useRelationshipSettings();
+  const [preview, setPreview] = useState<RelationshipSettings | null>(null);
+  const settings = preview ?? savedSettings;
   const [phase, setPhase] = useState<SunPhase>("day");
 
   useEffect(() => {
@@ -179,7 +183,9 @@ export default function AppFrame({ children }: { children: ReactNode }) {
     >
       <ThemeAtmosphere theme={settings.theme} />
       <div className="relative z-10 mx-auto min-h-screen w-full max-w-[360px] overflow-x-hidden px-4 py-6">
-        {children}
+        <AppearancePreviewContext value={setPreview}>
+          {children}
+        </AppearancePreviewContext>
       </div>
     </main>
   );

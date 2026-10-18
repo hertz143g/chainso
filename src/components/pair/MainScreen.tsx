@@ -2,15 +2,16 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import WidgetVisual, {
   relationshipWidgetToVisualData,
 } from "@/components/pair/WidgetVisual";
+import { RelationshipTimer } from "@/components/pair/TimeDisplay";
+import useClock from "@/hooks/useClock";
 import useRelationshipSettings from "@/hooks/useRelationshipSettings";
 import {
   calcDiff,
   createWidgetId,
-  format2,
   formatDateLong,
   formatTogether,
   getGoalProgress,
@@ -19,7 +20,6 @@ import {
   type AvatarDisplayStyle,
   type DrawingCanvas,
   type RelationshipWidget,
-  type TimeDisplayStyle,
   updateSettings,
 } from "@/lib/relationship";
 import { prepareImageForStorage } from "@/lib/widgetAppearance";
@@ -97,7 +97,7 @@ function fillDrawingCanvasBackground(context: CanvasRenderingContext2D) {
   context.fillRect(0, 0, DRAWING_CANVAS_WIDTH, DRAWING_CANVAS_HEIGHT);
 }
 
-function getCanvasPoint(canvas: HTMLCanvasElement, event: React.PointerEvent<HTMLCanvasElement>) {
+function getCanvasPoint(canvas: HTMLCanvasElement, event: { clientX: number; clientY: number }) {
   const rect = canvas.getBoundingClientRect();
 
   return {
@@ -107,7 +107,7 @@ function getCanvasPoint(canvas: HTMLCanvasElement, event: React.PointerEvent<HTM
 }
 
 function isInteractiveTarget(target: EventTarget | null) {
-  return target instanceof HTMLElement
+  return target instanceof Element
     ? Boolean(target.closest("a, button, input, label, select, textarea"))
     : false;
 }
@@ -192,22 +192,6 @@ function getHeroOccasion(
   }
 
   return null;
-}
-
-function AnimatedTimeValue({
-  value,
-  className,
-}: {
-  value: string;
-  className?: string;
-}) {
-  return (
-    <span className={cx("theme-time-value", className)}>
-      <span key={value} className="theme-time-digit theme-time-digit-in">
-        {value}
-      </span>
-    </span>
-  );
 }
 
 function WidgetActions({
@@ -349,7 +333,7 @@ function CoupleAvatar({
         >
           <div className={cx("h-full w-full", photoDataUrl && "theme-photo-depth")}>{image}</div>
         </div>
-        <div className="theme-glass mt-3 rounded-full px-4 py-2 text-[18px] font-semibold shadow-[0_10px_24px_var(--theme-shadow)]">
+        <div className="theme-glass mt-3 max-w-full truncate rounded-full px-4 py-2 text-[18px] font-semibold shadow-[0_10px_24px_var(--theme-shadow)]">
           {displayName}
         </div>
       </div>
@@ -407,131 +391,6 @@ function CoupleCameo({
   );
 }
 
-function TimeDisplay({
-  style,
-  hours,
-  minutes,
-  seconds,
-}: {
-  style: TimeDisplayStyle;
-  hours: string;
-  minutes: string;
-  seconds: string;
-}) {
-  const units = [
-    { value: hours, label: "часов", max: 24 },
-    { value: minutes, label: "минут", max: 60 },
-    { value: seconds, label: "секунд", max: 60 },
-  ];
-
-  if (style === "glass") {
-    return (
-      <div className="theme-time-tray grid w-full grid-cols-3 rounded-[30px] px-4 py-4 text-center">
-        {units.map((unit, index) => (
-          <div
-            key={unit.label}
-            className={cx(
-              "theme-time-cell",
-              index > 0 && "border-l border-[var(--theme-card-border)]",
-            )}
-          >
-            <AnimatedTimeValue
-              value={unit.value}
-              className="text-[30px] font-extrabold leading-none"
-            />
-            <div className="theme-muted-text mt-1 text-[12px] font-semibold">{unit.label}</div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (style === "orbits") {
-    const secondsAngle = Number(seconds) * 6;
-
-    return (
-      <div className="theme-time-tray relative min-h-[142px] w-full overflow-hidden rounded-[38px] p-4">
-        <div className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-[var(--theme-primary)] opacity-10 blur-2xl" />
-        <div className="relative z-10 grid h-full grid-cols-[minmax(0,1fr)_104px] items-center gap-4">
-          <div className="grid min-w-0 grid-cols-2 gap-3">
-            <div className="theme-glass rounded-[24px] px-3 py-4 text-center">
-              <AnimatedTimeValue
-                value={hours}
-                className="text-[42px] font-black leading-none tracking-[-0.07em]"
-              />
-              <div className="theme-muted-text mt-2 text-[11px] font-bold uppercase tracking-[0.12em]">
-                часы
-              </div>
-            </div>
-            <div className="theme-glass rounded-[24px] px-3 py-4 text-center">
-              <AnimatedTimeValue
-                value={minutes}
-                className="text-[42px] font-black leading-none tracking-[-0.07em]"
-              />
-              <div className="theme-muted-text mt-2 text-[11px] font-bold uppercase tracking-[0.12em]">
-                минуты
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="theme-time-orbit-ring flex h-[104px] w-[104px] items-center justify-center overflow-hidden rounded-full p-2 shadow-[0_16px_42px_var(--theme-shadow)]"
-            style={
-              {
-                background: `conic-gradient(var(--theme-primary) ${secondsAngle}deg, var(--theme-control-bg) 0deg)`,
-              } as CSSProperties
-            }
-          >
-            <div className="theme-time-orbit-core theme-glass relative flex h-full w-full flex-col items-center justify-center rounded-full">
-              <span className="absolute h-5 w-5 rounded-full bg-[var(--theme-primary)] opacity-25 blur-md" />
-              <span className="absolute h-3 w-3 animate-ping rounded-full bg-[var(--theme-primary)] opacity-30" />
-              <AnimatedTimeValue
-                value={seconds}
-                className="text-[30px] font-black leading-none"
-              />
-              <div className="theme-muted-text mt-1 text-[10px] font-bold uppercase tracking-[0.14em]">
-                сек
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="theme-time-tray relative min-h-[136px] w-full overflow-hidden rounded-[36px] px-4 py-4">
-      <div className="relative z-10 grid grid-cols-3 gap-3 text-center">
-        {units.map((unit) => {
-          const numericValue = Number(unit.value);
-          const fill = Number.isFinite(numericValue)
-            ? Math.min(100, Math.max(8, (numericValue / unit.max) * 100))
-            : 8;
-
-          return (
-            <div
-              key={unit.label}
-              className="theme-glass relative min-w-0 overflow-hidden rounded-b-[30px] rounded-t-[18px] px-2 py-4"
-            >
-              <div
-                className="theme-time-fill absolute inset-x-0 bottom-0 opacity-25"
-                style={{ height: `${fill}%` }}
-              />
-              <AnimatedTimeValue
-                value={unit.value}
-                className="relative z-10 text-[31px] font-black leading-none tracking-[-0.04em]"
-              />
-              <div className="theme-muted-text relative z-10 mt-2 text-[10px] font-bold uppercase tracking-[0.12em]">
-                {unit.label}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function DrawingCanvasEditor({
   canvas,
   onClose,
@@ -543,7 +402,11 @@ function DrawingCanvasEditor({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const isDrawingRef = useRef(false);
+  const drawingPointerRef = useRef<number | null>(null);
+  const undoRef = useRef<ImageData[]>([]);
+  const redoRef = useRef<ImageData[]>([]);
+  const [historyState, setHistoryState] = useState({ undo: 0, redo: 0 });
+  const [isCanvasReady, setIsCanvasReady] = useState(!canvas?.imageDataUrl);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const [tool, setTool] = useState<DrawingTool>("brush");
   const [color, setColor] = useState("#1f2937");
@@ -563,6 +426,10 @@ function DrawingCanvasEditor({
         if (!isActive) return;
         fillDrawingCanvasBackground(context);
         context.drawImage(image, 0, 0, DRAWING_CANVAS_WIDTH, DRAWING_CANVAS_HEIGHT);
+        setIsCanvasReady(true);
+      };
+      image.onerror = () => {
+        if (isActive) setIsCanvasReady(true);
       };
       image.src = canvas.imageDataUrl;
     }
@@ -621,38 +488,47 @@ function DrawingCanvasEditor({
     const context = canvasElement?.getContext("2d");
     if (!canvasElement || !context) return;
 
+    if (!isCanvasReady || drawingPointerRef.current !== null || event.button !== 0) return;
+    undoRef.current.push(context.getImageData(0, 0, DRAWING_CANVAS_WIDTH, DRAWING_CANVAS_HEIGHT));
+    if (undoRef.current.length > 12) undoRef.current.shift();
+    redoRef.current = [];
+    setHistoryState({ undo: undoRef.current.length, redo: 0 });
     const point = getCanvasPoint(canvasElement, event);
     canvasElement.setPointerCapture(event.pointerId);
-    isDrawingRef.current = true;
+    drawingPointerRef.current = event.pointerId;
     lastPointRef.current = point;
     applyStrokeStyle(context);
     drawDot(context, point);
   };
 
   const draw = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDrawingRef.current) return;
+    if (drawingPointerRef.current !== event.pointerId) return;
 
     event.preventDefault();
     const canvasElement = canvasRef.current;
     const context = canvasElement?.getContext("2d");
     if (!canvasElement || !context) return;
 
-    const point = getCanvasPoint(canvasElement, event);
-    const previousPoint = lastPointRef.current ?? point;
+    const samples = event.nativeEvent.getCoalescedEvents?.() ?? [];
     applyStrokeStyle(context);
     context.beginPath();
-    context.moveTo(previousPoint.x, previousPoint.y);
-    context.lineTo(point.x, point.y);
+    const previous = lastPointRef.current ?? getCanvasPoint(canvasElement, event);
+    context.moveTo(previous.x, previous.y);
+    for (const sample of samples.length ? samples : [event]) {
+      const point = getCanvasPoint(canvasElement, sample);
+      context.lineTo(point.x, point.y);
+      lastPointRef.current = point;
+    }
     context.stroke();
-    lastPointRef.current = point;
   };
 
   const endDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (drawingPointerRef.current !== event.pointerId) return;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    isDrawingRef.current = false;
+    drawingPointerRef.current = null;
     lastPointRef.current = null;
   };
 
@@ -661,12 +537,27 @@ function DrawingCanvasEditor({
 
     const context = canvasRef.current?.getContext("2d");
     if (!context) return;
+    undoRef.current.push(context.getImageData(0, 0, DRAWING_CANVAS_WIDTH, DRAWING_CANVAS_HEIGHT));
+    if (undoRef.current.length > 12) undoRef.current.shift();
+    redoRef.current = [];
+    setHistoryState({ undo: undoRef.current.length, redo: 0 });
     fillDrawingCanvasBackground(context);
+  };
+
+  const restoreDrawing = (direction: "undo" | "redo") => {
+    if (drawingPointerRef.current !== null) return;
+    const context = canvasRef.current?.getContext("2d");
+    const source = direction === "undo" ? undoRef.current : redoRef.current;
+    const destination = direction === "undo" ? redoRef.current : undoRef.current;
+    if (!context || !source.length) return;
+    destination.push(context.getImageData(0, 0, DRAWING_CANVAS_WIDTH, DRAWING_CANVAS_HEIGHT));
+    context.putImageData(source.pop()!, 0, 0);
+    setHistoryState({ undo: undoRef.current.length, redo: redoRef.current.length });
   };
 
   const saveCanvas = () => {
     const sourceCanvas = canvasRef.current;
-    if (!sourceCanvas) return;
+    if (!sourceCanvas || !isCanvasReady) return;
 
     const exportCanvas = document.createElement("canvas");
     exportCanvas.width = DRAWING_CANVAS_WIDTH;
@@ -700,6 +591,7 @@ function DrawingCanvasEditor({
             <button
               type="button"
               onClick={saveCanvas}
+              disabled={!isCanvasReady}
               className="theme-primary-button flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] font-black shadow-[0_12px_26px_var(--theme-shadow)]"
               aria-label="Сохранить и закрыть редактор холста"
             >
@@ -717,12 +609,16 @@ function DrawingCanvasEditor({
               onPointerMove={draw}
               onPointerUp={endDrawing}
               onPointerCancel={endDrawing}
+              onLostPointerCapture={endDrawing}
+              aria-label="Холст для рисования"
             />
           </div>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
             <div className="theme-glass grid gap-3 rounded-[24px] p-3 sm:grid-cols-[auto_auto_1fr] sm:items-center">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => restoreDrawing("undo")} disabled={!historyState.undo} aria-label="Отменить штрих" className="theme-icon-button rounded-full border px-3 py-2 text-[13px] font-bold disabled:opacity-35">↶</button>
+                <button type="button" onClick={() => restoreDrawing("redo")} disabled={!historyState.redo} aria-label="Вернуть штрих" className="theme-icon-button rounded-full border px-3 py-2 text-[13px] font-bold disabled:opacity-35">↷</button>
                 <button
                   type="button"
                   onClick={() => setTool("brush")}
@@ -820,6 +716,8 @@ function DrawingCanvasCard({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+        decoding="async"
+        draggable={false}
           src={canvas.imageDataUrl}
           alt="Холст"
           className="h-[72%] w-full bg-[#fffaf4] object-cover"
@@ -864,7 +762,7 @@ function AlbumEventCard({
   const photos = event.photos.slice(0, MAX_ALBUM_PHOTOS_PER_EVENT);
 
   const titleOverlay = (
-    <div className="theme-media-caption absolute inset-x-3 bottom-3 rounded-[22px] px-4 py-3 text-white">
+    <div className="theme-media-caption pointer-events-none absolute inset-x-3 bottom-3 rounded-[22px] px-4 py-3 text-white">
       <div className="truncate text-[18px] font-black leading-tight">{event.eventTitle}</div>
       <div className="mt-1 text-[12px] font-bold opacity-85">
         {formatDateLong(event.eventDateISO)}
@@ -879,7 +777,7 @@ function AlbumEventCard({
           {photos.map((photo) => (
             <div key={photo.id} className="relative overflow-hidden rounded-[24px] bg-[var(--theme-dashed-bg)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.imageDataUrl} alt={event.eventTitle} className="h-full min-h-[190px] w-full object-cover" />
+              <img decoding="async" loading="lazy" draggable={false} src={photo.imageDataUrl} alt={event.eventTitle} className="h-full min-h-[190px] w-full object-cover" />
               {isEditing ? (
                 <button
                   type="button"
@@ -923,7 +821,7 @@ function AlbumEventCard({
               )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.imageDataUrl} alt={event.eventTitle} className="h-full w-full object-cover" />
+              <img decoding="async" loading="lazy" draggable={false} src={photo.imageDataUrl} alt={event.eventTitle} className="h-full w-full object-cover" />
               {isEditing ? (
                 <button
                   type="button"
@@ -960,6 +858,8 @@ function AlbumEventCard({
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
+        decoding="async"
+        draggable={false}
                 src={coverPhoto.imageDataUrl}
                 alt={event.eventTitle}
                 className="h-full min-h-[210px] w-full object-cover"
@@ -987,6 +887,8 @@ function AlbumEventCard({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
+        decoding="async"
+        draggable={false}
                 src={photo.imageDataUrl}
                 alt={event.eventTitle}
                 className="h-full min-h-[98px] w-full object-cover"
@@ -1041,7 +943,7 @@ export default function MainScreen() {
   } | null>(null);
   const [widgetOrder, setWidgetOrder] = useState<RelationshipWidget[] | null>(null);
   const widgetOrderRef = useRef<RelationshipWidget[] | null>(null);
-  const [now, setNow] = useState(() => new Date());
+  const now = useClock(60_000);
   const [isEditingWidgets, setIsEditingWidgets] = useState(false);
   const [isUploadingAlbum, setIsUploadingAlbum] = useState(false);
   const [editingCanvasId, setEditingCanvasId] = useState<string | null>(null);
@@ -1053,21 +955,6 @@ export default function MainScreen() {
   const [isAlbumComposerOpen, setIsAlbumComposerOpen] = useState(false);
   const [isHeartPickerOpen, setIsHeartPickerOpen] = useState(false);
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setInterval> | undefined;
-    const sync = () => {
-      if (timer) clearInterval(timer);
-      if (document.hidden) return;
-      setNow(new Date());
-      timer = setInterval(() => setNow(new Date()), 1000);
-    };
-    sync();
-    document.addEventListener("visibilitychange", sync);
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", sync);
-    };
-  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -1274,6 +1161,7 @@ export default function MainScreen() {
 
   const onEndWidgetDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const dragState = widgetDragRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId) return;
 
     if (
       dragState &&
@@ -1303,6 +1191,7 @@ export default function MainScreen() {
   };
 
   const onPickAlbumPhotos = (target: AlbumUploadTarget) => {
+    if (isUploadingAlbum) return;
     const existingEvent = albumEvents.find((event) => event.eventKey === target.eventKey);
     if (!existingEvent && albumEvents.length >= MAX_ALBUM_EVENTS) {
       window.alert("В альбоме можно добавить максимум 3 события.");
@@ -1343,6 +1232,7 @@ export default function MainScreen() {
     const files = Array.from(event.currentTarget.files ?? []);
     event.currentTarget.value = "";
 
+    if (isUploadingAlbum) return;
     if (files.length === 0) {
       setAlbumUploadTarget(null);
       return;
@@ -1365,25 +1255,33 @@ export default function MainScreen() {
     setIsUploadingAlbum(true);
 
     try {
-      const photos = await Promise.all(
-        acceptedFiles.map(async (file) => ({
+      const target = albumUploadTarget;
+      const photos: AlbumPhoto[] = [];
+      for (const file of acceptedFiles) {
+        photos.push({
           id: createWidgetId(),
           imageDataUrl: await prepareImageForStorage(file, {
             maxDimension: 980,
             quality: 0.82,
-            targetLength: 520_000,
+            targetLength: 230_000,
           }),
           createdAtISO: new Date().toISOString(),
-          eventTitle: albumUploadTarget.eventTitle,
-          eventDateISO: albumUploadTarget.eventDateISO,
-          eventLayout: albumUploadTarget.eventLayout,
-        })),
-      );
+          eventTitle: target.eventTitle,
+          eventDateISO: target.eventDateISO,
+          eventLayout: target.eventLayout,
+        });
+      }
 
-      updateSettings((prev) => ({
-        ...prev,
-        albumPhotos: [...photos, ...prev.albumPhotos],
-      }));
+      updateSettings((prev) => {
+        const events = getAlbumEvents(prev.albumPhotos);
+        const matching = events.find((event) => event.eventKey === target.eventKey);
+        if (!matching && events.length >= MAX_ALBUM_EVENTS) {
+          throw new Error("Album event limit reached");
+        }
+        const available = MAX_ALBUM_PHOTOS_PER_EVENT - (matching?.photos.length ?? 0);
+        if (available < photos.length) throw new Error("Album photo limit reached");
+        return { ...prev, albumPhotos: [...photos, ...prev.albumPhotos] };
+      });
 
       if (!existingEvent) {
         onCloseAlbumComposer();
@@ -1630,12 +1528,7 @@ export default function MainScreen() {
       </div>
 
       <div className="theme-reveal theme-reveal-delay-5 theme-time-stage theme-parallax-time mt-4 flex justify-center">
-        <TimeDisplay
-          style={settings.timeDisplayStyle}
-          hours={format2(diff.hours)}
-          minutes={format2(diff.minutes)}
-          seconds={format2(diff.seconds)}
-        />
+        <RelationshipTimer startDateISO={settings.startDateISO} style={settings.timeDisplayStyle} />
       </div>
 
       <div
@@ -1745,6 +1638,7 @@ export default function MainScreen() {
               <button
                 type="button"
                 onClick={onCloseAlbumComposer}
+                disabled={isUploadingAlbum}
                 className="theme-icon-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-[18px] font-black"
                 aria-label="Закрыть создание события"
               >
@@ -1760,6 +1654,7 @@ export default function MainScreen() {
                 <input
                   value={albumDraftTitle}
                   onChange={(event) => setAlbumDraftTitle(event.target.value)}
+                  disabled={isUploadingAlbum}
                   placeholder="Первая поездка"
                   maxLength={32}
                   className="theme-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
@@ -1773,6 +1668,7 @@ export default function MainScreen() {
                   type="date"
                   value={albumDraftDateISO}
                   onChange={(event) => setAlbumDraftDateISO(event.target.value)}
+                  disabled={isUploadingAlbum}
                   className="theme-input theme-date-input w-full rounded-full px-4 py-3 text-[14px] font-bold outline-none"
                 />
               </label>
@@ -1788,6 +1684,7 @@ export default function MainScreen() {
                     key={option.id}
                     type="button"
                     onClick={() => setAlbumDraftLayout(option.id)}
+                    disabled={isUploadingAlbum}
                     className={cx(
                       "theme-option-card rounded-[22px] border px-3 py-3 text-left transition",
                       albumDraftLayout === option.id && "theme-option-card-selected",

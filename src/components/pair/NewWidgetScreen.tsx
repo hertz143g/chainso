@@ -16,7 +16,7 @@ import {
   type WidgetType,
   updateSettings,
 } from "@/lib/relationship";
-import { inferTrackFromUrl, resolveTrackLink } from "@/lib/trackLink";
+import { cleanTrackTitle, inferTrackFromUrl, resolveTrackLink, type TrackLinkMetadata } from "@/lib/trackLink";
 import {
   extractPaletteFromDataUrl,
   getWidgetPalette,
@@ -113,7 +113,7 @@ function widgetToDraft(widget: RelationshipWidget): WidgetDraft {
   if (widget.type === "track") {
     return {
       type: "track",
-      title: widget.title,
+      title: cleanTrackTitle(widget.title, widget.trackUrl),
       dateISO: "",
       subtitle: "",
       note: widget.note ?? "",
@@ -171,7 +171,7 @@ function buildWidgetFromDraft(
     const widget: TrackWidget = {
       ...base,
       type: "track",
-      title: draft.title.trim() || linkMetadata?.title || "Трек",
+      title: cleanTrackTitle(draft.title.trim() || linkMetadata?.title || "Трек", draft.trackUrl),
       artist: draft.artist.trim() || linkMetadata?.artist || "Музыка",
       note: draft.note.trim() || undefined,
       coverDataUrl: draft.imageDataUrl,
@@ -194,49 +194,6 @@ function buildWidgetFromDraft(
   return widget;
 }
 
-function WidgetTypeSketch({ type }: { type: WidgetType }) {
-  if (type === "memory") {
-    return (
-      <div className="theme-widget-card grid min-h-[92px] grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 overflow-hidden rounded-[22px] border p-2">
-        <div className="theme-photo-frame aspect-square rounded-[18px] border p-1">
-          <div className="theme-photo-inner h-full rounded-[14px]" />
-        </div>
-        <div className="flex min-w-0 flex-col justify-center">
-          <div className="theme-chip h-4 w-14 rounded-full" />
-          <div className="mt-3 h-3 w-full rounded-full bg-[var(--theme-text)] opacity-70" />
-          <div className="mt-2 h-2.5 w-3/4 rounded-full bg-[var(--theme-text-muted)] opacity-70" />
-        </div>
-      </div>
-    );
-  }
-
-  if (type === "track") {
-    return (
-      <div className="theme-widget-card grid min-h-[82px] grid-cols-[64px_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-[22px] border p-2.5">
-        <div className="theme-photo-frame aspect-square rounded-[18px] border" />
-        <div className="min-w-0">
-          <div className="theme-chip h-4 w-16 rounded-full" />
-          <div className="mt-3 h-3 w-full rounded-full bg-[var(--theme-text)] opacity-70" />
-          <div className="mt-2 h-2.5 w-2/3 rounded-full bg-[var(--theme-text-muted)] opacity-70" />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="theme-widget-card flex min-h-[98px] flex-col justify-between overflow-hidden rounded-[22px] border p-2.5">
-      <div className="flex justify-between">
-        <div className="theme-chip h-4 w-16 rounded-full" />
-        <div className="theme-chip h-4 w-14 rounded-full" />
-      </div>
-      <div className="theme-glass rounded-[18px] p-2">
-        <div className="h-3 w-4/5 rounded-full bg-[var(--theme-text)] opacity-70" />
-        <div className="mt-2 h-2.5 w-2/3 rounded-full bg-[var(--theme-text-muted)] opacity-70" />
-      </div>
-    </div>
-  );
-}
-
 function WidgetTypeCard({
   type,
   title,
@@ -256,15 +213,14 @@ function WidgetTypeCard({
     <button
       type="button"
       onClick={onClick}
-      className={`theme-option-card rounded-[24px] border-4 border-dashed px-4 py-4 text-left transition ${
+      aria-pressed={selected}
+      aria-label={`${title}: ${caption}`}
+      className={`theme-option-card flex min-w-0 flex-col items-center justify-center gap-2 rounded-[20px] border px-2 py-3 text-center transition ${
         selected ? "theme-option-card-selected" : ""
       } ${className}`}
     >
-      <div className="mb-3">
-        <div className="text-[15px] font-bold">{title}</div>
-        <div className="theme-subtle-text mt-0.5 text-[12px]">{caption}</div>
-      </div>
-      <WidgetTypeSketch type={type} />
+      <span className="text-[23px] leading-none" aria-hidden="true">{type === "track" ? "♫" : type === "memory" ? "▧" : "◷"}</span>
+      <span className="text-[12px] font-bold">{title}</span>
     </button>
   );
 }
@@ -282,10 +238,7 @@ function draftToVisualData(draft: WidgetDraft): WidgetVisualData {
     trackUrl: draft.type === "track" ? draft.trackUrl : undefined,
     platform: trackMetadata?.platform,
     imageDataUrl: draft.imageDataUrl,
-    accentColor:
-      draft.type === "track" && draft.accentColor === "#5AA897"
-        ? trackMetadata?.accentColor ?? draft.accentColor
-        : draft.accentColor,
+    accentColor: draft.accentColor,
     colorMode: draft.colorMode,
     accentPalette: draft.accentPalette,
   };
@@ -308,6 +261,8 @@ export default function NewWidgetScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
+  const customColorRef = useRef(false);
+  const autoMetadataRef = useRef<{ title: string; artist: string; imageUrl?: string } | null>(null);
   const widgetId = searchParams.get("id");
   const editingWidget = settings.widgets.find((widget) => widget.id === widgetId);
   const isEditing = Boolean(widgetId && editingWidget);
@@ -324,9 +279,8 @@ export default function NewWidgetScreen() {
     accentPalette: current.accentPalette,
   });
   const isAdaptiveAvailable = Boolean(current.imageDataUrl);
-  const trackLinkMetadata = current.type === "track" ? inferTrackFromUrl(current.trackUrl) : null;
   const [trackLookupStatus, setTrackLookupStatus] = useState<
-    "idle" | "loading" | "ready" | "invalid"
+    "idle" | "loading" | "ready" | "fallback" | "invalid"
   >("idle");
 
   const patchDraft = (patch: Partial<WidgetDraft>) => {
@@ -351,12 +305,13 @@ export default function NewWidgetScreen() {
         imageDataUrl: base.imageDataUrl,
         colorMode: base.colorMode,
         accentPalette: base.accentPalette,
-        accentColor: base.accentColor,
+        accentColor: customColorRef.current || editingWidget ? base.accentColor : createEmptyDraft(type).accentColor,
       };
     });
   };
 
   const selectSolidColor = (color: string) => {
+    customColorRef.current = true;
     patchDraft({
       accentColor: color,
       colorMode: "solid",
@@ -365,6 +320,7 @@ export default function NewWidgetScreen() {
 
   const selectAdaptiveColor = () => {
     if (!isAdaptiveAvailable) return;
+    customColorRef.current = true;
 
     patchDraft({
       colorMode: "adaptive",
@@ -377,8 +333,7 @@ export default function NewWidgetScreen() {
       ? current.title.trim().length > 0 && current.dateISO.length > 0
       : current.type === "memory"
         ? current.title.trim().length > 0
-        : (current.title.trim().length > 0 && current.artist.trim().length > 0) ||
-          Boolean(trackLinkMetadata);
+        : current.title.trim().length > 0 && current.artist.trim().length > 0;
 
   useEffect(() => {
     if (current.type !== "track") {
@@ -399,37 +354,35 @@ export default function NewWidgetScreen() {
     }
 
     const controller = new AbortController();
+    const applyMetadata = (metadata: TrackLinkMetadata) => {
+      const previousAuto = autoMetadataRef.current;
+      autoMetadataRef.current = { title: metadata.title, artist: metadata.artist, imageUrl: metadata.imageUrl };
+      setDraft((prev) => {
+        const base = prev ?? initialDraft;
+        if (base.type !== "track" || base.trackUrl.trim() !== trackUrl) return base;
+        const shouldUseTitle = !base.title.trim() || base.title === previousAuto?.title || base.title === fallbackMetadata.title;
+        const shouldUseArtist = !base.artist.trim() || base.artist === previousAuto?.artist;
+        const shouldUseCover = !base.imageDataUrl || (Boolean(previousAuto?.imageUrl) && base.imageDataUrl === previousAuto?.imageUrl);
+        return {
+          ...base,
+          title: shouldUseTitle ? metadata.title : base.title,
+          artist: shouldUseArtist ? metadata.artist : base.artist,
+          imageDataUrl: shouldUseCover ? metadata.imageUrl : base.imageDataUrl,
+          accentColor: !customColorRef.current && !editingWidget && base.colorMode === "solid" ? metadata.accentColor : base.accentColor,
+        };
+      });
+    };
     const timer = window.setTimeout(() => {
       setTrackLookupStatus("loading");
-
+      applyMetadata(fallbackMetadata);
       resolveTrackLink(trackUrl, controller.signal).then((metadata) => {
         if (controller.signal.aborted) return;
-
         if (!metadata) {
           setTrackLookupStatus("invalid");
           return;
         }
-
-        setTrackLookupStatus("ready");
-        setDraft((prev) => {
-          const base = prev ?? initialDraft;
-
-          if (base.type !== "track" || base.trackUrl.trim() !== trackUrl) return base;
-
-          const shouldUseTitle =
-            !base.title.trim() || base.title.trim() === fallbackMetadata.title;
-          const shouldUseArtist =
-            !base.artist.trim() || base.artist.trim() === fallbackMetadata.artist;
-          const shouldUseCover = !base.imageDataUrl && metadata.imageUrl;
-
-          return {
-            ...base,
-            title: shouldUseTitle ? metadata.title : base.title,
-            artist: shouldUseArtist ? metadata.artist : base.artist,
-            imageDataUrl: shouldUseCover ? metadata.imageUrl : base.imageDataUrl,
-            accentColor: base.accentColor === "#5AA897" ? metadata.accentColor : base.accentColor,
-          };
-        });
+        setTrackLookupStatus(metadata.resolved ? "ready" : "fallback");
+        applyMetadata(metadata);
       });
     }, 450);
 
@@ -437,7 +390,7 @@ export default function NewWidgetScreen() {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [current.type, current.trackUrl, initialDraft]);
+  }, [current.type, current.trackUrl, initialDraft, editingWidget]);
 
   const imageLabel =
     current.type === "track"
@@ -447,14 +400,16 @@ export default function NewWidgetScreen() {
         : "Фон события";
   const trackLinkHint =
     current.type !== "track" || !current.trackUrl.trim()
-      ? "Можно просто вставить ссылку: Spotify, Apple Music, YouTube, SoundCloud, Яндекс Музыка и т.д."
+      ? "Вставь ссылку — попробую найти название, исполнителя и обложку."
       : trackLookupStatus === "invalid"
-        ? "Ссылка пока не похожа на трек. Можно заполнить название вручную."
+        ? "Проверь ссылку: нужен адрес вида https://…"
         : trackLookupStatus === "loading"
-          ? "Пробую подтянуть название и обложку..."
-          : trackLinkMetadata
-            ? `Распознал источник: ${trackLinkMetadata.platform}.`
-            : "Можно заполнить название вручную.";
+          ? "Ищу название, исполнителя и обложку…"
+          : trackLookupStatus === "ready"
+            ? current.artist.trim() ? "Нашёл музыку. Название и исполнителя можно поправить." : "Название нашлось. Укажи исполнителя."
+            : trackLookupStatus === "fallback"
+              ? "Ссылка добавлена. Заполни название и исполнителя, если они не нашлись."
+              : "Проверяю ссылку…";
 
   const onPickImage = () => {
     imageInputRef.current?.click();
@@ -471,7 +426,7 @@ export default function NewWidgetScreen() {
       const imageDataUrl = await prepareImageForStorage(file, {
         maxDimension: 1180,
         quality: 0.82,
-        targetLength: current.type === "track" ? 520_000 : 640_000,
+        targetLength: 300_000,
       });
       const palette = await extractPaletteFromDataUrl(imageDataUrl);
 
@@ -497,7 +452,7 @@ export default function NewWidgetScreen() {
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!canSave) return;
+    if (!canSave || isSaving || isUploadingImage) return;
 
     setIsSaving(true);
 
@@ -519,7 +474,7 @@ export default function NewWidgetScreen() {
   };
 
   return (
-    <div className="theme-screen">
+    <div className="theme-screen pb-28">
       <div className="relative flex items-center">
         <Link href="/" className="w-8 text-left select-none">
           ←
@@ -530,13 +485,13 @@ export default function NewWidgetScreen() {
         <div className="w-8" />
       </div>
 
-      <form onSubmit={onSubmit} className="theme-panel mt-6 rounded-[22px] p-4">
+      <form id="widget-form" onSubmit={onSubmit} className="theme-panel mt-6 rounded-[22px] p-4">
         <div>
           <div className="text-[16px] font-extrabold underline decoration-[var(--theme-ring)] underline-offset-4">
             Тип виджета:
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-4 grid grid-cols-3 gap-2">
             <WidgetTypeCard
               type="event"
               title="Событие"
@@ -556,12 +511,17 @@ export default function NewWidgetScreen() {
             <WidgetTypeCard
               type="track"
               title="Трек"
-              caption="Широкая музыкальная карточка"
+              caption="Ваша песня и история за ней"
               selected={current.type === "track"}
               className="w-full"
               onClick={() => selectType("track")}
             />
           </div>
+        </div>
+
+        <div className="mt-5">
+          <div className="theme-form-label mb-2 text-[11px] font-bold uppercase tracking-[0.1em]">Так будет на странице</div>
+          <div key={current.type} className="theme-panel-pop"><WidgetPreview draft={current} /></div>
         </div>
 
         <div className="mt-6 space-y-3">
@@ -572,6 +532,9 @@ export default function NewWidgetScreen() {
                 inputMode="url"
                 value={current.trackUrl}
                 onChange={(event) => patchDraft({ trackUrl: event.target.value })}
+                aria-label="Ссылка на музыку"
+                maxLength={2048}
+                autoComplete="off"
                 placeholder="Ссылка на трек"
                 className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
               />
@@ -583,9 +546,11 @@ export default function NewWidgetScreen() {
 
           <input
             value={current.title}
+            aria-label={current.type === "track" ? "Название трека" : current.type === "memory" ? "Название момента" : "Название события"}
+            maxLength={160}
             onChange={(event) => patchDraft({ title: event.target.value })}
             placeholder={
-              current.type === "track" ? "Название трека, если ссылка не подтянулась" : "Название виджета"
+              current.type === "track" ? "Название трека" : current.type === "memory" ? "Название момента" : "Название события"
             }
             className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
           />
@@ -596,6 +561,7 @@ export default function NewWidgetScreen() {
                 type="date"
                 value={current.dateISO}
                 onChange={(event) => patchDraft({ dateISO: event.target.value })}
+                onInput={(event) => patchDraft({ dateISO: event.currentTarget.value })}
                 className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <input
@@ -613,6 +579,7 @@ export default function NewWidgetScreen() {
                 type="date"
                 value={current.dateISO}
                 onChange={(event) => patchDraft({ dateISO: event.target.value })}
+                onInput={(event) => patchDraft({ dateISO: event.currentTarget.value })}
                 className="theme-input theme-date-input rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <textarea
@@ -620,6 +587,7 @@ export default function NewWidgetScreen() {
                 onChange={(event) => patchDraft({ note: event.target.value })}
                 placeholder="Короткая подпись"
                 rows={3}
+                maxLength={1000}
                 className="theme-input w-full rounded-[22px] px-4 py-3 text-[14px] outline-none"
               />
             </>
@@ -631,13 +599,16 @@ export default function NewWidgetScreen() {
                 value={current.artist}
                 onChange={(event) => patchDraft({ artist: event.target.value })}
                 placeholder="Исполнитель"
+                aria-label="Исполнитель"
+                maxLength={120}
                 className="theme-input w-full rounded-full px-4 py-3 text-[14px] outline-none"
               />
               <textarea
                 value={current.note}
                 onChange={(event) => patchDraft({ note: event.target.value })}
-                placeholder="Подпись или заметка"
+                placeholder="Почему эта песня ваша? Необязательно"
                 rows={3}
+                maxLength={1000}
                 className="theme-input w-full rounded-[22px] px-4 py-3 text-[14px] outline-none"
               />
             </>
@@ -649,6 +620,7 @@ export default function NewWidgetScreen() {
           <button
             type="button"
             onClick={onPickImage}
+            disabled={isUploadingImage}
             className="theme-upload-button mt-3 flex min-h-[88px] w-full items-center justify-center rounded-[22px] border-2 border-dashed px-4 py-4 text-center text-[14px] transition"
           >
             {isUploadingImage
@@ -703,20 +675,7 @@ export default function NewWidgetScreen() {
           ) : null}
         </div>
 
-        <div className="mt-6">
-          <div className="theme-form-label text-[13px]">Превью</div>
-          <div className="mt-3">
-            <WidgetPreview draft={current} />
-          </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={!canSave || isSaving || isUploadingImage}
-          className="theme-primary-button mt-6 w-full rounded-[18px] py-3 text-[16px] font-semibold disabled:opacity-55"
-        >
-          {isEditing ? "Сохранить изменения" : "Добавить виджет"}
-        </button>
 
         <input
           ref={imageInputRef}
@@ -726,6 +685,14 @@ export default function NewWidgetScreen() {
           onChange={onImageChange}
         />
       </form>
+      <div className="theme-settings-save fixed inset-x-0 bottom-0 z-40 px-4 pt-3">
+        <div className="theme-panel mx-auto w-full max-w-[328px] rounded-[24px] p-3">
+          {!canSave ? <div className="theme-muted-text mb-2 text-center text-[11px]">{current.type === "track" ? "Укажи название и исполнителя" : current.type === "event" ? "Добавь название и дату" : "Добавь название"}</div> : null}
+          <button type="submit" form="widget-form" disabled={!canSave || isSaving || isUploadingImage} className="theme-primary-button w-full rounded-[18px] py-3 text-[16px] font-semibold disabled:opacity-55">
+            {isSaving ? "Сохраняю…" : isEditing ? "Сохранить изменения" : "Добавить виджет"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

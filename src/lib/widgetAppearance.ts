@@ -84,7 +84,7 @@ export function getWidgetPalette({ accentColor, colorMode, accentPalette }: Widg
   return buildSolidPalette(accentColor);
 }
 
-async function readFileAsDataUrl(file: File) {
+async function readFileAsDataUrl(file: Blob) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("File read error"));
@@ -115,62 +115,54 @@ export async function prepareImageForStorage(
     targetLength?: number;
   },
 ) {
-  const sourceDataUrl = await readFileAsDataUrl(file);
-
-  if (typeof window === "undefined") return sourceDataUrl;
-
-  let image: HTMLImageElement;
-
-  try {
-    image = await loadImageFromDataUrl(sourceDataUrl);
-  } catch {
-    return sourceDataUrl;
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Выбери изображение");
   }
+  if (!file.size || file.size > 32 * 1024 * 1024) {
+    throw new Error("Изображение должно быть не больше 32 МБ");
+  }
+  if (typeof window === "undefined") throw new Error("Browser required");
 
-  const maxDimension = options?.maxDimension ?? 1280;
-  const quality = options?.quality ?? 0.86;
-  const minQuality = options?.minQuality ?? 0.62;
-  const targetLength = options?.targetLength ?? 620_000;
-  const largestSide = Math.max(image.width, image.height, 1);
-  const scale = Math.min(1, maxDimension / largestSide);
-
+  const objectUrl = URL.createObjectURL(file);
   const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+  try {
+    const image = await loadImageFromDataUrl(objectUrl);
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Image processing unavailable");
 
-  if (!context) return sourceDataUrl;
+    const maxDimension = options?.maxDimension ?? 1280;
+    const minQuality = options?.minQuality ?? 0.62;
+    const targetLength = options?.targetLength ?? 360_000;
+    let scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight, 1));
+    let quality = options?.quality ?? 0.86;
+    let bestDataUrl = "";
 
-  let attemptScale = scale;
-  let attemptQuality = quality;
-  let bestDataUrl = sourceDataUrl;
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-  for (let attempt = 0; attempt < 6; attempt += 1) {
-    const width = Math.max(1, Math.round(image.width * attemptScale));
-    const height = Math.max(1, Math.round(image.height * attemptScale));
+      // toBlob yields to the browser between attempts instead of repeatedly
+      // blocking interaction with synchronous JPEG/base64 encoding.
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Image encoding failed")), "image/jpeg", quality);
+      });
+      const candidate = await readFileAsDataUrl(blob);
+      if (!bestDataUrl || candidate.length < bestDataUrl.length) bestDataUrl = candidate;
+      if (candidate.length <= targetLength) return candidate;
 
-    canvas.width = width;
-    canvas.height = height;
-    context.clearRect(0, 0, width, height);
-    context.drawImage(image, 0, 0, width, height);
-
-    const compressedDataUrl = canvas.toDataURL("image/jpeg", attemptQuality);
-    const candidate = compressedDataUrl === "data:," ? sourceDataUrl : compressedDataUrl;
-
-    if (candidate.length < bestDataUrl.length) {
-      bestDataUrl = candidate;
+      if (quality > minQuality + 0.05) quality = Math.max(minQuality, quality - 0.08);
+      else scale *= 0.78;
     }
-
-    if (candidate.length <= targetLength) {
-      return candidate;
-    }
-
-    if (attemptQuality > minQuality + 0.05) {
-      attemptQuality = Math.max(minQuality, attemptQuality - 0.08);
-    } else {
-      attemptScale *= 0.85;
-    }
+    if (bestDataUrl.length > targetLength) throw new Error("Image is too large to store");
+    return bestDataUrl;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+    canvas.width = 0;
+    canvas.height = 0;
   }
-
-  return bestDataUrl;
 }
 
 export async function extractPaletteFromDataUrl(dataUrl: string) {

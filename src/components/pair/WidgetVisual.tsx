@@ -5,7 +5,8 @@ import type {
   WidgetColorMode,
   WidgetType,
 } from "@/lib/relationship";
-import { inferTrackFromUrl } from "@/lib/trackLink";
+import { eventDayLabel } from "@/lib/widgetDates";
+import MusicWidget from "@/components/pair/MusicWidget";
 
 export type WidgetVisualData = {
   type: WidgetType;
@@ -38,6 +39,7 @@ function titleFitStyle(text: string, maxPx: number, minPx: number): CSSPropertie
 function formatWidgetDate(dateISO: string, variant: "short" | "long") {
   const [year, month, day] = dateISO.split("-").map(Number);
   const date = new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1);
+  if (Number.isNaN(date.getTime())) return "Без даты";
 
   return new Intl.DateTimeFormat("ru-RU", {
     day: "numeric",
@@ -97,6 +99,9 @@ function FullImageLayer({
     <div className="theme-photo-depth absolute inset-0 overflow-hidden rounded-[inherit]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        decoding="async"
+        loading="lazy"
+        draggable={false}
         src={imageDataUrl}
         alt={alt}
         className="absolute inset-0 h-full w-full object-cover"
@@ -109,24 +114,6 @@ function FullImageLayer({
             : "bg-[linear-gradient(180deg,var(--theme-image-overlay-soft)_0%,var(--theme-image-overlay-mid)_40%,var(--theme-image-overlay-strong)_100%)]",
         )}
       />
-    </div>
-  );
-}
-
-function TrackWaveform() {
-  return (
-    <div className="theme-track-waveform mt-3" aria-hidden="true">
-      {Array.from({ length: 12 }).map((_, index) => (
-        <span
-          key={index}
-          style={
-            {
-              "--wave-delay": `${index * 0.12}s`,
-              "--wave-height": `${42 + ((index * 17) % 38)}%`,
-            } as CSSProperties
-          }
-        />
-      ))}
     </div>
   );
 }
@@ -187,7 +174,7 @@ export default function WidgetVisual({
 
   if (widget.type === "memory") {
     const note = widget.note?.trim();
-    const helperText = !hasImage ? "Добавь фото и короткую подпись." : note;
+    const helperText = note || (!hasImage ? "Воспоминание, которое хочется сохранить." : undefined);
 
     return (
       <article
@@ -199,7 +186,7 @@ export default function WidgetVisual({
         <ColorBackdrop widget={widget} />
         {actions}
 
-        <div className="relative z-10 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-3">
+        <div className={cx("relative z-10 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-3", hasActions && "pt-9")}>
           <div className="relative aspect-square w-full self-start">
             <div className="absolute inset-1 rotate-[-5deg] rounded-[30px] bg-[var(--theme-photo-frame)] shadow-[0_18px_42px_var(--theme-shadow)]" />
             <div className="theme-photo-frame relative h-full rotate-[-1.5deg] overflow-hidden rounded-[30px] border p-2 shadow-[0_18px_46px_rgba(3,7,18,0.32)] backdrop-blur-md">
@@ -212,6 +199,9 @@ export default function WidgetVisual({
                 {widget.imageDataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
+        decoding="async"
+        loading="lazy"
+        draggable={false}
                     src={widget.imageDataUrl}
                     alt={title}
                     className="h-full w-full object-cover"
@@ -226,7 +216,7 @@ export default function WidgetVisual({
           </div>
 
           <div className="min-w-0">
-            <div className={cx("mb-3 flex items-start justify-between gap-2", hasActions && "pr-14")}>
+            <div className="mb-3 flex flex-wrap items-start gap-2">
               <span className="theme-chip rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] backdrop-blur-md">
                 {widgetLabel(widget.type)}
               </span>
@@ -257,78 +247,11 @@ export default function WidgetVisual({
   }
 
   if (widget.type === "track") {
-    const artist = widget.artist?.trim() || "Исполнитель";
-    const note = widget.note?.trim();
-    const trackLink = widget.trackUrl ? inferTrackFromUrl(widget.trackUrl) : null;
-    const platform = widget.platform ?? trackLink?.platform ?? "Музыка";
-
-    return (
-      <article
-        className={cx(
-          "theme-widget-card theme-surface-lift relative isolate col-span-2 min-h-[152px] overflow-hidden rounded-[30px] border p-4",
-          className,
-        )}
-      >
-        <ColorBackdrop widget={widget} />
-        {actions}
-
-        <div className="relative z-10 grid grid-cols-[112px_minmax(0,1fr)] items-center gap-4">
-          <div
-            className={cx(
-              "theme-track-cover theme-photo-frame flex aspect-square w-full items-center justify-center overflow-hidden rounded-[26px] border text-[32px] font-bold text-[var(--theme-text)] shadow-[0_18px_36px_var(--theme-shadow)]",
-              widget.imageDataUrl && "theme-photo-depth",
-            )}
-          >
-            {widget.imageDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={widget.imageDataUrl}
-                alt={`${artist} - ${title}`}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              "♪"
-            )}
-          </div>
-
-          <div className={cx("min-w-0", hasActions && "pr-14")}>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <div className="theme-chip inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur-md">
-                {platform}
-              </div>
-              {trackLink ? (
-                <a
-                  href={trackLink.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="theme-chip inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold backdrop-blur-md"
-                >
-                  Открыть
-                </a>
-              ) : null}
-            </div>
-            <h3
-              className="widget-fit-text font-extrabold leading-[1.05]"
-              style={titleFitStyle(title, 22, 15)}
-            >
-              {title}
-            </h3>
-            <p className="theme-muted-text widget-fit-text mt-1 text-[14px] font-semibold leading-snug">
-              {artist}
-            </p>
-            {note ? (
-              <p className="theme-muted-text widget-fit-text mt-2 text-[12px] font-medium leading-snug opacity-80">
-                {note}
-              </p>
-            ) : null}
-            <TrackWaveform />
-          </div>
-        </div>
-      </article>
-    );
+    return <MusicWidget widget={widget} actions={actions} className={className} />;
   }
 
   const subtitle = widget.subtitle?.trim();
+  const dayLabel = widget.dateISO ? eventDayLabel(widget.dateISO) : null;
 
   return (
     <article
@@ -342,8 +265,8 @@ export default function WidgetVisual({
       {hasImage ? <ColorBackdrop widget={widget} imageOverlay /> : null}
       {actions}
 
-      <div className="relative z-10 flex h-full min-h-[190px] flex-col justify-between">
-        <div className={cx("flex items-start justify-between gap-3", hasActions && "pr-16")}>
+      <div className={cx("relative z-10 flex h-full min-h-[190px] flex-col justify-between gap-5", hasActions && "pt-9")}>
+        <div className="flex flex-wrap items-start justify-between gap-2">
           <span className="theme-chip rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] backdrop-blur-md">
             {widgetLabel(widget.type)}
           </span>
@@ -353,6 +276,7 @@ export default function WidgetVisual({
         </div>
 
         <div className="theme-glass max-w-full rounded-[26px] px-4 py-4 backdrop-blur-md">
+          {dayLabel ? <div className="theme-muted-text mb-2 text-[11px] font-bold uppercase tracking-[0.08em]">{dayLabel}</div> : null}
           <h3
             className="widget-fit-text font-extrabold leading-[1.04]"
             style={titleFitStyle(title, 26, 17)}
