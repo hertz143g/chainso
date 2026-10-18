@@ -2025,3 +2025,63 @@ body {
     transform: none;
   }
 }
+
+/* Short, composited feedback keeps controls responsive on touch screens. */
+:where(button, a, input, textarea, select) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, a):focus-visible {
+  outline: 3px solid var(--theme-ring);
+  outline-offset: 4px;
+}
+
+:where(.theme-primary-button, .theme-icon-button, .theme-header-pill,
+  .theme-option-card, .theme-upload-button, .theme-action-chip):active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+:where(button):disabled {
+  cursor: wait;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .theme-screen > form {
+    animation: surface-pop 320ms var(--ease-standard) both;
+  }
+
+  .theme-hero-scene [class*="theme-parallax-"] {
+    transition: transform 220ms ease-out;
+  }
+}
+
+@media (hover: none) {
+  :where(.theme-primary-button, .theme-icon-button, .theme-header-pill,
+    .theme-option-card, .theme-upload-button, .theme-action-chip):hover:not(:active) {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .theme-widget-atmosphere-image {
+    animation: none;
+  }
+
+  .theme-widget-atmosphere-blob {
+    animation-duration: 16s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .theme-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

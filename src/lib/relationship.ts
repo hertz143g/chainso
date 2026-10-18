@@ -441,9 +441,9 @@ export function saveSettings(settings: RelationshipSettings) {
   if (typeof window === "undefined") return;
 
   const normalized = normalizeSettings(settings);
-  cachedSettings = normalized;
   localStorage.setItem(KEY, JSON.stringify(normalized));
-  localStorage.removeItem(LEGACY_KEY);
+  cachedSettings = normalized;
+  try { localStorage.removeItem(LEGACY_KEY); } catch { /* The current version is already saved. */ }
   emitSettingsUpdated();
 }
 
@@ -451,6 +451,7 @@ export function updateSettings(
   updater: (current: RelationshipSettings) => RelationshipSettings,
 ) {
   const nextSettings = updater(loadSettings());
+  if (nextSettings === loadSettings()) return nextSettings;
   saveSettings(nextSettings);
   return nextSettings;
 }
@@ -459,7 +460,7 @@ export function subscribeSettings(callback: () => void) {
   if (typeof window === "undefined") return () => {};
 
   const handleStorage = (event: StorageEvent) => {
-    if (event.key === KEY || event.key === LEGACY_KEY) {
+    if (event.key === null || event.key === KEY || event.key === LEGACY_KEY) {
       cachedSettings = readAndNormalizeSettings();
       callback();
     }
@@ -490,7 +491,7 @@ export function calcDiff(startISO: string, now = new Date()) {
   const [y, m, d] = startISO.split("-").map(Number);
   const start = new Date(y, (m ?? 1) - 1, d ?? 1, 0, 0, 0, 0);
 
-  if (Number.isNaN(start.getTime())) {
+  if (Number.isNaN(start.getTime()) || start.getFullYear() !== y || start.getMonth() !== m - 1 || start.getDate() !== d || now < start) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0, years: 0, months: 0, day: 0 };
   }
 
@@ -502,23 +503,18 @@ export function calcDiff(startISO: string, now = new Date()) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  let years = now.getFullYear() - start.getFullYear();
-  let months = now.getMonth() - start.getMonth();
-  let day = now.getDate() - start.getDate();
-
-  if (day < 0) {
-    const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-    day += prevMonthLastDay;
-    months -= 1;
-  }
-  if (months < 0) {
-    months += 12;
-    years -= 1;
-  }
-
-  years = Math.max(0, years);
-  months = Math.max(0, months);
-  day = Math.max(0, day);
+  let elapsedMonths = (now.getFullYear() - y) * 12 + now.getMonth() - (m - 1);
+  const anniversary = (offset: number) => {
+    const date = new Date(y, m - 1 + offset, 1);
+    date.setDate(Math.min(d, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()));
+    return date;
+  };
+  if (anniversary(elapsedMonths) > now) elapsedMonths -= 1;
+  const anchor = anniversary(elapsedMonths);
+  const years = Math.floor(elapsedMonths / 12);
+  const months = elapsedMonths % 12;
+  const day = Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) -
+    Date.UTC(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())) / 86400000);
 
   return { days, hours, minutes, seconds, years, months, day };
 }

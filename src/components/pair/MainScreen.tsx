@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import WidgetVisual, {
   relationshipWidgetToVisualData,
 } from "@/components/pair/WidgetVisual";
@@ -30,7 +30,7 @@ function cx(...classes: Array<string | false | undefined>) {
 
 function scrollToSection(sectionRef: RefObject<HTMLDivElement | null>) {
   sectionRef.current?.scrollIntoView({
-    behavior: "smooth",
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
     block: "start",
   });
 }
@@ -542,6 +542,7 @@ function DrawingCanvasEditor({
   onSave: (imageDataUrl: string) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const isDrawingRef = useRef(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const [tool, setTool] = useState<DrawingTool>("brush");
@@ -570,6 +571,34 @@ function DrawingCanvasEditor({
       isActive = false;
     };
   }, [canvas?.id, canvas?.imageDataUrl]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (event.key === "Tab") {
+        const controls = dialogRef.current?.querySelectorAll<HTMLElement>("button:not(:disabled), input:not(:disabled), [tabindex='0']");
+        const first = controls?.[0];
+        const last = controls?.[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
 
   const applyStrokeStyle = (context: CanvasRenderingContext2D) => {
     context.lineCap = "round";
@@ -648,11 +677,15 @@ function DrawingCanvasEditor({
 
     fillDrawingCanvasBackground(context);
     context.drawImage(sourceCanvas, 0, 0);
-    onSave(exportCanvas.toDataURL("image/jpeg", 0.9));
+    try {
+      onSave(exportCanvas.toDataURL("image/jpeg", 0.82));
+    } catch {
+      window.alert("Не удалось сохранить рисунок. В хранилище браузера недостаточно места.");
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(5,8,18,0.74)] px-4 py-4 backdrop-blur-2xl">
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Редактор рисунка" className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(5,8,18,0.74)] px-4 py-4 backdrop-blur-2xl">
       <div className="mx-auto flex min-h-full w-full max-w-[920px] flex-col justify-center">
         <div className="theme-panel theme-panel-pop rounded-[34px] p-3">
           <div className="flex items-center justify-between gap-3 px-1 pb-3">
@@ -1006,6 +1039,8 @@ export default function MainScreen() {
     isDragging: boolean;
     lastHoverKey: string | null;
   } | null>(null);
+  const [widgetOrder, setWidgetOrder] = useState<RelationshipWidget[] | null>(null);
+  const widgetOrderRef = useRef<RelationshipWidget[] | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [isEditingWidgets, setIsEditingWidgets] = useState(false);
   const [isUploadingAlbum, setIsUploadingAlbum] = useState(false);
@@ -1019,12 +1054,23 @@ export default function MainScreen() {
   const [isHeartPickerOpen, setIsHeartPickerOpen] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const sync = () => {
+      if (timer) clearInterval(timer);
+      if (document.hidden) return;
+      setNow(new Date());
+      timer = setInterval(() => setNow(new Date()), 1000);
+    };
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", sync);
+    };
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const prefersMobileMotion =
       window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches;
@@ -1057,8 +1103,8 @@ export default function MainScreen() {
     };
 
     const onPointerLeave = () => {
-      pointerX *= 0.45;
-      pointerY *= 0.45;
+      pointerX = 0;
+      pointerY = 0;
       schedule();
     };
 
@@ -1147,7 +1193,8 @@ export default function MainScreen() {
     targetWidgetId: string,
     placement: WidgetDropPlacement,
   ) => {
-    updateSettings((prev) => {
+    const currentWidgets = widgetOrderRef.current ?? settings.widgets;
+    const next = ((prev: { widgets: RelationshipWidget[] }) => {
       if (draggedWidgetId === targetWidgetId) return prev;
 
       const draggedWidget = prev.widgets.find((widget) => widget.id === draggedWidgetId);
@@ -1172,7 +1219,9 @@ export default function MainScreen() {
         ...prev,
         widgets,
       };
-    });
+    })({ widgets: currentWidgets });
+    widgetOrderRef.current = next.widgets;
+    setWidgetOrder(next.widgets);
   };
 
   const onStartWidgetDrag = (
@@ -1234,8 +1283,23 @@ export default function MainScreen() {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
+    const order = widgetOrderRef.current;
     widgetDragRef.current = null;
+    widgetOrderRef.current = null;
+    setWidgetOrder(null);
     setDraggingWidgetId(null);
+    if (order && event.type !== "pointercancel") {
+      try {
+        updateSettings((prev) => {
+          const byId = new Map(prev.widgets.map((widget) => [widget.id, widget]));
+          const ordered = order.flatMap((widget) => byId.get(widget.id) ?? []);
+          const ids = new Set(order.map((widget) => widget.id));
+          return { ...prev, widgets: [...ordered, ...prev.widgets.filter((widget) => !ids.has(widget.id))] };
+        });
+      } catch {
+        window.alert("Не удалось сохранить порядок. Освободи место в хранилище браузера.");
+      }
+    }
   };
 
   const onPickAlbumPhotos = (target: AlbumUploadTarget) => {
@@ -1343,6 +1407,8 @@ export default function MainScreen() {
     }));
   };
 
+  const closeCanvasEditor = useCallback(() => setEditingCanvasId(null), []);
+
   const onSaveDrawingCanvas = (imageDataUrl: string) => {
     const timestamp = new Date().toISOString();
     const currentCanvasId = editingCanvasId;
@@ -1413,7 +1479,7 @@ export default function MainScreen() {
       {editingCanvasId ? (
         <DrawingCanvasEditor
           canvas={activeDrawingCanvas}
-          onClose={() => setEditingCanvasId(null)}
+          onClose={closeCanvasEditor}
           onSave={onSaveDrawingCanvas}
         />
       ) : null}
@@ -1552,7 +1618,7 @@ export default function MainScreen() {
 
         <div className="theme-subtle-text mt-2 flex justify-between px-1 text-[13px] font-normal">
           <div>{progress.goal} дней</div>
-          <div>{progress.leftDays} дня осталось</div>
+          <div>{progress.leftDays} {ruPlural(progress.leftDays, "день", "дня", "дней")} осталось</div>
         </div>
       </div>
 
@@ -1586,7 +1652,7 @@ export default function MainScreen() {
 
       {settings.widgets.length > 0 ? (
         <div className="theme-reveal theme-reveal-delay-6 mt-6 grid grid-cols-2 gap-4">
-          {settings.widgets.map((widget) => (
+          {(widgetOrder ?? settings.widgets).map((widget) => (
             <WidgetCard
               key={widget.id}
               widget={widget}

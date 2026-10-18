@@ -278,7 +278,8 @@ export default function SettingsScreen() {
   const onFileChange =
     (field: "photo1DataUrl" | "photo2DataUrl") =>
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.currentTarget.files?.[0];
+      const input = event.currentTarget;
+      const file = input.files?.[0];
       if (!file) return;
 
       const setBusy = field === "photo1DataUrl" ? setIsUploadingPhoto1 : setIsUploadingPhoto2;
@@ -300,7 +301,7 @@ export default function SettingsScreen() {
         window.alert("Не удалось обработать фото. Попробуй выбрать другое изображение.");
       } finally {
         setBusy(false);
-        event.currentTarget.value = "";
+        input.value = "";
       }
     };
 
@@ -312,7 +313,9 @@ export default function SettingsScreen() {
       updateSettings((prev) => ({
         ...prev,
         ...current,
-        widgets: current.widgets,
+        widgets: prev.widgets,
+        albumPhotos: prev.albumPhotos,
+        drawingCanvases: prev.drawingCanvases,
       }));
 
       router.push("/");

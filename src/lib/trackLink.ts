@@ -74,11 +74,15 @@ function normalizeTrackUrl(input: string) {
 
   try {
     const url = new URL(value.includes("://") ? value : `https://${value}`);
-    if (!url.hostname.includes(".")) return null;
+    if (!["http:", "https:"].includes(url.protocol) || !url.hostname.includes(".")) return null;
     return url;
   } catch {
     return null;
   }
+}
+
+function safeDecode(value: string) {
+  try { return decodeURIComponent(value); } catch { return value; }
 }
 
 function cleanPathText(value: string) {
@@ -130,7 +134,7 @@ function getTitleFromPath(url: URL) {
     /^\d+$/.test(segment) || (/^[a-z0-9]+$/i.test(segment) && segment.length >= 12);
   const segments = url.pathname
     .split("/")
-    .map((segment) => cleanPathText(decodeURIComponent(segment)))
+    .map((segment) => cleanPathText(safeDecode(segment)))
     .filter(
       (segment) =>
         segment && !ignoredSegments.has(segment.toLowerCase()) && !looksLikeOpaqueId(segment),
@@ -228,7 +232,7 @@ export async function resolveTrackLink(input: string, signal?: AbortSignal) {
   if (!platform?.getOembedUrl) return fallback;
 
   try {
-    const response = await fetch(platform.getOembedUrl(fallback.url), { signal });
+    const response = await fetch(platform.getOembedUrl(fallback.url), { signal: AbortSignal.any([signal ?? new AbortController().signal, AbortSignal.timeout(8000)]) });
     if (!response.ok) return fallback;
 
     const data = (await response.json()) as {
