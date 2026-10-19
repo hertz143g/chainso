@@ -1850,6 +1850,13 @@ export default function MainScreen() {
         </div>
       ) : null}
 
+      <Link
+        href="/gifts"
+        className="theme-dashed-card-strong mt-10 block rounded-[28px] border-2 border-dashed px-4 py-4 text-center text-[16px] font-semibold"
+      >
+        Маркетплейс подарков
+      </Link>
+
       <div className={cx("h-10", isEditingWidgets && "h-44")} />
     </div>
   );
